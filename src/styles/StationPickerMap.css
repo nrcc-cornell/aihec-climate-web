@@ -1,0 +1,30 @@
+
+    .StationPickerMap{
+        float:left;
+        //right: 7vw;
+        //margin: 10px 5vw 10px 5vw;
+        //margin: 10px 10px 10px 0px;
+        border: none;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .leaflet-container {
+        //height: 360px;
+        //width: 680px;
+        //margin: 0 auto;
+        z-index: 1;
+    }
+
+    .leaflet-container path{
+        transition: fill .75s;
+        //transition: fill 1.0s;
+    }
+
+    .map-container {
+        //height: 460px;
+        //width: 724px;
+        //margin: 0 auto;
+        z-index: 1;
+    }
+

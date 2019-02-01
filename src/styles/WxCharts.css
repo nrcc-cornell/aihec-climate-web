@@ -1,0 +1,63 @@
+@media screen and (max-width: 960px) {
+  #wx-chart {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-top: 0.5vw;
+    width: 96vw;
+    height: 50vh;
+    min-height: 200px;
+    background-color: #fff;
+  }
+}
+
+@media screen and (min-width: 961px) {
+  #wx-chart {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-top: 0.5vw;
+    width: 76vw;
+    height: 50vh;
+    min-height: 300px;
+    background-color: #fff;
+  }
+}
+
+.customized-legend {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  //padding: 20px;
+  margin-top: 0.5vw;
+  margin-bottom: 0.5vw;
+  //margin-left: 10vw;
+  width: 94vw;
+  height: calc(20px + 1.0vw);
+  //height: 30px;
+  background-color: #fff;
+  font-size: calc(10px + 0.8vw);
+  line-height: calc(1em + 0.5vw);
+  text-align: center;
+}
+
+.customized-tooltip {
+  margin-top: 6vw;
+  font-size: calc(6px + 0.7vw);
+  line-height: calc(1em + 0.5vw);
+}
+
+.tooltip-item {
+//  margin: 2vw;
+}
+
+.legend-item {
+  margin: 1vw;
+}
+
+.legend-symbol {
+  margin: 0 10 0 0;
+}
+
+//.recharts-cartesian-axis { font-size: calc(8px+1.0vw); font-family: sans-serif; }
+.recharts-cartesian-axis { font-size: calc(10px + 0.2vw); font-family: sans-serif; }

@@ -1,0 +1,16 @@
+.tool-lister {
+    float: left;
+    width: 88vw;
+    //height: 40vw;
+    height: 100%;
+    //margin: 10px 0px 10px 0px;
+    margin: 10vh 0px 1vh 0px;
+    //background: lightgray;
+    text-align: center;
+    display: inline-block;
+}
+
+.tool-header {
+    font-size: calc(16px + 1.0vw);
+    margin: 0px 0px 1vh 0px;
+}

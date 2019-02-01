@@ -1,0 +1,28 @@
+/*
+///////////////////////////////////////////////////////////////////////////////
+//
+// SCAN-ACIS Decision Tools
+// Copyright (c) 2018 Northeast Regional Climate Center, Cornell University
+// All Rights Reserved
+//
+///////////////////////////////////////////////////////////////////////////////
+*/
+
+@media screen {
+    html { height: 100%; }
+    //body { width: 1024px; height: 768px; }
+    body {}
+
+    .ui-widget * { outline: none; }
+
+    #root{
+        font-family: 'times';
+        line-height: 1.0em;
+        color: #000000;
+        display: flex;
+        //height: 466px;
+        //width: 908px;
+        //width: 926px;
+    }
+}
+

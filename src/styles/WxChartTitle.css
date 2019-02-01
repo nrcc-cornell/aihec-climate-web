@@ -1,0 +1,15 @@
+.wx-chart-title {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  //padding: 20px;
+  margin-top: 0.5vw;
+  //margin-left: 10vw;
+  width: 94vw;
+  height: calc(10px + 1.0vw);
+  //height: 30px;
+  background-color: #fff;
+  font-size: calc(12px + 0.8vw);
+  line-height: calc(1em + 0.5vw);
+  text-align: center;
+}

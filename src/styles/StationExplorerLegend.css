@@ -1,0 +1,63 @@
+.explorer-map-legend {
+    border-radius: 10px;
+    border: 2px solid #4ca20b;
+    line-height: 20px;
+    color: #555;
+    background: #F5F5DC;
+    //display: flex;
+    font-weight: bold;
+    text-align: left;
+    //margin-left: calc(30vw - 80px);
+    margin-left: 0px;
+    //margin-right: 25vw;
+    //width: 36vw;
+    width: 100px;
+    //width: 94vw;
+    min-width: 100px;
+    z-index: 0;
+}
+
+.explorer-map-legend-label {
+    font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    text-align: left;
+    margin: 2px 14px 2px 8px;
+    //margin: 1vw 2vw 1vw 0px;
+}
+
+.explorer-map-legend-color-box {
+  float: left;
+  width: 18px;
+  height: 10px;
+  //margin: 5px;
+  //margin: 1vw;
+  //margin: 1vw 0.5vw 1vw 1vw;
+  margin: 4px 0px 0px 8px;
+  border: 2px solid rgba(0, 0, 0, .5);
+}
+
+.blue {
+  background: #0000FF;
+  opacity: 0.7;
+}
+
+.red {
+  background: #FF0000;
+  opacity: 0.7;
+}
+
+.green {
+  background: darkgreen;
+  opacity: 0.7;
+}
+
+.brown {
+  background: brown;
+  opacity: 0.7;
+}
+
+.black {
+  background: black;
+  opacity: 0.7;
+}
+

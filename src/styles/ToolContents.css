@@ -1,0 +1,9 @@
+.tool-contents {
+    //margin: 10px 5vw 10px 5vw;
+    display: flex;
+    width: 100%;
+}
+.tool-pre-select {
+    font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    display: flex;
+}
