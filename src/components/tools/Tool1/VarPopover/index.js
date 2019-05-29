@@ -8,6 +8,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Popover from '@material-ui/core/Popover';
 //import ExtremeSwitch from '../ExtremeSwitch'
 import VarPicker from '../VarPicker'
+//import OutputSelect from '../../common/OutputSelect'
 
 const styles = theme => ({
   typography: {

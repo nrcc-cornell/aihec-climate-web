@@ -23,8 +23,8 @@ export class AppStore {
         } else if (i===1) {
             this.activePage = 'about'
         } else {
-            this.activePage = 'tool'
-            if (this.getToolName==='tool1') { this.wxgraph_downloadData() }
+            this.activePage = 'tools'
+            if (this.getToolName==='climview') { this.wxgraph_downloadData() }
         }
     };
     @computed get getActivePage() { return this.activePage };
@@ -34,7 +34,7 @@ export class AppStore {
             tabIndex = 0;
         } else if (this.getActivePage==='about') {
             tabIndex = 1;
-        } else if (this.getActivePage==='tool') {
+        } else if (this.getActivePage==='tools') {
             tabIndex = 2;
         } else {
         }
@@ -42,79 +42,76 @@ export class AppStore {
     };
     @computed get homeIsSelected() { return this.getActivePage==='home' };
     @computed get aboutIsSelected() { return this.getActivePage==='about' };
-    @computed get toolIsSelected() { return this.getActivePage==='tool' };
+    @computed get toolIsSelected() { return this.getActivePage==='tools' };
 
-    toolNameArray = ['tool1','tool2','tool3']
+    toolNameArray = ['climview','tool2','tool3']
     @observable toolName = this.toolNameArray[0]
     // set toolName from tool card
     @action setToolName = (n) => {
             this.toolName = n
         };
     // set toolName from select menu
-    @action setSelectedToolName = (t) => {
-            if (this.getToolName !== t) {
-                this.toolName = t.value;
-                if (this.getToolName==='tool1') { this.wxgraph_downloadData() }
+    //@action setSelectedToolName = (t) => {
+    //        if (this.getToolName !== t) {
+    //            this.toolName = t.value;
+    //            if (this.getToolName==='climview') { this.wxgraph_downloadData() }
+    //        }
+    //    };
+    // set toolName from select menu
+    @action setSelectedToolName = (e) => {
+            if (this.getToolName !== e.target.value) {
+                this.toolName = e.target.value;
+                if (this.getToolName==='climview') { this.wxgraph_downloadData() }
             }
         };
     @computed get getToolName() { return this.toolName };
 
     getToolInfo = (name) => {
-            let title, tagline, thumbnail, onclick
+            let title, tagline, thumbnail, url, onclick
             let pathToImages = './thumbnails/'
-            if (name==='tool1') {
-                title = 'Long-Term Climate Time Series'
+            if (name==='climview') {
+                title = 'Climate Viewer'
                 tagline = 'Data observed near your nation over the past century.'
-                thumbnail = pathToImages+'tool1-thumbnail.png'
+                url = '/tools/climate-viewer'
             } else if (name==='tool2') {
-                title = 'Recent Weather Data'
+                title = 'Tool 2'
                 tagline = 'Recent observations at weather stations on/near your nation.'
-                thumbnail = pathToImages+'tool2-thumbnail.png'
+                url = '/tools/tool2'
             } else if (name==='tool3') {
-                title = 'Future Climatological Projections'
+                title = 'Tool 3'
                 tagline = 'Climate model projections for your nation through the year 2100.'
-                thumbnail = pathToImages+'tool3-thumbnail.png'
+                url = '/tools/tool3'
             } else {
             }
-            //onclick = () => {this.setToolName(name)}
             onclick = () => {this.setActivePage(2); this.setToolName(name)}
-            return {'name':name, 'title':title, 'tagline':tagline, 'thumbnail':thumbnail, 'onclick':onclick}
+            return {'name':name, 'title':title, 'tagline':tagline, 'thumbnail':thumbnail, 'url':url, 'onclick':onclick}
         };
 
     @computed get getNationGeojson() { return us_aiannh_pilot };
 
     /// manage currently active nation
     // get currently selected nation object (for nation select and nation picker)
-    @observable nation = {"name":"Pine Ridge Reservation"};
+    @observable nation = {"name":"Pine Ridge Reservation","ll":["43.3449996","-102.0818655"]}
     @action setNation = (l) => {
         if (this.getNation.name !== l.toString()) {
             this.nation = this.getNations.find(obj => obj.name === l);
-            //if (this.getToolName==='gddtool') { this.gddtool_downloadData() }
-            if (this.getToolName==='tool1') { this.wxgraph_downloadData() }
+            if (this.getToolName==='climview') { this.wxgraph_downloadData() }
         };
     }
     // set nation from select menu
     @action setSelectedNation = (t) => {
             if (this.getNation.name !== t.value) {
                 this.nation = this.getNations.find(obj => obj.name.toString() === t.value);
-                //if (this.getToolName==='gddtool') { this.gddtool_downloadData() }
-                if (this.getToolName==='tool1') { this.wxgraph_downloadData() }
+                if (this.getToolName==='climview') { this.wxgraph_downloadData() }
             }
             if (this.getShowModalMap) { this.setShowModalMap(false) };
         };
     @computed get getNation() { return this.nation };
 
     // manage list of all nations
-    //@observable nations = [
-    //  ]
-    //@action setNations = (l) => {
-    //    this.nations = l
-    //}
-    //@computed get getNations() { return this.nations };
     @computed get getNations() {
         let nationsObject = this.getNationGeojson
-        let nations = nationsObject['features'].map( function(item) {return {'name':item.properties.NAMELSAD} } );
-        //console.log(nations);
+        let nations = nationsObject['features'].map( function(item) {return {'name':item.properties.NAMELSAD,'ll':[item.properties.INTPTLAT,item.properties.INTPTLON]} } );
         return nations
     };
 
@@ -187,7 +184,7 @@ export class AppStore {
             this.showModalMap=b
             if (!this.getShowModalMap) {
             //    if (this.getToolName==='gddtool') { this.gddtool_downloadData() }
-            //    if (this.getToolName==='tool1') { this.wxgraph_downloadData() }
+            //    if (this.getToolName==='climview') { this.wxgraph_downloadData() }
             }
         }
     @computed get getShowModalMap() {

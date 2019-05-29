@@ -7,6 +7,15 @@ import { MuiThemeProvider, createMuiTheme, withStyles, withTheme  } from "@mater
 //import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import brown from '@material-ui/core/colors/brown';
 
+// import route Components here
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Switch,
+  Redirect
+} from 'react-router-dom'
+
 // Components
 import Header from '../../components/Header';
 import HomeContents from '../../components/HomeContents';
@@ -46,18 +55,24 @@ class App extends Component {
         const { classes } = this.props;
 
         return (
+          <Router basename={process.env.PUBLIC_URL}>
             <MuiThemeProvider theme={theme}>
               <div className="App">
                 <Header />
 
-                <div className={classes.toolbar}></div>
-                {app.getActiveTabIndex===0 && <HomeContents /> }
-                {app.getActiveTabIndex===1 && <AboutContents /> }
-                {app.getActiveTabIndex===2 && <ToolContents name={app.getToolName}/> }
+                <Switch>
+                  <Route exact path="/" component={HomeContents} />
+                  <Route path="/about" component={AboutContents} />
+                  <Route exact path="/tools" render={(props) => <ToolContents {...props} name={'climview'} />} />
+                  <Route path="/tools/climate-viewer" render={(props) => <ToolContents {...props} name={'climview'} />} />
+                  <Route path="/tools/tool2" render={(props) => <ToolContents {...props} name={'tool2'} />} />
+                  <Route render={() => <Redirect to="/" />} />
+                </Switch>
 
                 <Footer />
               </div>
             </MuiThemeProvider>
+          </Router>
         );
     }
 }

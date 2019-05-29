@@ -5,91 +5,68 @@ import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import green from '@material-ui/core/colors/green';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Grid from "@material-ui/core/Grid";
 import Hidden from '@material-ui/core/Hidden';
-import ReactModal from 'react-modal';
 
 // Components
-//import LocationSelect from '../../components/LocationSelect';
-import NationPicker from '../../components/NationPicker';
+import StationExplorerMap from '../../components/StationExplorerMap';
 import NationSelect from '../../components/NationSelect';
-import ToolLister from '../../components/ToolLister';
 
 // Styles
-import '../../styles/HomeContents.css';
+//import '../../styles/HomeContents.css';
 
 const styles = theme => ({
-  button: {
-    //margin: theme.spacing.unit,
-    background: green[500],
-  },
+  labelText: {
+    color: 'black',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    //marginBottom: '20px'
+  }
 });
 
-var app;
+let app;
 
 @inject('store') @observer
 class HomeContents extends Component {
 
     constructor(props) {
-        super(props);
-        app = this.props.store.app;
+      super(props);
+      app = this.props.store.app;
+      // set site's active page
+      app.setActivePage(0);
     }
 
     render() {
-
-        const { classes } = this.props;
+        const { classes, theme } = this.props;
 
         return (
-           <div className="HomeContents">
-             <Grid item container spacing={40} justify="center">
-               <Grid item>
-                 <div style={{ paddingTop: 20, paddingBottom: 10 }}>
-                   <Typography variant="h4">
-                     Climate Tools for Tribal Nations
-                   </Typography>
-                 </div>
-               </Grid>
-             </Grid>
-             <div style={{ paddingTop: 10, paddingBottom: 30 }}>
-               <Grid container spacing={8} justify="center" xs={12}>
-                <Grid item>
-                  <Hidden xsDown>
-                    <Typography variant="h6">
-                      My Nation :
-                    </Typography>
-                  </Hidden>
-                </Grid>
-                <Grid item xs={9} sm={7} md={5}>
-                  <NationSelect names={app.getNations} />
-                </Grid>
-                <Grid item>
-                  <Button className={classes.button} variant="contained" onClick={()=>{app.setShowModalMap(true)}}>
-                    Map
-                  </Button>
-                </Grid>
-              </Grid>
+            <div className="HomeContents">
+                   <div style={{ paddingTop: 20, paddingBottom: 40 }}>
+                     <Grid container spacing={8} justify="center" xs={12} alignItems="center">
+                      <Grid item>
+                          <Typography variant="h2" className={classes.labelText}>
+                            Nation :
+                          </Typography>
+                      </Grid>
+                      <Grid item xs={7} sm={5} md={3}>
+                        {app.getNations && app.getNation && <NationSelect names={app.getNations} />}
+                      </Grid>
+                     </Grid>
+                  </div>
+                  <Grid container direction="column" spacing="24" alignItems="center">
+                      <Grid item xs={12}>
+                        { this.props.store.app.getNations && (<StationExplorerMap />)}
+                      </Grid>
+                  </Grid>
             </div>
-            <ReactModal
-               isOpen={app.getShowModalMap}
-               onRequestClose={()=>{app.setShowModalMap(false)}}
-               shouldCloseOnOverlayClick={true}
-               contentLabel="Location Selector"
-               className="Modal"
-               overlayClassName="Overlay"
-             >
-               <NationPicker/>
-            </ReactModal>
-            <ToolLister />
-           </div>
         );
     }
 }
 
 HomeContents.propTypes = {
   classes: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(HomeContents);

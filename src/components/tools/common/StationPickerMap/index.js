@@ -15,8 +15,8 @@ import { Map, GeoJSON, Marker, Popup, TileLayer, ZoomControl } from 'react-leafl
 
 // Styles
 
-import NationPickerLegend from '../../components/NationPickerLegend';
-import NationPickerButtonFlyTo from '../../components/NationPickerButtonFlyTo';
+//import NationPickerLegend from '../../components/NationPickerLegend';
+//import NationPickerButtonFlyTo from '../../components/NationPickerButtonFlyTo';
 
 // start: added code to work with markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -29,14 +29,14 @@ L.Icon.Default.mergeOptions({
 // end: added code to work with markers
 
 const mapContainer = 'map-container';
-const zoomLevel = 4;
+const zoomLevel = 6;
 const minZoomLevel = 4;
 const maxZoomLevel = 16;
 var app;
 var history;
 
 @inject('store') @observer
-class NationPickerMap extends Component {
+class StationPickerMap extends Component {
 
     constructor(props) {
         super(props);
@@ -57,7 +57,7 @@ class NationPickerMap extends Component {
             [49.5904, -66.9326]
         ];
         this.mapCenter = [38.0, -95.7];
-        this.zoomLevel = 4;
+        this.zoomLevel = 6;
         this.minZoomLevel = 3;
         this.maxZoomLevel = 16;
     }
@@ -102,9 +102,8 @@ class NationPickerMap extends Component {
             click: () => {
                 app.setNation(feature.properties.NAMELSAD);
                 if (app.getShowModalMap) { app.setShowModalMap(false) };
-                app.setActivePage(2);
-                //history.push('/tools');
-                history.push(app.getToolInfo(app.getToolName).url);
+                //app.setActivePage(2);
+                //history.push(app.getToolInfo(app.getToolName).url);
             },
             mouseover: () => {
                     nation.openPopup();
@@ -121,11 +120,10 @@ class NationPickerMap extends Component {
         let markerLon = (app.getNation) ? app.getNation.ll[1] : 0.0
 
         return (
-            <div className="NationPickerMap">
+            <div className="StationPickerMap">
                     <Map
                         ref={e => { this.mapInstance = e }}
                         center={[markerLat,markerLon]}
-                        bounds={this.maxBounds}
                         zoomControl={false}
                         zoom={this.zoomLevel}
                         minZoom={this.minZoomLevel}
@@ -133,8 +131,8 @@ class NationPickerMap extends Component {
                         attributionControl={false}
                         className={mapContainer}
                         style={{
-                            height:(app.getActivePage==='test') ? ((this.state.height>500) ? '460px' : '300px') : this.state.height*0.60,
-                            width:(app.getActivePage==='test') ? ((this.state.width>=960) ? this.state.width*0.54 : this.state.width*0.86) : this.state.width*0.80,
+                            height: '200px',
+                            width: '200px',
                         }}
                     >
                         <TileLayer
@@ -146,11 +144,7 @@ class NationPickerMap extends Component {
                             style={app.nationFeatureStyle}
                             onEachFeature={this.onEachFeature}
                         />
-                        <Marker key={'marker-select'} position={[markerLat,markerLon]} />
-                        <NationPickerButtonFlyTo pos="bottomleft" loc="CONUS" onclick={this.onClickCONUS} />
-                        <NationPickerButtonFlyTo pos="bottomleft" loc="Alaska" onclick={this.onClickAlaska} />
                         <ZoomControl position="topleft" />
-                        <NationPickerLegend/>
                     </Map>
             </div>
         );
@@ -158,4 +152,4 @@ class NationPickerMap extends Component {
     }
 }
 
-export default withRouter(NationPickerMap);
+export default withRouter(StationPickerMap);

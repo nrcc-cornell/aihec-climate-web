@@ -9,6 +9,10 @@
     margin: 20px 0px 200px 0px;
 }
 
+.nation-select-label {
+    font-size: 20px;
+}
+
 .Modal {
     position: absolute;
     top: 40px;

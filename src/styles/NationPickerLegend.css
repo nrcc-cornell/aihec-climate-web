@@ -1,4 +1,4 @@
-.nation-picker-map-legend {
+.explorer-map-legend {
     border-radius: 10px;
     border: 2px solid #4ca20b;
     line-height: 20px;
@@ -17,7 +17,7 @@
     z-index: 0;
 }
 
-.nation-picker-map-legend-label {
+.explorer-map-legend-label {
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 12px;
     text-align: left;
@@ -25,7 +25,7 @@
     //margin: 1vw 2vw 1vw 0px;
 }
 
-.nation-picker-map-legend-color-box {
+.explorer-map-legend-color-box {
   float: left;
   width: 18px;
   height: 10px;

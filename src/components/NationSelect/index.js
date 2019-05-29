@@ -3,6 +3,7 @@
 
 import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
+import { withRouter } from "react-router-dom";
 import Select from 'react-select';
 import { array } from 'prop-types'
 import Typography from '@material-ui/core/Typography';
@@ -12,8 +13,10 @@ import Typography from '@material-ui/core/Typography';
 // Components
 
 // Styles
+import '../../styles/NationSelect.css';
 
 var app;
+var history;
 
 @inject('store') @observer
 class NationSelect extends Component {
@@ -29,10 +32,18 @@ class NationSelect extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
+        history = this.props.history;
     }
 
     componentDidMount() {
       this.forceUpdate();
+    }
+
+    // run on selection
+    onChangeNation = (t) => {
+        app.setSelectedNation(t);
+        //history.push('/tools');
+        history.push(app.getToolInfo(app.getToolName).url);
     }
 
     render() {
@@ -51,15 +62,15 @@ class NationSelect extends Component {
             <Select
                 name="nation"
                 className="nation-select"
-                placeholder={'NATION > '+app.getNation.name}
+                placeholder={app.getNation.name}
                 value={app.getNation.name}
                 isClearable={false}
                 options={selectOptions}
-                onChange={app.setSelectedNation}
+                onChange={this.onChangeNation}
             /> 
           </Typography>
         );
     }
 }
 
-export default NationSelect;
+export default withRouter(NationSelect);

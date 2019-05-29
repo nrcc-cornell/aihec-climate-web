@@ -10,7 +10,9 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 //import FormLabel from '@material-ui/core/FormLabel';
-//import Grid from '@material-ui/core/Grid';
+import Grid from '@material-ui/core/Grid';
+
+import StationPickerMap from '../../common/StationPickerMap';
 
 const styles = theme => ({
   root: {
@@ -38,6 +40,11 @@ class VarPicker extends React.Component {
     const { classes } = this.props;
 
     return (
+      <Grid container direction="column" justify="space-evenly" alignItems="center">
+        <Grid item>
+          <StationPickerMap/>
+        </Grid>
+        <Grid item>
       <div className={classes.root}>
       <FormControl component="fieldset">
         <RadioGroup
@@ -71,16 +78,11 @@ class VarPicker extends React.Component {
             label="Total Precipitation"
             labelPlacement="right"
           />
-          <FormControlLabel
-            value="snow"
-            control={<Radio color="primary" />}
-            label="Total Snowfall"
-            labelPlacement="right"
-            disabled
-          />
         </RadioGroup>
       </FormControl>
       </div>
+        </Grid>
+      </Grid>
     );
   }
 }

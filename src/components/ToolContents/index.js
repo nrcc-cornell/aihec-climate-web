@@ -3,20 +3,30 @@
 
 import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
+import { withStyles } from '@material-ui/core/styles';
 import { string } from 'prop-types'
 
 // Components
 import LocationSelect from '../../components/LocationSelect';
-import ToolSelect from '../../components/ToolSelect';
-import OutputSelect from '../../components/OutputSelect';
+//import ToolSelect from '../../components/ToolSelect';
+//import OutputSelect from '../../components/OutputSelect';
 import Tool1 from '../../components/tools/Tool1';
 import Tool2 from '../../components/tools/Tool2';
 import Tool3 from '../../components/tools/Tool3';
-import Typography from '@material-ui/core/Typography';
+//import Typography from '@material-ui/core/Typography';
 import Grid from "@material-ui/core/Grid";
 
 // Styles
 import '../../styles/ToolContents.css';
+
+const styles = theme => ({
+  headerText: {
+    color: 'Black',
+    fontSize: '34px',
+    fontWeight: 'normal',
+    marginBottom: '4px'
+  }
+});
 
 var app;
 
@@ -37,34 +47,26 @@ class ToolContents extends Component {
     }
 
     render() {
+      const { classes, theme } = this.props;
 
+      if (app.getNations) {
         return (
             <div className='tool-contents'>
             <Grid container spacing="8">
               <Grid item xs={12}>
-                 <Typography variant="h5">
-                    Climate Tools for Tribal Nations
-                 </Typography>
-              </Grid>
-              <Grid item xs={12}>
                 <LocationSelect />
               </Grid>
-              <Grid item xs={9} sm={6}>
-                <ToolSelect names={app.toolNameArray} />
-              </Grid>
-              <Grid item xs={9} sm={4}>
-                <OutputSelect />
-              </Grid>
               <Grid item xs={12}>
-                { this.props.name==='tool1' && (<Tool1 />) }
+                { this.props.name==='climview' && (<Tool1 />) }
                 { this.props.name==='tool2' && (<Tool2 />) }
                 { this.props.name==='tool3' && (<Tool3 />) }
               </Grid>
             </Grid>
             </div>
         );
+      }
     }
 }
 
-export default ToolContents;
+export default withStyles(styles)(ToolContents);
 

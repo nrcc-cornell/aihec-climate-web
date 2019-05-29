@@ -8,8 +8,8 @@ import Grid from "@material-ui/core/Grid";
 import Typography from '@material-ui/core/Typography';
 
 // Components
-import StationExplorer from '../../components/StationExplorer';
-import ToolLister from '../../components/ToolLister';
+//import StationExplorer from '../../components/StationExplorer';
+//import ToolLister from '../../components/ToolLister';
 
 // Styles
 import '../../styles/AboutContents.css';
@@ -20,6 +20,11 @@ const styles = theme => ({
   },
   control: {
     padding: theme.spacing.unit * 2,
+  },
+  aboutHeaderText: {
+    color: 'black',
+    fontSize: '26px',
+    fontWeight: 'normal',
   },
 });
 
@@ -41,7 +46,7 @@ class AboutContents extends Component {
             <div className="about-contents">
             <Grid container className={classes.root} spacing={32}>
               <Grid item sm={12} md={6}>
-                    <Typography align="left" paragraph variant="h4">
+                    <Typography align="left" paragraph variant="h2" className={classes.aboutHeaderText}>
                       Purpose of these tools
                     </Typography>
                     <Typography align="justify" paragraph variant="body1">
@@ -58,7 +63,7 @@ class AboutContents extends Component {
                     </Typography>
               </Grid>
               <Grid item sm={12} md={6}>
-                    <Typography align="left" paragraph variant="h4">
+                    <Typography align="left" paragraph variant="h2" className={classes.aboutHeaderText}>
                       Station Networks
                     </Typography>
                     <Typography align="justify" paragraph variant="body1">
@@ -71,18 +76,8 @@ Nulla augue nulla, auctor id ante sit amet, semper sollicitudin eros. Ut lorem n
                         <li><a href="https://www.wcc.nrcs.usda.gov/tribalscan/tribalscan_brochure.pdf" target="_blank" rel="noopener noreferrer">Tribal SCAN brochure</a></li>
                       </ul>
                     </Typography>
-                    <StationExplorer/>
               </Grid>
             </Grid>
-            <br/>
-            <Grid item container spacing={40} justify="center">
-               <Grid item>
-                 <Typography variant="h4">
-                    Climate Tools for Tribal Nations
-                 </Typography>
-               </Grid>
-            </Grid>
-            <ToolLister />
             </div>
         );
     }

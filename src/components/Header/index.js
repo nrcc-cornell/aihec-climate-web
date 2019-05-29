@@ -2,14 +2,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React from 'react';
+import { withRouter } from "react-router-dom";
 import { inject, observer} from 'mobx-react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
-import Hidden from '@material-ui/core/Hidden';
-import IconButton from '@material-ui/core/IconButton';
-import HomeIcon from '@material-ui/icons/Home';
-import InfoIcon from '@material-ui/icons/Info';
 import Toolbar from '@material-ui/core/Toolbar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -35,24 +32,42 @@ const styles = theme => ({
   appBar: {
     marginLeft: 0,
   },
-  menuButton: {
-    marginRight: 20,
-    [theme.breakpoints.up('sm')]: {
-      display: 'none',
-    },
+  headerText: {
+    color: 'brown',
+    fontSize: '30px',
+    fontWeight: 'bold',
+    marginBottom: '4px'
+  },
+  subHeaderText: {
+    color: 'brown',
+    fontSize: '16px'
   },
   rightToolbar: {
     marginLeft: 'auto',
     marginRight: 0,
-    //[theme.breakpoints.up('sm')]: {
+    //[theme.breakpoints.down('sm')]: {
     //  display: 'none',
     //},
   },
-  toolbar: theme.mixins.toolbar,
-  content: {
-    flexGrow: 1,
-    //padding: theme.spacing.unit * 3,
+  bottomToolbar: {
+    //[theme.breakpoints.up('md')]: {
+    //  display: 'none',
+    //},
+    display: 'none',
   },
+  titleLong: {
+    cursor: 'pointer',
+    [theme.breakpoints.down('xs')]: {
+      display: 'none',
+    },
+  },
+  titleShort: {
+    cursor: 'pointer',
+    [theme.breakpoints.up('sm')]: {
+      display: 'none',
+    },
+  },
+  toolbar: theme.mixins.toolbar,
 });
 
 //var app;
@@ -70,63 +85,71 @@ class FullWidthTabs extends React.Component {
   };
 
   handleChange = (event, value) => {
-    //this.setState({ value });
+    let url = ''
+    if (value===0) {
+        // go to home page
+        url = '/';
+    } else if (value===1) {
+        // go to about page
+        url = '/about';
+    } else {
+        // go to tools page, at the currently selected tool
+        url = this.props.store.app.getToolInfo(this.props.store.app.getToolName).url;
+    }
+    this.props.history.push(url);
     this.props.store.app.setActivePage(value);
   };
 
-  handleChangeHome = () => {
-    this.setState({value: 0});
-    this.props.store.app.setActivePage(0);
-  };
-
-  handleChangeAbout = () => {
-    this.setState({value: 1});
-    this.props.store.app.setActivePage(1);
+  handleChangeIndex = index => {
+    this.setState({ value: index });
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, theme } = this.props;
 
     return (
       <div className={classes.root}>
-        <AppBar position="fixed" className={classes.appBar}>
+        <AppBar position="static" color="inherit">
           <Toolbar>
-            <Typography variant="title" color="inherit" noWrap>
-              (LOGO / TITLE)
-            </Typography>
+            <div className={classes.titleLong} onClick={() => {this.props.history.push('/')}}>
+                <Typography variant="h1" className={classes.headerText}>
+                        Climate Tools for Tribal Nations
+                </Typography>
+                <Typography variant="h2" className={classes.subHeaderText}>
+                </Typography>
+            </div>
+            <div className={classes.titleShort} onClick={() => {this.props.history.push('/')}}>
+                <Typography variant="h1" className={classes.headerText}>
+                        Tribal Climate Tools
+                </Typography>
+                <Typography variant="h2" className={classes.subHeaderText}>
+                </Typography>
+            </div>
             <section className={classes.rightToolbar}>
-              <Hidden smUp implementation="css">
-                <IconButton
-                  color="inherit"
-                  aria-label="Home"
-                  onClick={this.handleChangeHome}
-                  className={classes.homeButton}
-                >
-                  <HomeIcon />
-                </IconButton>
-                <IconButton
-                  color="inherit"
-                  aria-label="About AIHEC"
-                  onClick={this.handleChangeAbout}
-                  className={classes.infoButton}
-                >
-                  <InfoIcon />
-                </IconButton>
-              </Hidden>
-              <Hidden xsDown implementation="css">
-                <Tabs
-                  value={this.props.store.app.getActiveTabIndex}
-                  onChange={this.handleChange}
-                  //indicatorColor="secondary"
-                  //textColor="secondary"
-                  variant="fullWidth"
-                >
-                  <Tab label="HOME" />
-                  <Tab label="ABOUT" />
-                </Tabs>
-              </Hidden>
+              <Tabs
+                value={this.props.store.app.getActiveTabIndex}
+                onChange={this.handleChange}
+                indicatorColor="primary"
+                textColor="primary"
+                variant="standard"
+              >
+                <Tab label="TOOLS" value={2} />
+                <Tab label="ABOUT" value={1} />
+              </Tabs>
             </section>
           </Toolbar>
+          <div className={classes.bottomToolbar}>
+              <Tabs
+                value={this.props.store.app.getActiveTabIndex}
+                onChange={this.handleChange}
+                indicatorColor="primary"
+                textColor="primary"
+                variant="standard"
+              >
+                <Tab label="TOOLS" value={2} />
+                <Tab label="ABOUT" value={1} />
+              </Tabs>
+          </div>
         </AppBar>
       </div>
     );
@@ -135,7 +158,7 @@ class FullWidthTabs extends React.Component {
 
 FullWidthTabs.propTypes = {
   classes: PropTypes.object.isRequired,
-  //theme: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(FullWidthTabs);
+export default withRouter(withStyles(styles)(FullWidthTabs));

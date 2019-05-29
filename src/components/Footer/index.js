@@ -70,6 +70,7 @@ class Footer extends Component {
 
 const styles = theme => ({
   root: {
+    boxShadow: '0 50vh 0 50vh '+`${theme.palette.primary[300]}`,
     //display: 'flex',
     marginTop: 30,
     //width: '100%',
@@ -83,7 +84,7 @@ const styles = theme => ({
     margin: '0 16px'
   },
   subFooter: {
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+    //backgroundColor: 'rgba(0, 0, 0, 0.15)',
     padding: '8px 16px 8px 16px',
     marginTop: '8px'
   },
