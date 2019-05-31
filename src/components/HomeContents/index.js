@@ -10,7 +10,7 @@ import Grid from "@material-ui/core/Grid";
 import Hidden from '@material-ui/core/Hidden';
 
 // Components
-import StationExplorerMap from '../../components/StationExplorerMap';
+import NationPickerMap from '../../components/NationPickerMap';
 import NationSelect from '../../components/NationSelect';
 
 // Styles
@@ -56,7 +56,7 @@ class HomeContents extends Component {
                   </div>
                   <Grid container direction="column" spacing="24" alignItems="center">
                       <Grid item xs={12}>
-                        { this.props.store.app.getNations && (<StationExplorerMap />)}
+                        { this.props.store.app.getNations && (<NationPickerMap />)}
                       </Grid>
                   </Grid>
             </div>
