@@ -13,6 +13,7 @@
     "dom-to-image": "^2.6.0",
     "file-saver": "^2.0.2",
     "highcharts": "^7.1.1",
+    "highcharts-more": "^0.1.7",
     "highcharts-react-official": "^2.1.3",
     "leaflet": "^1.3.4",
     "mobx": "^5.9.4",

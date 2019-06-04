@@ -6,6 +6,9 @@ import { inject, observer} from 'mobx-react';
 import { MuiThemeProvider, createMuiTheme, withStyles, withTheme  } from "@material-ui/core/styles";
 //import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import brown from '@material-ui/core/colors/brown';
+import Highcharts from 'highcharts/highstock';
+//import HC_exporting from 'highcharts/modules/exporting'
+import HighchartsReact from 'highcharts-react-official';
 
 // import route Components here
 import {
@@ -28,6 +31,9 @@ import Footer from '../../components/Footer';
 // modified tab css version for this app
 //import '../../styles/react-tabs.css';
 import '../../styles/App.css';
+
+// init the exporting module
+require("highcharts/modules/exporting")(Highcharts);
 
 const theme = createMuiTheme({
   shadows: ["none"],

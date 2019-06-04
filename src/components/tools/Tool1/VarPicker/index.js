@@ -40,7 +40,7 @@ class VarPicker extends React.Component {
     const { classes } = this.props;
 
     return (
-      <Grid container direction="column" justify="space-evenly" alignItems="center">
+      <Grid container direction="row" justify="space-evenly" alignItems="center" spacing={24}>
         <Grid item>
           <StationPickerMap/>
         </Grid>

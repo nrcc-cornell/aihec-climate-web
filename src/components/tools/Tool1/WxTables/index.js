@@ -70,7 +70,7 @@ class WxTables extends Component {
                     return [row.date,row.avgt,row.maxt,row.mint,row.pcpn]
                 })
 
-        const tableTitle = 'Observed Data @ '+app.wxgraph_getClimateSummary[0]['stn']
+        const tableTitle = 'Observed Data @ '+app.wxgraph_getClimateSummary['stn'][0]
 
         return (
                 <MUIDataTable

@@ -24,7 +24,7 @@ export class AppStore {
             this.activePage = 'about'
         } else {
             this.activePage = 'tools'
-            if (this.getToolName==='climview') { this.wxgraph_downloadData() }
+            //if (this.getToolName==='climview') { this.wxgraph_downloadData() }
         }
     };
     @computed get getActivePage() { return this.activePage };
@@ -61,7 +61,7 @@ export class AppStore {
     @action setSelectedToolName = (e) => {
             if (this.getToolName !== e.target.value) {
                 this.toolName = e.target.value;
-                if (this.getToolName==='climview') { this.wxgraph_downloadData() }
+                //if (this.getToolName==='climview') { this.wxgraph_downloadData() }
             }
         };
     @computed get getToolName() { return this.toolName };
@@ -95,14 +95,14 @@ export class AppStore {
     @action setNation = (l) => {
         if (this.getNation.name !== l.toString()) {
             this.nation = this.getNations.find(obj => obj.name === l);
-            if (this.getToolName==='climview') { this.wxgraph_downloadData() }
+            //if (this.toolIsSelected && this.getToolName==='climview') { this.wxgraph_downloadData() }
         };
     }
     // set nation from select menu
     @action setSelectedNation = (t) => {
             if (this.getNation.name !== t.value) {
                 this.nation = this.getNations.find(obj => obj.name.toString() === t.value);
-                if (this.getToolName==='climview') { this.wxgraph_downloadData() }
+                //if (this.toolIsSelected && this.getToolName==='climview') { this.wxgraph_downloadData() }
             }
             if (this.getShowModalMap) { this.setShowModalMap(false) };
         };
@@ -139,33 +139,34 @@ export class AppStore {
         return stns[this.getNation.name]
     };
 
-    @action nationOnEachFeature = (feature, layer) => {
-        let nation = layer.bindPopup(feature.properties.NAMELSAD);
-        layer.on({
-            click: () => {
-                this.setNation(feature.properties.NAMELSAD);
-                if (this.getShowModalMap) { this.setShowModalMap(false) };
-            },
-            mouseover: () => {
-                    nation.openPopup();
-                },
-            mouseout: () => {
-                    nation.closePopup();
-                },
-        })
-    }
+    //@action nationOnEachFeature = (feature, layer) => {
+    //    let nation = layer.bindPopup(feature.properties.NAMELSAD);
+    //    layer.on({
+    //        click: () => {
+    //            this.setNation(feature.properties.NAMELSAD);
+    //            this.loadProjections(this.getStateId);
+    //            if (this.getShowModalMap) { this.setShowModalMap(false) };
+    //        },
+    //        mouseover: () => {
+    //                nation.openPopup();
+    //            },
+    //        mouseout: () => {
+    //                nation.closePopup();
+    //            },
+    //    })
+    //}
 
-    @action nationOnEachFeature_explorer = (feature, layer) => {
-        let nation = layer.bindPopup(feature.properties.NAMELSAD);
-        layer.on({
-            mouseover: () => {
-                    nation.openPopup();
-                },
-            mouseout: () => {
-                    nation.closePopup();
-                },
-        })
-    }
+    //@action nationOnEachFeature_explorer = (feature, layer) => {
+    //    let nation = layer.bindPopup(feature.properties.NAMELSAD);
+    //    layer.on({
+    //        mouseover: () => {
+    //                nation.openPopup();
+    //            },
+    //        mouseout: () => {
+    //                nation.closePopup();
+    //            },
+    //    })
+    //}
 
     nationFeatureStyle = (feature) => {
             return {
@@ -192,8 +193,22 @@ export class AppStore {
     }
 
     ///////////////////////////////////////////////////////
-    /// Tool: Long-term weather grapher
+    /// Tool: Climate Viewer
     ///////////////////////////////////////////////////////
+    /// chart details
+    /// which time range is selected?
+    /// past : observed annual values through last year
+    /// present : two months of daily observed data and normals
+    /// future: model projections from next year through 2100
+    @observable chart_view='past';
+    @action setChartView = (v) => {
+        this.chart_view = v;
+    };
+    @computed get getChartView() { return this.chart_view };
+    @computed get chartViewIsPast() { return this.getChartView==='past' };
+    @computed get chartViewIsPresent() { return this.getChartView==='present' };
+    @computed get chartViewIsFuture() { return this.getChartView==='future' };
+
     /// which variable is active?
     /// possibilities are 'avgt','mint','maxt','pcpn','snow'
     @observable wxgraph_var = 'avgt';
@@ -212,6 +227,7 @@ export class AppStore {
     }
     @computed get wxgraph_getVar() { return this.wxgraph_var };
 
+    /// which output type is active?
     @observable outputType = 'chart';
     @action setOutputType = (changeEvent) => {
         console.log('Changing output type to ', changeEvent.target.value)
@@ -263,30 +279,50 @@ export class AppStore {
     //     maxt : annual average max temperature (F)
     //     pcpn : annual accumulated precipitation (in)
     //     snow : annual accumulated snowfall (in)
-    @observable wxgraph_climateSummary = [{
-                'date': moment().format('YYYY-MM-DD'),
-                'avgt': NaN,
-                'maxt': NaN,
-                'mint': NaN,
-                'pcpn': NaN,
-                'snow': NaN,
-                }];
+    //@observable wxgraph_climateSummary = [{
+    //            'date': moment().format('YYYY-MM-DD'),
+    //            'avgt': NaN,
+    //            'maxt': NaN,
+    //            'mint': NaN,
+    //            'pcpn': NaN,
+    //            'snow': NaN,
+    //            }];
+    @observable wxgraph_climateSummary = {
+                'stn': '',
+                'years': [moment().format('YYYY-MM-DD')],
+                'avgt': [NaN],
+                'maxt': [NaN],
+                'mint': [NaN],
+                'pcpn': [NaN],
+                'snow': [NaN],
+                };
     @action wxgraph_setClimateSummary = (m) => {
-        let data = this.wxgraph_getClimateData
-        let dataObjArray = []
-        data.forEach(function (d) {
-            dataObjArray.push({
-                'stn':m.name+', '+m.state,
-                'date':d[0],
-                'avgt':(d[1]==='M') ? NaN : parseFloat(d[1]),
-                'maxt':(d[2]==='M') ? NaN : parseFloat(d[2]),
-                'mint':(d[3]==='M') ? NaN : parseFloat(d[3]),
-                'pcpn':(d[4]==='M') ? NaN : ((d[4]==='T') ? 0.00 : parseFloat(d[4])),
-                'snow':NaN,
-            })
+        let dataIn = this.wxgraph_getClimateData
+        let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,snowValue
+        let dataObj = {}
+        dataObj['stn']=[]
+        dataObj['years']=[]
+        dataObj['avgt']=[]
+        dataObj['maxt']=[]
+        dataObj['mint']=[]
+        dataObj['pcpn']=[]
+        dataIn.forEach(function (d) {
+            stnValue = m.name+', '+m.state
+            dateValue = Date.UTC(d[0],1,1)
+            avgtValue = (d[1]==='M') ? NaN : parseFloat(d[1])
+            maxtValue = (d[2]==='M') ? NaN : parseFloat(d[2])
+            mintValue = (d[3]==='M') ? NaN : parseFloat(d[3])
+            pcpnValue = (d[4]==='M') ? NaN : ((d[4]==='T') ? 0.00 : parseFloat(d[4]))
+            snowValue = NaN
+            dataObj['stn'].push(stnValue)
+            dataObj['years'].push(dateValue)
+            dataObj['avgt'].push(avgtValue)
+            dataObj['maxt'].push(maxtValue)
+            dataObj['mint'].push(mintValue)
+            dataObj['pcpn'].push(pcpnValue)
         });
 
-        this.wxgraph_climateSummary = dataObjArray
+        this.wxgraph_climateSummary = dataObj
     }
     @computed get wxgraph_getClimateSummary() {
         return this.wxgraph_climateSummary
@@ -297,8 +333,8 @@ export class AppStore {
             let elems
             //let numdays
             elems = [
-                {"name":"avgt","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
-                {"name":"maxt","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
                 {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
                 {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
             ]
@@ -340,6 +376,156 @@ export class AppStore {
               "Request Error: " + (err.response.data || err.response.statusText)
             );
           });
+    }
+
+    //////////////////////////////////
+    // CURRENT DATA
+    //////////////////////////////////
+
+    //////////////////////////////////
+    // PROJECTIONS
+    //////////////////////////////////
+
+    @observable state_id = 'NY';
+    @action updateStateId = (id) => {
+            this.stateId = id
+        }
+    @computed get getStateId() {
+            return this.state_id
+        }
+
+    // store downloaded projection data
+    @observable projection_data = null;
+    @action updateProjectionData = (d,re,scen) => {
+            let newData = {}
+            newData[scen] = {}
+            newData[scen][re] = {}
+            newData[scen][re]['years'] = d['years']
+            newData[scen][re]['avgt'] = d['avgt']
+            newData[scen][re]['maxt'] = d['maxt']
+            newData[scen][re]['mint'] = d['mint']
+            newData[scen][re]['pcpn'] = d['pcpn']
+            this.projection_data[scen][re] = newData[scen][re]
+            //this.projection_data[scen][re]['years'] = d['years']
+            //this.projection_data[scen][re]['avgt'] = d['avgt']
+            //this.projection_data[scen][re]['maxt'] = d['maxt']
+            //this.projection_data[scen][re]['mint'] = d['mint']
+            //this.projection_data[scen][re]['pcpn'] = d['pcpn']
+        }
+    @action emptyProjectionData = (d) => {
+            if (this.getProjectionData) { this.projection_data = null }
+            let data = {}
+            data['years'] = []
+            data['avgt'] = []
+            data['maxt'] = []
+            data['mint'] = []
+            data['pcpn'] = []
+            this.projection_data = {
+                    'rcp45' : {
+                        'mean' : data,
+                        'max' : data,
+                        'min' : data,
+                        },
+                    'rcp85' : {
+                        'mean' : data,
+                        'max' : data,
+                        'min' : data,
+                        },
+                };
+        }
+    @computed get getProjectionData() {
+            return this.projection_data
+        }
+
+    // Logic for displaying spinner (projections)
+    @observable loader_projections=false;
+    @action updateLoaderProjections = (l) => {
+            this.loader_projections = l;
+        }
+    @computed get getLoaderProjections() {
+            return this.loader_projections
+        }
+
+    // Check if a projection is loading
+    @computed get isProjectionLoading() {
+        if (this.getProjectionData) {
+            if (this.getProjectionData.rcp85.mean.years.length > 0 &&
+                this.getProjectionData.rcp85.min.years.length > 0 &&
+                this.getProjectionData.rcp85.max.years.length > 0 &&
+                this.getProjectionData.rcp45.mean.years.length > 0 &&
+                this.getProjectionData.rcp45.min.years.length > 0 &&
+                this.getProjectionData.rcp45.max.years.length > 0 &&
+                !this.getLoaderProjections) {
+                    return false;
+            } else {
+                    return true;
+            }
+        } else {
+            return true;
+        }
+    }
+
+  @action loadProjections_1950_2100 = (id,scen,re) => {
+
+    if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
+    let varReduce = ''
+    if (re==='mean') { varReduce = 'wMean' }
+    if (re==='max') { varReduce = 'allMax' }
+    if (re==='min') { varReduce = 'allMin' }
+
+    const params = {
+      "grid": "loca:"+varReduce+":"+scen,
+      "state":id,
+      "sdate": "1950",
+      "edate": "2099",
+      "elems": [
+        { "name":"avgt","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
+        { "name":"maxt","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
+        { "name":"mint","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
+        { "name":"pcpn","interval":[1],"duration":1,"reduce":"sum","area_reduce":"state_mean" }
+      ]
+    };
+
+    //console.log('loading projections: params');
+    //console.log(params);
+
+    return axios
+      //.post("http://grid2.rcc-acis.org/GridData", params)
+      .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
+      .then(res => {
+        console.log('successful download of projection data : ' + scen + ' ' + re + ' 1950-2100');
+        let i
+        let data = {}
+        data['years'] = []
+        data['avgt'] = []
+        data['maxt'] = []
+        data['mint'] = []
+        data['pcpn'] = []
+        for (i=0; i<res.data.data.length; i++) {
+            //data['years'].push(res.data.data[i][0])
+            data['years'].push(Date.UTC(res.data.data[i][0],1,1))
+            data['avgt'].push(res.data.data[i][1][params['state']])
+            data['maxt'].push(res.data.data[i][2][params['state']])
+            data['mint'].push(res.data.data[i][3][params['state']])
+            data['pcpn'].push(res.data.data[i][4][params['state']])
+        }
+        this.updateProjectionData(data,re,scen);
+        console.log(this.getProjectionData);
+        if (this.getLoaderProjections === true) { this.updateLoaderProjections(false); }
+      })
+      .catch(err => {
+        console.log("Failed to load projection data 1950-2100 ", err);
+      });
+  }
+
+    @action loadProjections = (id) => {
+        this.emptyProjectionData()
+        this.loadProjections_1950_2100(id,'rcp85','mean');
+        this.loadProjections_1950_2100(id,'rcp85','max');
+        this.loadProjections_1950_2100(id,'rcp85','min');
+        this.loadProjections_1950_2100(id,'rcp45','mean');
+        this.loadProjections_1950_2100(id,'rcp45','max');
+        this.loadProjections_1950_2100(id,'rcp45','min');
     }
 
     // run these on initial load

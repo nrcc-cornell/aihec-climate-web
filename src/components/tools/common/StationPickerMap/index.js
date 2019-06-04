@@ -96,15 +96,15 @@ class StationPickerMap extends Component {
     onEachFeature = (feature,layer) => {
         let nation = layer.bindPopup(feature.properties.NAMELSAD);
         layer.on({
-            preclick: () => {
-                layer.closePopup();
-            },
-            click: () => {
-                app.setNation(feature.properties.NAMELSAD);
-                if (app.getShowModalMap) { app.setShowModalMap(false) };
-                //app.setActivePage(2);
-                //history.push(app.getToolInfo(app.getToolName).url);
-            },
+            //preclick: () => {
+            //    layer.closePopup();
+            //},
+            //click: () => {
+            //    //app.setNation(feature.properties.NAMELSAD);
+            //    if (app.getShowModalMap) { app.setShowModalMap(false) };
+            //    //app.setActivePage(2);
+            //    //history.push(app.getToolInfo(app.getToolName).url);
+            //},
             mouseover: () => {
                     nation.openPopup();
                 },

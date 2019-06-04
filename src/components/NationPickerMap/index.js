@@ -101,6 +101,7 @@ class NationPickerMap extends Component {
             },
             click: () => {
                 app.setNation(feature.properties.NAMELSAD);
+                //app.loadProjections(app.getStateId);
                 if (app.getShowModalMap) { app.setShowModalMap(false) };
                 app.setActivePage(2);
                 //history.push('/tools');

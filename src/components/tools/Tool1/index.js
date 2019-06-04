@@ -8,11 +8,13 @@ import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 
 // Components
+import ChartRangeSelector from './ChartRangeSelector'
 import VarPicker from './VarPicker'
 //import ToolSelect from '../common/ToolSelect'
 //import OutputSelect from '../common/OutputSelect'
 import VarPopover from './VarPopover'
 import WxCharts from './WxCharts'
+//import PastCharts from './PastCharts'
 import WxTables from './WxTables'
 
 // Styles
@@ -28,10 +30,16 @@ class Tool1 extends Component {
         app = this.props.store.app;
     }
 
+    componentDidMount() {
+        app.wxgraph_downloadData();
+        app.loadProjections(app.getStateId);
+    }
+
     render() {
 
         let display;
-        if (app.getOutputType==='chart') { display = <WxCharts /> }
+        //if (app.getOutputType==='chart' && app.getChartView==='past') { display = <PastCharts/> }
+        if (app.getOutputType==='chart') { display = <WxCharts/> }
         if (app.getOutputType==='table') { display = <WxTables /> }
         let display_VarPicker;
         if (app.getOutputType==='chart') { display_VarPicker = <VarPicker /> }
@@ -47,7 +55,11 @@ class Tool1 extends Component {
         if (app.getOutputType==='table') { display_VarPopover = null }
 
         return (
-            <Grid container justify="center" alignItems="center">
+            <Grid container direction="column" justify="center" alignItems="center">
+              <Grid container item direction="row" justify="center" alignItems="center">
+                <ChartRangeSelector/>
+              </Grid>
+              <Grid container item justify="center" alignItems="center">
                 <Grid item className="nothing" xs={0} md={2}>
                   <Hidden smDown>
                     {display_VarPicker}
@@ -71,6 +83,7 @@ class Tool1 extends Component {
                         </LoadingOverlay>
                     </Grid>
                 </Grid>
+              </Grid>
             </Grid>
         );
     }
