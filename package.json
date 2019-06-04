@@ -4,7 +4,8 @@
   "homepage": "https://aihec-climate.github.io/aihec-climate-web",
   "private": true,
   "devDependencies": {
-    "custom-react-scripts": "0.2.2"
+    "custom-react-scripts": "0.2.2",
+    "gh-pages": "^2.0.1"
   },
   "dependencies": {
     "@material-ui/core": "^3.9.3",
@@ -33,6 +34,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
