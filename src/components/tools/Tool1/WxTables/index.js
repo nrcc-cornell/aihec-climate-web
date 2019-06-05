@@ -23,7 +23,7 @@ class WxTables extends Component {
         let pageSize = 10;
 
         let setPage = () => {
-                let data = app.wxgraph_getClimateSummary;
+                let data = app.getPastData;
                 let idxValid = 0;
                 data.slice().reverse().some(function (value,index) {
                     idxValid=index;
@@ -47,7 +47,7 @@ class WxTables extends Component {
         columns.push({name:'Min Temp', options:{filter:false,sort:true,display:true,download:true}})
         columns.push({name:'Total Precipitation', options:{filter:false,sort:true,display:true,download:true}})
 
-        let data = JSON.parse(JSON.stringify(app.wxgraph_getClimateSummary));
+        let data = JSON.parse(JSON.stringify(app.getPastData));
 
         const options = {
           filterType: 'checkbox',
@@ -70,7 +70,7 @@ class WxTables extends Component {
                     return [row.date,row.avgt,row.maxt,row.mint,row.pcpn]
                 })
 
-        const tableTitle = 'Observed Data @ '+app.wxgraph_getClimateSummary['stn'][0]
+        const tableTitle = 'Observed Data @ '+app.getPastData['stn'][0]
 
         return (
                 <MUIDataTable

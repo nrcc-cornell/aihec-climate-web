@@ -13,8 +13,10 @@ import VarPicker from './VarPicker'
 //import ToolSelect from '../common/ToolSelect'
 //import OutputSelect from '../common/OutputSelect'
 import VarPopover from './VarPopover'
-import WxCharts from './WxCharts'
-//import PastCharts from './PastCharts'
+//import WxCharts from './WxCharts'
+import PastCharts from './PastCharts'
+import PresentCharts from './PresentCharts'
+import FutureCharts from './FutureCharts'
 import WxTables from './WxTables'
 
 // Styles
@@ -31,15 +33,16 @@ class Tool1 extends Component {
     }
 
     componentDidMount() {
-        app.wxgraph_downloadData();
-        app.loadProjections(app.getStateId);
+        app.climview_loadData();
     }
 
     render() {
 
         let display;
-        //if (app.getOutputType==='chart' && app.getChartView==='past') { display = <PastCharts/> }
-        if (app.getOutputType==='chart') { display = <WxCharts/> }
+        if (app.getOutputType==='chart' && app.getChartView==='past') { display = <PastCharts/> }
+        if (app.getOutputType==='chart' && app.getChartView==='present') { display = <PresentCharts/> }
+        if (app.getOutputType==='chart' && app.getChartView==='future') { display = <FutureCharts/> }
+        //if (app.getOutputType==='chart') { display = <WxCharts/> }
         if (app.getOutputType==='table') { display = <WxTables /> }
         let display_VarPicker;
         if (app.getOutputType==='chart') { display_VarPicker = <VarPicker /> }
@@ -73,7 +76,7 @@ class Tool1 extends Component {
                     </Grid>
                     <Grid item>
                         <LoadingOverlay
-                          active={app.wxgraph_dataIsLoading}
+                          active={app.isPastLoading}
                           spinner
                           background={'rgba(255,255,255,1.0)'}
                           color={'rgba(34,139,34,1.0)'}

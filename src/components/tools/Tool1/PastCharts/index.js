@@ -9,17 +9,18 @@ import moment from 'moment';
 //import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, } from 'recharts';
 //import Grid from '@material-ui/core/Grid';
 import Highcharts from 'highcharts/highstock';
+//import HC_exporting from 'highcharts/modules/exporting'
 import HighchartsReact from 'highcharts-react-official';
 
 //Components
-//import TimeFrameButtonGroup from '../TimeFrameButtonGroup'
-import WxChartTitle from '../WxChartTitle'
 
 // Styles
 import '../../../../styles/WxCharts.css';
 
 var HighchartsMore = require('highcharts-more');
 HighchartsMore(Highcharts);
+
+//require("highcharts/modules/exporting")(Highcharts);
 
 var app;
 
@@ -29,32 +30,37 @@ class PastCharts extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
+        this.chart;
+        this.exportChart = () => {
+          this.chart.exportChart();
+        };
     }
 
-    createPastSeries = (y,a) => {
-        let i
-        let oseries = [];
-        if (a) {
-            for (i=0; i<y.length; i++) {
-                oseries.push([y[i],a[i]])
-            };
-        }
-        return oseries;
-    }
+    //componentDidMount() {
+    //  this.chart = this.refs.chart.chart;
+    //}
 
     render() {
 
-        if (app.wxgraph_getClimateSummary && app.wxgraph_getClimateSummary['years']!=[]) {
-
         let varName = app.wxgraph_getVar
         let varLabel = app.wxgraph_getVarLabels[app.wxgraph_getVar]
-        let station = app.wxgraph_getClimateSummary['stn'][0]
+        let station = (app.getPastData) ? app.getPastData['stn'][0] : ''
         let today = new Date()
 
-        let odata = app.wxgraph_getClimateSummary
-        console.log('odata');
-        console.log(odata);
-        let dataToChart = this.createPastSeries(odata['years'],odata[varName])
+        var odata = app.getPastData
+
+        let createPastSeries = (y,a) => {
+            let i
+            let oseries = [];
+            if (a) {
+                for (i=0; i<y.length; i++) {
+                    oseries.push([y[i],a[i]])
+                };
+            }
+            return oseries;
+        }
+
+        if (!app.isPastLoading && app.getPastData['date']!=[]) {
 
         const options = {
                  plotOptions: {
@@ -64,11 +70,7 @@ class PastCharts extends Component {
                      series: {
                          type: 'line',
                          showCheckbox: false,
-                         //pointStart: parseInt(pdata['rcp85']['mean'].years[0],10),
-                         //pointInterval: 1,
                          pointStart: Date.UTC(1850,1,1),
-                         //pointStart: pdata['rcp85']['mean'].years[0],
-                         //pointInterval: 24*3600*1000,
                          animation: true,
                          lineWidth: 4,
                          marker: {
@@ -103,6 +105,14 @@ class PastCharts extends Component {
           title: {
             text: varLabel+' @ '+station
           },
+          exporting: {
+            //showTable: true,
+            chartOptions: {
+              chart: {
+                backgroundColor: '#ffffff'
+              }
+            },
+          },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
           legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
           xAxis: { type: 'datetime', startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
@@ -110,7 +120,7 @@ class PastCharts extends Component {
                  },
           series: [{
               name: app.wxgraph_getVarLabels[app.wxgraph_getVar],
-              data: this.dataToChart,
+              data: (app.getPastData['date']!=[]) ? createPastSeries(odata['date'],odata[varName]) : [],
               color: '#000000',
               step: false,
               lineWidth: 0,
@@ -124,6 +134,7 @@ class PastCharts extends Component {
           <div id="wx-chart">
             <HighchartsReact
               highcharts={Highcharts}
+              constructorType={"chart"}
               options={options}
             />
           </div>

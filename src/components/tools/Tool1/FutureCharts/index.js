@@ -5,11 +5,7 @@ import React, { Component } from 'react';
 import { toJS } from 'mobx';
 import { inject, observer} from 'mobx-react';
 import moment from 'moment';
-//import { ResponsiveContainer, ComposedChart, AreaChart, LineChart, BarChart, Bar, Line, Area, XAxis, YAxis, Surface, Symbols, CartesianGrid, Tooltip, Legend, Brush } from 'recharts';
-//import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, } from 'recharts';
-//import Grid from '@material-ui/core/Grid';
 import Highcharts from 'highcharts/highstock';
-//import HC_exporting from 'highcharts/modules/exporting'
 import HighchartsReact from 'highcharts-react-official';
 
 //Components
@@ -25,7 +21,7 @@ HighchartsMore(Highcharts);
 var app;
 
 @inject('store') @observer
-class WxCharts extends Component {
+class FutureCharts extends Component {
 
     constructor(props) {
         super(props);
@@ -44,24 +40,11 @@ class WxCharts extends Component {
 
         let varName = app.wxgraph_getVar
         let varLabel = app.wxgraph_getVarLabels[app.wxgraph_getVar]
-        let station = (app.getPastData) ? app.getPastData['stn'][0] : ''
-        let today = new Date()
+        let nation = app.getNation.name
+        let startYear = new Date(2000,0,1)
 
-        var odata = app.getPastData
-        var cdata = app.getPresentData
+        var odata = app.getLivnehData
         var pdata = app.getProjectionData
-
-
-        let createPastSeries = (y,a) => {
-            let i
-            let oseries = [];
-            if (a) {
-                for (i=0; i<y.length; i++) {
-                    oseries.push([y[i],a[i]])
-                };
-            }
-            return oseries;
-        }
 
         let createProjectionSeries = (y,a,syear) => {
             let i
@@ -85,22 +68,17 @@ class WxCharts extends Component {
             return ranges;
         }
 
-        if (!app.isPresentLoading && app.getPresentData['date']!=[]) {
+        if (!app.isProjectionLoading && app.getProjectionData['date']!=[]) {
 
         const options = {
                  plotOptions: {
                      line: {
                          animation: true,
-                         //animation: !this.props.store.app.isProjectionLoading && this.props.store.app.getProjectionView,
                      },
                      series: {
                          type: 'line',
                          showCheckbox: false,
-                         //pointStart: parseInt(pdata['rcp85']['mean'].years[0],10),
-                         //pointInterval: 1,
                          pointStart: Date.UTC(1850,1,1),
-                         //pointStart: pdata['rcp85']['mean'].years[0],
-                         //pointInterval: 24*3600*1000,
                          animation: true,
                          lineWidth: 4,
                          marker: {
@@ -133,7 +111,7 @@ class WxCharts extends Component {
                      }
                  },
           title: {
-            text: varLabel+' @ '+station
+            text: varLabel+' @ '+nation
           },
           exporting: {
             //showTable: true,
@@ -145,31 +123,22 @@ class WxCharts extends Component {
           },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
           legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
-          xAxis: { type: 'datetime', startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
+          xAxis: { type: 'datetime', startOnTick: false, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
                      dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
                  },
           series: [{
-              name: app.wxgraph_getVarLabels[app.wxgraph_getVar],
-              data: (app.getPastData['date']!=[]) ? createPastSeries(odata['date'],odata[varName]) : [],
+              name: 'Observed',
+              data: (!app.isProjectionLoading) ? createProjectionSeries(odata['years'],odata[varName],startYear): [],
               color: '#000000',
               step: false,
               lineWidth: 0,
               marker: { enabled: true },
-              visible: app.chartViewIsPast,
-              showInLegend: app.chartViewIsPast,
-          },{
-              name: app.wxgraph_getVarLabels[app.wxgraph_getVar],
-              data: (app.getPastData['date']!=[]) ? createPastSeries(odata['date'].slice(-3),odata[varName].slice(-3)) : [],
-              color: '#0000FF',
-              step: false,
-              lineWidth: 0,
-              marker: { enabled: true },
-              visible: app.chartViewIsPresent,
-              showInLegend: app.chartViewIsPresent,
+              zIndex: 24,
+              visible: app.chartViewIsFuture,
+              showInLegend: app.chartViewIsFuture,
           },{
               name: 'Climate model average',
-              //data: pdata['rcp85']['mean'][varName],
-              data: (!app.isProjectionLoading) ? createProjectionSeries(pdata['rcp85']['mean']['years'],pdata['rcp85']['mean'][varName],today): [],
+              data: (!app.isProjectionLoading) ? createProjectionSeries(pdata['rcp85']['mean']['years'],pdata['rcp85']['mean'][varName],startYear): [],
               type: "line",
               zIndex: 24,
               lineWidth: 1,
@@ -180,13 +149,13 @@ class WxCharts extends Component {
               showInLegend: app.chartViewIsFuture,
           },{
               name: 'Climate model range',
-              data: (!app.isProjectionLoading) ? createProjectionRanges(toJS(pdata)['rcp85']['min']['years'],toJS(pdata)['rcp85']['min'][varName],toJS(pdata)['rcp85']['max'][varName],today): [],
+              data: (!app.isProjectionLoading) ? createProjectionRanges(toJS(pdata)['rcp85']['min']['years'],toJS(pdata)['rcp85']['min'][varName],toJS(pdata)['rcp85']['max'][varName],startYear): [],
               marker : {symbol: 'square', radius: 12 },
               type: "arearange",
               linkedTo: ':previous',
               lineWidth:0,
-              color: 'rgba(0,0,0,0.4)',
-              fillColor: 'rgba(0,0,0,0.4)',
+              color: 'rgba(0,0,0,0.2)',
+              fillColor: 'rgba(0,0,0,0.2)',
               fillOpacity: 0.1,
               zIndex: 0,
               visible: app.chartViewIsFuture,
@@ -213,5 +182,5 @@ class WxCharts extends Component {
     }
 }
 
-export default WxCharts;
+export default FutureCharts;
 

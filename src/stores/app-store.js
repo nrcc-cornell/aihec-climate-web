@@ -200,7 +200,7 @@ export class AppStore {
     /// past : observed annual values through last year
     /// present : two months of daily observed data and normals
     /// future: model projections from next year through 2100
-    @observable chart_view='past';
+    @observable chart_view='present';
     @action setChartView = (v) => {
         this.chart_view = v;
     };
@@ -308,7 +308,7 @@ export class AppStore {
         dataObj['pcpn']=[]
         dataIn.forEach(function (d) {
             stnValue = m.name+', '+m.state
-            dateValue = Date.UTC(d[0],1,1)
+            dateValue = Date.UTC(d[0],0,1)
             avgtValue = (d[1]==='M') ? NaN : parseFloat(d[1])
             maxtValue = (d[2]==='M') ? NaN : parseFloat(d[2])
             mintValue = (d[3]==='M') ? NaN : parseFloat(d[3])
@@ -379,8 +379,265 @@ export class AppStore {
     }
 
     //////////////////////////////////
+    // PAST DATA
+    //////////////////////////////////
+
+    // store downloaded past data
+    @observable past_data = null;
+
+
+    @action updatePastData = (d) => {
+            let newData = {}
+            newData = {}
+            newData['stn'] = d['stn']
+            newData['date'] = d['date']
+            newData['avgt'] = d['avgt']
+            newData['maxt'] = d['maxt']
+            newData['mint'] = d['mint']
+            newData['pcpn'] = d['pcpn']
+            this.past_data = newData
+        }
+    @action emptyPastData = () => {
+            if (this.getPastData) { this.past_data = null }
+            let data = {}
+            data['stn'] = []
+            data['date'] = []
+            data['avgt'] = []
+            data['maxt'] = []
+            data['mint'] = []
+            data['pcpn'] = []
+            this.past_data = data
+        }
+    @computed get getPastData() {
+            return this.past_data
+        }
+
+    // Check if a past data is loading
+    @computed get isPastLoading() {
+        if (this.getPastData) {
+            if (this.getPastData.date.length > 0 &&
+                !this.getLoaderPast) {
+                    return false;
+            } else {
+                    return true;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    // Logic for displaying spinner (past)
+    @observable loader_past=false;
+    @action updateLoaderPast = (l) => {
+            this.loader_past = l;
+        }
+    @computed get getLoaderPast() {
+            return this.loader_past
+        }
+
+    // Past data download - set parameters
+    @computed get getAcisParamsPast() {
+            let elems
+            elems = [
+                {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
+            ]
+            return {
+                "sid": this.getStationFromNation,
+                "meta":"name,state",
+                "sdate":"por",
+                "edate":"por",
+                "elems":elems
+            }
+        }
+
+    // Past data download - download data using parameters
+    @action loadPastData = () => {
+        console.log("Call loadPastData")
+        if (this.getLoaderPast === false) { this.updateLoaderPast(true); }
+        this.emptyPastData()
+        return axios
+          .post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPast)
+          .then(res => {
+            console.log('SUCCESS downloading PAST DATA from ACIS');
+            let i,thisDate
+            let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,snowValue
+            let data = {}
+            data['stn'] = []
+            data['date'] = []
+            data['avgt'] = []
+            data['maxt'] = []
+            data['mint'] = []
+            data['pcpn'] = []
+            for (i=0; i<res.data.data.length; i++) {
+                stnValue = res.data.meta.name+', '+res.data.meta.state
+                dateValue = Date.UTC(res.data.data[i][0],0,1)
+                avgtValue = (res.data.data[i][1]==='M') ? NaN : parseFloat(res.data.data[i][1])
+                maxtValue = (res.data.data[i][2]==='M') ? NaN : parseFloat(res.data.data[i][2])
+                mintValue = (res.data.data[i][3]==='M') ? NaN : parseFloat(res.data.data[i][3])
+                pcpnValue = (res.data.data[i][4]==='M') ? NaN : ((res.data.data[i][4]==='T') ? 0.00 : parseFloat(res.data.data[i][4]))
+                data['stn'].push(stnValue)
+                data['date'].push(dateValue)
+                data['avgt'].push(avgtValue)
+                data['maxt'].push(maxtValue)
+                data['mint'].push(mintValue)
+                data['pcpn'].push(pcpnValue)
+            }
+            this.updatePastData(data);
+            console.log(this.getPastData);
+            if (this.getLoaderPast === true) { this.updateLoaderPast(false); }
+          })
+          .catch(err => {
+            console.log(
+              "Request Error: " + (err.response.data || err.response.statusText)
+            );
+          });
+    }
+
+    //////////////////////////////////
     // CURRENT DATA
     //////////////////////////////////
+
+    // store downloaded present data
+    @observable present_data = null;
+    @action updatePresentData = (d) => {
+            let newData = {}
+            newData = {}
+            newData['stn'] = d['stn']
+            newData['obs'] = {}
+            newData['normal'] = {}
+            newData['extreme'] = {}
+            newData['obs']['date'] = d['date']
+            newData['obs']['maxt'] = d['maxt_obs']
+            newData['obs']['mint'] = d['mint_obs']
+            newData['obs']['pcpn'] = d['pcpn_obs']
+            newData['normal']['date'] = d['date']
+            newData['normal']['maxt'] = d['maxt_normal']
+            newData['normal']['mint'] = d['mint_normal']
+            newData['extreme']['date'] = d['date']
+            newData['extreme']['maxt'] = d['maxt_extreme']
+            newData['extreme']['mint'] = d['mint_extreme']
+            this.present_data = newData
+        }
+    @action emptyPresentData = () => {
+            if (this.getPresentData) { this.present_data = null }
+            let data = {}
+            data['date'] = []
+            data['maxt'] = []
+            data['mint'] = []
+            data['pcpn'] = []
+            this.present_data = {
+                    'stn' : "",
+                    'obs' : data,
+                    'normal' : data,
+                    'extremes' : data,
+                };
+        }
+    @computed get getPresentData() {
+            return this.present_data
+        }
+
+    // Check if a present data is loading
+    @computed get isPresentLoading() {
+        if (this.getPresentData) {
+            if (this.getPresentData.obs.date.length > 0 &&
+                !this.getLoaderPresent) {
+                    return false;
+            } else {
+                    return true;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    // Logic for displaying spinner (present)
+    @observable loader_present=false;
+    @action updateLoaderPresent = (l) => {
+            this.loader_present = l;
+        }
+    @computed get getLoaderPresent() {
+            return this.loader_present
+        }
+
+    // Present data download - set parameters
+    @computed get getAcisParamsPresent() {
+            let elems
+            let startdate = moment();
+            startdate = startdate.subtract(90, "days");
+            startdate = startdate.format("YYYY-MM-DD");
+            let enddate = moment()
+            enddate = enddate.format("YYYY-MM-DD")
+            elems = [
+                //{"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"maxt"},
+                {"name":"mint"},
+                {"name":"pcpn"},
+                {"name":"maxt","normal":"1"},
+                {"name":"mint","normal":"1"},
+                // add extremes
+            ]
+            return {
+                "sid": this.getStationFromNation,
+                "meta":"name,state",
+                "sdate":startdate,
+                "edate":enddate,
+                "elems":elems
+            }
+        }
+
+    // Present data download - download data using parameters
+    @action loadPresentData = () => {
+        console.log("Call loadPresentData")
+        if (this.getLoaderPresent === false) { this.updateLoaderPresent(true); }
+        this.emptyPresentData()
+        return axios
+          .post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresent)
+          .then(res => {
+            console.log('SUCCESS downloading PRESENT DATA from ACIS');
+            console.log(res);
+            let i,thisDate
+            let maxtObsValue,mintObsValue,pcpnObsValue,maxtNormalValue,mintNormalValue,maxtExtremeValue,mintExtremeValue
+            let data = {}
+            data['stn'] = res.data.meta.name+', '+res.data.meta.state
+            data['date'] = []
+            data['maxt_obs'] = []
+            data['mint_obs'] = []
+            data['pcpn_obs'] = []
+            data['maxt_normal'] = []
+            data['mint_normal'] = []
+            data['maxt_extreme'] = []
+            data['mint_extreme'] = []
+            for (i=0; i<res.data.data.length; i++) {
+                thisDate = res.data.data[i][0];
+                maxtObsValue = (res.data.data[i][1]==='M') ? NaN : parseFloat(res.data.data[i][1])
+                mintObsValue = (res.data.data[i][2]==='M') ? NaN : parseFloat(res.data.data[i][2])
+                pcpnObsValue = (res.data.data[i][3]==='M') ? NaN : ((res.data.data[i][4]==='T') ? 0.00 : parseFloat(res.data.data[i][3]))
+                maxtNormalValue = (res.data.data[i][4]==='M') ? NaN : parseFloat(res.data.data[i][4])
+                mintNormalValue = (res.data.data[i][5]==='M') ? NaN : parseFloat(res.data.data[i][5])
+                //maxtExtremeValue = (res.data.data[i][6]==='M') ? NaN : parseFloat(res.data.data[i][6])
+                //mintExtremeValue = (res.data.data[i][7]==='M') ? NaN : parseFloat(res.data.data[i][7])
+                data['date'].push(Date.UTC( thisDate.substr(0,4), thisDate.substr(5,2)-1, thisDate.substr(8,2) ))
+                data['maxt_obs'].push(maxtObsValue)
+                data['mint_obs'].push(mintObsValue)
+                data['pcpn_obs'].push(pcpnObsValue)
+                data['maxt_normal'].push(maxtNormalValue)
+                data['mint_normal'].push(mintNormalValue)
+                //data['maxt_extreme'].push(maxtExtremeValue)
+                //data['mint_extreme'].push(mintExtremeValue)
+            }
+            this.updatePresentData(data);
+            //console.log(this.getPresentData);
+            if (this.getLoaderPresent === true) { this.updateLoaderPresent(false); }
+          })
+          .catch(err => {
+            console.log(
+              "Request Error: " + (err.response.data || err.response.statusText)
+            );
+          });
+    }
 
     //////////////////////////////////
     // PROJECTIONS
@@ -392,6 +649,26 @@ export class AppStore {
         }
     @computed get getStateId() {
             return this.state_id
+        }
+
+    // store downloaded livneh data
+    @observable livneh_data = null;
+    @action updateLivnehData = (d) => {
+            this.livneh_data = d;
+            console.log(this.getLivnehData);
+        }
+    @action emptyLivnehData = (d) => {
+            if (this.getLivnehData) { this.livneh_data = null }
+            let data = {}
+            data['years'] = []
+            data['avgt'] = []
+            data['maxt'] = []
+            data['mint'] = []
+            data['pcpn'] = []
+            this.livneh_data = data
+        }
+    @computed get getLivnehData() {
+            return this.livneh_data
         }
 
     // store downloaded projection data
@@ -406,11 +683,6 @@ export class AppStore {
             newData[scen][re]['mint'] = d['mint']
             newData[scen][re]['pcpn'] = d['pcpn']
             this.projection_data[scen][re] = newData[scen][re]
-            //this.projection_data[scen][re]['years'] = d['years']
-            //this.projection_data[scen][re]['avgt'] = d['avgt']
-            //this.projection_data[scen][re]['maxt'] = d['maxt']
-            //this.projection_data[scen][re]['mint'] = d['mint']
-            //this.projection_data[scen][re]['pcpn'] = d['pcpn']
         }
     @action emptyProjectionData = (d) => {
             if (this.getProjectionData) { this.projection_data = null }
@@ -475,14 +747,19 @@ export class AppStore {
 
     const params = {
       "grid": "loca:"+varReduce+":"+scen,
-      "state":id,
+      //"state":id,
+      "loc":this.getNation.ll[1].toString()+','+this.getNation.ll[0].toString(),
       "sdate": "1950",
       "edate": "2099",
       "elems": [
-        { "name":"avgt","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
-        { "name":"maxt","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
-        { "name":"mint","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
-        { "name":"pcpn","interval":[1],"duration":1,"reduce":"sum","area_reduce":"state_mean" }
+        //{ "name":"avgt","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
+        //{ "name":"maxt","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
+        //{ "name":"mint","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
+        //{ "name":"pcpn","interval":[1],"duration":1,"reduce":"sum","area_reduce":"state_mean" }
+        { "name":"avgt","interval":[1],"duration":1,"reduce":"mean" },
+        { "name":"maxt","interval":[1],"duration":1,"reduce":"mean" },
+        { "name":"mint","interval":[1],"duration":1,"reduce":"mean" },
+        { "name":"pcpn","interval":[1],"duration":1,"reduce":"sum" }
       ]
     };
 
@@ -503,11 +780,15 @@ export class AppStore {
         data['pcpn'] = []
         for (i=0; i<res.data.data.length; i++) {
             //data['years'].push(res.data.data[i][0])
-            data['years'].push(Date.UTC(res.data.data[i][0],1,1))
-            data['avgt'].push(res.data.data[i][1][params['state']])
-            data['maxt'].push(res.data.data[i][2][params['state']])
-            data['mint'].push(res.data.data[i][3][params['state']])
-            data['pcpn'].push(res.data.data[i][4][params['state']])
+            data['years'].push(Date.UTC(res.data.data[i][0],0,1))
+            //data['avgt'].push(res.data.data[i][1][params['state']])
+            //data['maxt'].push(res.data.data[i][2][params['state']])
+            //data['mint'].push(res.data.data[i][3][params['state']])
+            //data['pcpn'].push(res.data.data[i][4][params['state']])
+            data['avgt'].push(res.data.data[i][1])
+            data['maxt'].push(res.data.data[i][2])
+            data['mint'].push(res.data.data[i][3])
+            data['pcpn'].push(res.data.data[i][4])
         }
         this.updateProjectionData(data,re,scen);
         console.log(this.getProjectionData);
@@ -518,14 +799,78 @@ export class AppStore {
       });
   }
 
+  @action loadLivnehData = (id) => {
+
+    if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
+
+    // FOR ANNUAL REQUESTS
+    const params = {
+      "grid": "livneh",
+      //"state":id,
+      "loc":this.getNation.ll[1].toString()+','+this.getNation.ll[0].toString(),
+      "sdate": "1950",
+      "edate": "2013",
+      "elems": [
+        //{ "name":"avgt","interval":"yly","duration":1,"reduce":"mean","area_reduce":"state_mean" },
+        //{ "name":"maxt","interval":"yly","duration":1,"reduce":"mean","area_reduce":"state_mean" },
+        //{ "name":"mint","interval":"yly","duration":1,"reduce":"mean","area_reduce":"state_mean" },
+        //{ "name":"pcpn","interval":"yly","duration":1,"reduce":"sum","area_reduce":"state_mean" },
+        { "name":"avgt","interval":"yly","duration":1,"reduce":"mean" },
+        { "name":"maxt","interval":"yly","duration":1,"reduce":"mean" },
+        { "name":"mint","interval":"yly","duration":1,"reduce":"mean" },
+        { "name":"pcpn","interval":"yly","duration":1,"reduce":"sum" },
+      ]
+    };
+
+    return axios
+      .post("http://grid2.rcc-acis.org/GridData", params)
+      .then(res => {
+        console.log('successful download of livneh data 1950-2013');
+        let data = {}
+        data['years'] = []
+        data['avgt'] = []
+        data['maxt'] = []
+        data['mint'] = []
+        data['pcpn'] = []
+        for (var i=0; i<res.data.data.length; i++) {
+            //data['years'].push(res.data.data[i][0])
+            data['years'].push(Date.UTC(res.data.data[i][0],0,1))
+            //data['avgt'].push(res.data.data[i][1][params['state']])
+            //data['maxt'].push(res.data.data[i][2][params['state']])
+            //data['mint'].push(res.data.data[i][3][params['state']])
+            //data['pcpn'].push(res.data.data[i][4][params['state']])
+            data['avgt'].push(res.data.data[i][1])
+            data['maxt'].push(res.data.data[i][2])
+            data['mint'].push(res.data.data[i][3])
+            data['pcpn'].push(res.data.data[i][4])
+        }
+        this.updateLivnehData(data);
+        if (this.getLoaderProjections === true) { this.updateLoaderProjections(false); }
+      })
+      .catch(err => {
+        console.log("Failed to load livneh data 1950-2013 ", err);
+      });
+  }
+
     @action loadProjections = (id) => {
         this.emptyProjectionData()
+        this.emptyLivnehData()
+        this.loadLivnehData(id);
         this.loadProjections_1950_2100(id,'rcp85','mean');
         this.loadProjections_1950_2100(id,'rcp85','max');
         this.loadProjections_1950_2100(id,'rcp85','min');
         this.loadProjections_1950_2100(id,'rcp45','mean');
         this.loadProjections_1950_2100(id,'rcp45','max');
         this.loadProjections_1950_2100(id,'rcp45','min');
+    }
+
+    @action climview_loadData = () => {
+        //this.emptyPastData()
+        //this.emptyPresentData()
+        //this.emptyProjectionData()
+        this.loadPastData();
+        this.loadPresentData();
+        this.loadProjections(this.getStateId);
     }
 
     // run these on initial load
