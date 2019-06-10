@@ -60,6 +60,23 @@ class PastCharts extends Component {
             return oseries;
         }
 
+        function tooltipFormatter() {
+            var i, item;
+            var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%Y', this.x) + '</span>';
+            var tips = "";
+            for (i=0; i<this.points.length; i++) {
+                item = this.points[i];
+                //console.log(item);
+                if ( item.series.name.includes("range") ) {
+                    tips += '<br/>' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
+                    //tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span> : ' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0);
+                } else {
+                    tips += '<br/>' + item.y.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
+                }
+            }
+            return header + tips;
+        }
+
         if (!app.isPastLoading && app.getPastData['date']!=[]) {
 
         const options = {
@@ -113,9 +130,12 @@ class PastCharts extends Component {
               }
             },
           },
+          tooltip: { useHtml:true, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
+              xDateFormat:"%b %d, %Y", shape: 'rect',
+              crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
           legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
-          xAxis: { type: 'datetime', startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
+          xAxis: { type: 'datetime', crosshair: true, startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
                      dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
                  },
           series: [{

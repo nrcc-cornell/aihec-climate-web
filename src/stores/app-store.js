@@ -10,6 +10,8 @@ import us_aiannh_pilot from '../assets/us_aiannh_pilot.json';
 
 const protocol = window.location.protocol;
 
+const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
+
 export class AppStore {
     ///////////////////////////////////////////////////////
     /// Pages on the site
@@ -87,11 +89,12 @@ export class AppStore {
             return {'name':name, 'title':title, 'tagline':tagline, 'thumbnail':thumbnail, 'url':url, 'onclick':onclick}
         };
 
-    @computed get getNationGeojson() { return us_aiannh_pilot };
+    //@computed get getNationGeojson() { return us_aiannh_pilot };
+    @computed get getNationGeojson() { console.log(us_aiannh_pilot); return us_aiannh_pilot };
 
     /// manage currently active nation
     // get currently selected nation object (for nation select and nation picker)
-    @observable nation = {"name":"Pine Ridge Reservation","ll":["43.3449996","-102.0818655"]}
+    @observable nation = {"name":"Pine Ridge Reservation","ll":["43.3449996","-102.0818655"],"llbounds":[[-103.001027,42.987359],[-101.227336,43.796737]]}
     @action setNation = (l) => {
         if (this.getNation.name !== l.toString()) {
             this.nation = this.getNations.find(obj => obj.name === l);
@@ -111,7 +114,26 @@ export class AppStore {
     // manage list of all nations
     @computed get getNations() {
         let nationsObject = this.getNationGeojson
-        let nations = nationsObject['features'].map( function(item) {return {'name':item.properties.NAMELSAD,'ll':[item.properties.INTPTLAT,item.properties.INTPTLON]} } );
+        let nations = nationsObject['features'].map( function(item) {
+          let i;
+          let coords,thisLatArray,thisLonArray,wLon,eLon,nLat,sLat,extCoords;
+          let allLon=[];
+          let allLat=[];
+          coords = item.geometry.coordinates
+          for (i=0; i<coords.length; i++) {
+            thisLonArray = coords[i].map(function(c) { return c[0]; })
+            thisLatArray = coords[i].map(function(c) { return c[1]; })
+            allLon.push( ...thisLonArray )
+            allLat.push( ...thisLatArray )
+          };
+          wLon = Math.min.apply(null, allLon);
+          eLon = Math.max.apply(null, allLon);
+          nLat = Math.max.apply(null, allLat);
+          sLat = Math.min.apply(null, allLat);
+          // extCoords hold the extreme [[SW],[NE]] coordinates that define a bounding box containing nation
+          extCoords = [[wLon,sLat],[eLon,nLat]]
+          return {'name':item.properties.NAMELSAD,'ll':[item.properties.INTPTLAT,item.properties.INTPTLON],'llbounds':extCoords};
+        });
         return nations
     };
 
@@ -501,6 +523,7 @@ export class AppStore {
     //////////////////////////////////
 
     // store downloaded present data
+    // these contain the obs and normals
     @observable present_data = null;
     @action updatePresentData = (d) => {
             let newData = {}
@@ -508,7 +531,6 @@ export class AppStore {
             newData['stn'] = d['stn']
             newData['obs'] = {}
             newData['normal'] = {}
-            newData['extreme'] = {}
             newData['obs']['date'] = d['date']
             newData['obs']['maxt'] = d['maxt_obs']
             newData['obs']['mint'] = d['mint_obs']
@@ -516,9 +538,6 @@ export class AppStore {
             newData['normal']['date'] = d['date']
             newData['normal']['maxt'] = d['maxt_normal']
             newData['normal']['mint'] = d['mint_normal']
-            newData['extreme']['date'] = d['date']
-            newData['extreme']['maxt'] = d['maxt_extreme']
-            newData['extreme']['mint'] = d['mint_extreme']
             this.present_data = newData
         }
     @action emptyPresentData = () => {
@@ -532,18 +551,48 @@ export class AppStore {
                     'stn' : "",
                     'obs' : data,
                     'normal' : data,
-                    'extremes' : data,
                 };
         }
     @computed get getPresentData() {
             return this.present_data
         }
 
+    // store downloaded present data
+    // these contain the obs and normals
+    @observable present_extremes = null;
+    @action updatePresentExtremes = (d) => {
+            let newData = {}
+            newData = {}
+            newData['stn'] = d['stn']
+            newData['extreme'] = {}
+            newData['extreme']['date'] = d['date']
+            newData['extreme']['maxt'] = d['maxt_extreme']
+            newData['extreme']['mint'] = d['mint_extreme']
+            this.present_extremes = newData
+        }
+    @action emptyPresentExtremes = () => {
+            if (this.getPresentExtremes) { this.present_extremes = null }
+            let data = {}
+            data['date'] = []
+            data['maxt'] = []
+            data['mint'] = []
+            data['pcpn'] = []
+            this.present_extremes = {
+                    'stn' : "",
+                    'extreme' : data,
+                };
+        }
+    @computed get getPresentExtremes() {
+            return this.present_extremes
+        }
+
     // Check if a present data is loading
     @computed get isPresentLoading() {
-        if (this.getPresentData) {
+        if (this.getPresentData && this.getPresentExtremes) {
             if (this.getPresentData.obs.date.length > 0 &&
-                !this.getLoaderPresent) {
+                this.getPresentExtremes.extreme.date.length > 0 &&
+                !this.getLoaderPresent &&
+                !this.getLoaderPresentExtremes) {
                     return false;
             } else {
                     return true;
@@ -560,6 +609,15 @@ export class AppStore {
         }
     @computed get getLoaderPresent() {
             return this.loader_present
+        }
+
+    // Logic for displaying spinner (present)
+    @observable loader_present_extremes=false;
+    @action updateLoaderPresentExtremes = (l) => {
+            this.loader_present_extremes = l;
+        }
+    @computed get getLoaderPresentExtremes() {
+            return this.loader_present_extremes
         }
 
     // Present data download - set parameters
@@ -597,7 +655,7 @@ export class AppStore {
           .post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresent)
           .then(res => {
             console.log('SUCCESS downloading PRESENT DATA from ACIS');
-            console.log(res);
+            //console.log(res);
             let i,thisDate
             let maxtObsValue,mintObsValue,pcpnObsValue,maxtNormalValue,mintNormalValue,maxtExtremeValue,mintExtremeValue
             let data = {}
@@ -608,8 +666,6 @@ export class AppStore {
             data['pcpn_obs'] = []
             data['maxt_normal'] = []
             data['mint_normal'] = []
-            data['maxt_extreme'] = []
-            data['mint_extreme'] = []
             for (i=0; i<res.data.data.length; i++) {
                 thisDate = res.data.data[i][0];
                 maxtObsValue = (res.data.data[i][1]==='M') ? NaN : parseFloat(res.data.data[i][1])
@@ -617,20 +673,86 @@ export class AppStore {
                 pcpnObsValue = (res.data.data[i][3]==='M') ? NaN : ((res.data.data[i][4]==='T') ? 0.00 : parseFloat(res.data.data[i][3]))
                 maxtNormalValue = (res.data.data[i][4]==='M') ? NaN : parseFloat(res.data.data[i][4])
                 mintNormalValue = (res.data.data[i][5]==='M') ? NaN : parseFloat(res.data.data[i][5])
-                //maxtExtremeValue = (res.data.data[i][6]==='M') ? NaN : parseFloat(res.data.data[i][6])
-                //mintExtremeValue = (res.data.data[i][7]==='M') ? NaN : parseFloat(res.data.data[i][7])
                 data['date'].push(Date.UTC( thisDate.substr(0,4), thisDate.substr(5,2)-1, thisDate.substr(8,2) ))
                 data['maxt_obs'].push(maxtObsValue)
                 data['mint_obs'].push(mintObsValue)
                 data['pcpn_obs'].push(pcpnObsValue)
                 data['maxt_normal'].push(maxtNormalValue)
                 data['mint_normal'].push(mintNormalValue)
-                //data['maxt_extreme'].push(maxtExtremeValue)
-                //data['mint_extreme'].push(mintExtremeValue)
             }
             this.updatePresentData(data);
             //console.log(this.getPresentData);
             if (this.getLoaderPresent === true) { this.updateLoaderPresent(false); }
+          })
+          .catch(err => {
+            console.log(
+              "Request Error: " + (err.response.data || err.response.statusText)
+            );
+          });
+    }
+
+    // Present extremes download - set parameters
+    @computed get getAcisParamsPresentExtremes() {
+            let elems
+            elems = [
+                {"name":"maxt","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"max"},"smry_only":"1","groupby":"year"},
+                {"name":"mint","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"min"},"smry_only":"1","groupby":"year"}
+            ]
+            return {
+                "sid": this.getStationFromNation,
+                "meta":"name,state",
+                "sdate":"por",
+                "edate":"por",
+                "elems":elems
+            }
+        }
+
+    // Present extremes download - download data using parameters
+    @action loadPresentExtremes = () => {
+        console.log("Call loadPresentExtremes")
+        if (this.getLoaderPresentExtremes === false) { this.updateLoaderPresentExtremes(true); }
+        this.emptyPresentExtremes()
+        return axios
+          .post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresentExtremes)
+          .then(res => {
+            console.log('SUCCESS downloading PRESENT EXTREMES from ACIS');
+            console.log(res);
+            let i,startDate,thisDate,thisDateDT,lastYear,thisYear,extremeDate,todayDate
+            let maxtExtremeValue,mintExtremeValue
+            let data = {}
+            // today's date as MM-DD
+            todayDate=moment().format('MM-DD')
+            startDate=moment()
+            startDate = startDate.subtract(90, "days");
+            // this year as YYYY string
+            thisYear=moment().format('YYYY')
+            // last year as YYYY string
+            lastYear=parseInt(thisYear,10) - 1
+            lastYear=lastYear.toString()
+            data['stn'] = res.data.meta.name+', '+res.data.meta.state
+            data['date'] = []
+            data['maxt_extreme'] = []
+            data['mint_extreme'] = []
+            // max temperature extremes
+            for (i=0; i<res.data.smry[0].length; i++) {
+                extremeDate = res.data.smry[0][i][1];
+                // this date as 'MM-DD'
+                thisDate = extremeDate.slice(-5);
+                maxtExtremeValue = (res.data.smry[0][i][0]==='M') ? NaN : parseFloat(res.data.smry[0][i][0])
+                mintExtremeValue = (res.data.smry[1][i][0]==='M') ? NaN : parseFloat(res.data.smry[1][i][0])
+                if (thisDate <= todayDate) {
+                    thisDateDT = Date.UTC( thisYear, thisDate.substr(0,2)-1, thisDate.substr(3,2) );
+                } else {
+                    thisDateDT = Date.UTC( lastYear, thisDate.substr(0,2)-1, thisDate.substr(3,2) );
+                }
+                if (thisDateDT >= startDate) {
+                    data['date'].push(thisDateDT)
+                    data['maxt_extreme'].push(maxtExtremeValue)
+                    data['mint_extreme'].push(mintExtremeValue)
+                }
+            }
+            this.updatePresentExtremes(data);
+            if (this.getLoaderPresentExtremes === true) { this.updateLoaderPresentExtremes(false); }
           })
           .catch(err => {
             console.log(
@@ -737,7 +859,7 @@ export class AppStore {
         }
     }
 
-  @action loadProjections_1950_2100 = (id,scen,re) => {
+  @action loadProjections_2000_2100 = (id,scen,re) => {
 
     if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
     let varReduce = ''
@@ -745,11 +867,22 @@ export class AppStore {
     if (re==='max') { varReduce = 'allMax' }
     if (re==='min') { varReduce = 'allMin' }
 
+    //calculate bounding box from center point of nation
+    let wLon = parseFloat(this.getNation.ll[1]) - 0.50
+    let eLon = parseFloat(this.getNation.ll[1]) + 0.50
+    let nLat = parseFloat(this.getNation.ll[0]) + 0.50
+    let sLat = parseFloat(this.getNation.ll[0]) - 0.50
+
     const params = {
       "grid": "loca:"+varReduce+":"+scen,
       //"state":id,
-      "loc":this.getNation.ll[1].toString()+','+this.getNation.ll[0].toString(),
-      "sdate": "1950",
+      //"loc":this.getNation.ll[1].toString()+','+this.getNation.ll[0].toString(),
+      //"bbox":"-103.001027,42.987359,-101.227336,43.796737",
+      // bounding box over entire selected nation
+      //"bbox":this.getNation.llbounds[0][0].toString()+','+this.getNation.llbounds[0][1].toString()+','+this.getNation.llbounds[1][0].toString()+','+this.getNation.llbounds[1][1].toString(),
+      // limit bounding box to 1x1 degree, using interior point as center of bounding box
+      "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+      "sdate": "2000",
       "edate": "2099",
       "elems": [
         //{ "name":"avgt","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
@@ -763,16 +896,17 @@ export class AppStore {
       ]
     };
 
-    //console.log('loading projections: params');
-    //console.log(params);
+    console.log('loading projections: params');
+    console.log(params);
 
     return axios
       //.post("http://grid2.rcc-acis.org/GridData", params)
       .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
       .then(res => {
-        console.log('successful download of projection data : ' + scen + ' ' + re + ' 1950-2100');
+        console.log('successful download of projection data : ' + scen + ' ' + re + ' 2000-2100');
         let i
         let data = {}
+        let arrFlat
         data['years'] = []
         data['avgt'] = []
         data['maxt'] = []
@@ -781,34 +915,61 @@ export class AppStore {
         for (i=0; i<res.data.data.length; i++) {
             //data['years'].push(res.data.data[i][0])
             data['years'].push(Date.UTC(res.data.data[i][0],0,1))
+
+            // when I was testing with state averages
             //data['avgt'].push(res.data.data[i][1][params['state']])
             //data['maxt'].push(res.data.data[i][2][params['state']])
             //data['mint'].push(res.data.data[i][3][params['state']])
             //data['pcpn'].push(res.data.data[i][4][params['state']])
-            data['avgt'].push(res.data.data[i][1])
-            data['maxt'].push(res.data.data[i][2])
-            data['mint'].push(res.data.data[i][3])
-            data['pcpn'].push(res.data.data[i][4])
+
+            // when I was testing with single grid
+            //data['avgt'].push(res.data.data[i][1])
+            //data['maxt'].push(res.data.data[i][2])
+            //data['mint'].push(res.data.data[i][3])
+            //data['pcpn'].push(res.data.data[i][4])
+
+            // when averaging over bounding box
+            // for each variable, we 1)flatten array and 2)average all values
+            arrFlat = [].concat.apply([], res.data.data[i][1]);
+            data['avgt'].push(arrAvg(arrFlat))
+            arrFlat = [].concat.apply([], res.data.data[i][2]);
+            data['maxt'].push(arrAvg(arrFlat))
+            arrFlat = [].concat.apply([], res.data.data[i][3]);
+            data['mint'].push(arrAvg(arrFlat))
+            arrFlat = [].concat.apply([], res.data.data[i][4]);
+            data['pcpn'].push(arrAvg(arrFlat))
         }
         this.updateProjectionData(data,re,scen);
         console.log(this.getProjectionData);
         if (this.getLoaderProjections === true) { this.updateLoaderProjections(false); }
       })
       .catch(err => {
-        console.log("Failed to load projection data 1950-2100 ", err);
+        console.log("Failed to load projection data 2000-2100 ", err);
       });
   }
 
   @action loadLivnehData = (id) => {
 
     if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
+    //console.log('getNation')
+    //console.log(this.getNation);
+
+    //calculate bounding box from center point of nation
+    let wLon = parseFloat(this.getNation.ll[1]) - 0.50
+    let eLon = parseFloat(this.getNation.ll[1]) + 0.50
+    let nLat = parseFloat(this.getNation.ll[0]) + 0.50
+    let sLat = parseFloat(this.getNation.ll[0]) - 0.50
 
     // FOR ANNUAL REQUESTS
     const params = {
       "grid": "livneh",
       //"state":id,
-      "loc":this.getNation.ll[1].toString()+','+this.getNation.ll[0].toString(),
-      "sdate": "1950",
+      //"loc":this.getNation.ll[1].toString()+','+this.getNation.ll[0].toString(),
+      // bounding box over entire selected nation
+      //"bbox":this.getNation.llbounds[0][0].toString()+','+this.getNation.llbounds[0][1].toString()+','+this.getNation.llbounds[1][0].toString()+','+this.getNation.llbounds[1][1].toString(),
+      // limit bounding box to 1x1 degree, using interior point as center of bounding box
+      "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+      "sdate": "2000",
       "edate": "2013",
       "elems": [
         //{ "name":"avgt","interval":"yly","duration":1,"reduce":"mean","area_reduce":"state_mean" },
@@ -825,30 +986,47 @@ export class AppStore {
     return axios
       .post("http://grid2.rcc-acis.org/GridData", params)
       .then(res => {
-        console.log('successful download of livneh data 1950-2013');
+        console.log('successful download of livneh data 2000-2013');
+        let i
         let data = {}
+        let arrFlat
         data['years'] = []
         data['avgt'] = []
         data['maxt'] = []
         data['mint'] = []
         data['pcpn'] = []
-        for (var i=0; i<res.data.data.length; i++) {
+        for (i=0; i<res.data.data.length; i++) {
             //data['years'].push(res.data.data[i][0])
             data['years'].push(Date.UTC(res.data.data[i][0],0,1))
+
+            // when I was testing with state averages
             //data['avgt'].push(res.data.data[i][1][params['state']])
             //data['maxt'].push(res.data.data[i][2][params['state']])
             //data['mint'].push(res.data.data[i][3][params['state']])
             //data['pcpn'].push(res.data.data[i][4][params['state']])
-            data['avgt'].push(res.data.data[i][1])
-            data['maxt'].push(res.data.data[i][2])
-            data['mint'].push(res.data.data[i][3])
-            data['pcpn'].push(res.data.data[i][4])
+
+            // when I was testing with single grid
+            //data['avgt'].push(res.data.data[i][1])
+            //data['maxt'].push(res.data.data[i][2])
+            //data['mint'].push(res.data.data[i][3])
+            //data['pcpn'].push(res.data.data[i][4])
+
+            // when averaging over bounding box
+            // for each variable, we 1)flatten array and 2)average all values
+            arrFlat = [].concat.apply([], res.data.data[i][1]);
+            data['avgt'].push(arrAvg(arrFlat))
+            arrFlat = [].concat.apply([], res.data.data[i][2]);
+            data['maxt'].push(arrAvg(arrFlat))
+            arrFlat = [].concat.apply([], res.data.data[i][3]);
+            data['mint'].push(arrAvg(arrFlat))
+            arrFlat = [].concat.apply([], res.data.data[i][4]);
+            data['pcpn'].push(arrAvg(arrFlat))
         }
         this.updateLivnehData(data);
         if (this.getLoaderProjections === true) { this.updateLoaderProjections(false); }
       })
       .catch(err => {
-        console.log("Failed to load livneh data 1950-2013 ", err);
+        console.log("Failed to load livneh data 2000-2013 ", err);
       });
   }
 
@@ -856,12 +1034,12 @@ export class AppStore {
         this.emptyProjectionData()
         this.emptyLivnehData()
         this.loadLivnehData(id);
-        this.loadProjections_1950_2100(id,'rcp85','mean');
-        this.loadProjections_1950_2100(id,'rcp85','max');
-        this.loadProjections_1950_2100(id,'rcp85','min');
-        this.loadProjections_1950_2100(id,'rcp45','mean');
-        this.loadProjections_1950_2100(id,'rcp45','max');
-        this.loadProjections_1950_2100(id,'rcp45','min');
+        this.loadProjections_2000_2100(id,'rcp85','mean');
+        this.loadProjections_2000_2100(id,'rcp85','max');
+        this.loadProjections_2000_2100(id,'rcp85','min');
+        this.loadProjections_2000_2100(id,'rcp45','mean');
+        this.loadProjections_2000_2100(id,'rcp45','max');
+        this.loadProjections_2000_2100(id,'rcp45','min');
     }
 
     @action climview_loadData = () => {
@@ -870,6 +1048,7 @@ export class AppStore {
         //this.emptyProjectionData()
         this.loadPastData();
         this.loadPresentData();
+        this.loadPresentExtremes();
         this.loadProjections(this.getStateId);
     }
 

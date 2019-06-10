@@ -40,12 +40,9 @@ class PresentCharts extends Component {
 
     render() {
 
-        let varName = app.wxgraph_getVar
-        let varLabel = app.wxgraph_getVarLabels[app.wxgraph_getVar]
         let station = (app.getPresentData) ? app.getPresentData['stn'] : ''
-        let today = new Date()
-
-        var cdata = app.getPresentData
+        let cdata = app.getPresentData
+        let edata = app.getPresentExtremes
 
         let createSeries = (y,a) => {
             let i
@@ -69,7 +66,24 @@ class PresentCharts extends Component {
             return ranges;
         }
 
-        if (!app.isPresentLoading && app.getPresentData['date']!=[]) {
+        function tooltipFormatter() {
+            var i, item;
+            var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%b %d, %Y', this.x) + '</span>';
+            var tips = "";
+            for (i=0; i<this.points.length; i++) {
+                item = this.points[i];
+                //console.log(item);
+                if ( item.series.name.includes("Range") ) {
+                    tips += '<br/>' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
+                    //tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span> : ' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0);
+                } else {
+                    tips += '<br/>' + item.y.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
+                }
+            }
+            return header + tips;
+        }
+
+        if (!app.isPresentLoading && app.getPresentData['date']!=[] && app.getPresentExtremes['date']!=[]) {
 
         const options = {
                  plotOptions: {
@@ -122,27 +136,41 @@ class PresentCharts extends Component {
               }
             },
           },
+          //tooltip: { useHtml:true, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
+          //    xDateFormat:"%b %d, %Y", positioner:function(){return {x:80, y:60}}, shape: 'rect',
+          //    crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
+          tooltip: { useHtml:true, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
+              xDateFormat:"%b %d, %Y", shape: 'rect',
+              crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
-          legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
-          xAxis: { type: 'datetime', startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
+          legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 30 },
+          //legend: { align: 'left', symbolRadius: 0, floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
+          xAxis: { type: 'datetime', crosshair: true, startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
                    dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
             },
           yAxis: {
-              title:{ text:'Temperature', style:{"font-size":"14px", color:"#000000"}},
+              title:{ text:'Temperature (F)', style:{"font-size":"14px", color:"#000000"}},
             },
           series: [{
-              name: 'Observed Temperature Range',
-              //data: (!app.isPresentLoading) ? createSeries(cdata['obs']['date'],cdata['obs']['maxt']) : [],
+              name: "Observed Temp Range", data: {}, color: '#D3D3D3', lineWidth: 0, marker : {symbol: 'square', lineWidth: 2, lineColor: '#000000', fillColor: '#000000', radius: 2 }
+          },{
+              name: 'Observed Temp Range',
               data: (!app.isPresentLoading) ? createRanges(cdata['obs']['date'],cdata['obs']['mint'],cdata['obs']['maxt']): [],
               type: 'columnrange',
+              linkedTo: ':previous',
               color: '#000000',
               step: false,
               lineWidth: 0,
-              marker: { enabled: true },
+              marker: {
+                enabled: false,
+              },
+              zIndex: 1,
               visible: app.chartViewIsPresent,
-              showInLegend: app.chartViewIsPresent,
+              showInLegend: false,
           },{
-              name: 'Normal temperature range',
+              name: "Normal Temp Range", data: {}, color: '#D3D3D3', lineWidth: 0, marker : {symbol: 'square', lineWidth: 2, lineColor: 'rgba(0,0,0,0.1)', fillColor: 'rgba(0,0,0,0.1)', radius: 12 }
+          },{
+              name: 'Normal Temp Range',
               data: (!app.isPresentLoading) ? createRanges(cdata['normal']['date'],cdata['normal']['mint'],cdata['normal']['maxt']): [],
               marker : {symbol: 'square', radius: 12 },
               type: "arearange",
@@ -152,6 +180,43 @@ class PresentCharts extends Component {
               fillColor: 'rgba(0,0,0,0.1)',
               fillOpacity: 0.1,
               zIndex: 0,
+              marker: {
+                enabled: false,
+                symbol: 'square',
+                radius: 2,
+              },
+              visible: app.chartViewIsPresent,
+              showInLegend: false,
+          },{
+              name: 'Record High Temp',
+              data: (!app.isPresentLoading) ? createSeries(edata['extreme']['date'],edata['extreme']['maxt']): [],
+              type: "line",
+              lineWidth:0,
+              //linkedTo: ':previous',
+              color: '#ff0000',
+              fillOpacity: 0.0,
+              zIndex: 2,
+              marker: {
+                enabled: true,
+                symbol: 'circle',
+                radius: 2,
+              },
+              visible: app.chartViewIsPresent,
+              showInLegend: app.chartViewIsPresent,
+          },{
+              name: 'Record Low Temp',
+              data: (!app.isPresentLoading) ? createSeries(edata['extreme']['date'],edata['extreme']['mint']): [],
+              type: "line",
+              lineWidth:0,
+              linkedTo: ':previous',
+              color: '#0000ff',
+              fillOpacity: 0.0,
+              zIndex: 2,
+              marker: {
+                enabled: true,
+                symbol: 'circle',
+                radius: 2,
+              },
               visible: app.chartViewIsPresent,
               showInLegend: app.chartViewIsPresent,
           }]

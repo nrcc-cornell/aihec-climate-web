@@ -4,6 +4,7 @@
 import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
 import LoadingOverlay from 'react-loading-overlay';
+import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 
@@ -63,12 +64,17 @@ class Tool1 extends Component {
                 <ChartRangeSelector/>
               </Grid>
               <Grid container item justify="center" alignItems="center">
-                <Grid item className="nothing" xs={0} md={2}>
+                <Grid item className="nothing" xs={0} md={3}>
                   <Hidden smDown>
-                    {display_VarPicker}
+                    <Typography
+                      color="inherit"
+                      style={{ borderRight: '0.1em solid black', padding: '0.5em' }}
+                    >
+                      {display_VarPicker}
+                    </Typography>
                   </Hidden>
                 </Grid>
-                <Grid item container className="nothing" direction="row" justify="center" xs={12} md={10}>
+                <Grid item container className="nothing" direction="row" justify="center" xs={12} md={9}>
                     <Grid item>
                       <Hidden mdUp>
                         {display_VarPopover}
