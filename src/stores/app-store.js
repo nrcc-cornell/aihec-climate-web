@@ -137,26 +137,50 @@ export class AppStore {
         return nations
     };
 
-    @computed get getStationFromNation() {
+    //@computed get getStationFromNation() {
+    //    let stns = {
+    //        "Flathead Reservation": "246640 2",
+    //        "L'Anse Reservation": "14858 1",
+    //        "Pine Ridge Reservation": "391972 2",
+    //        "Tohono O'odham Nation Reservation": "024675 2",
+    //        "Navajo Nation Reservation": "021248 2",
+    //        "Fort Belknap Reservation": "241722 2",
+    //        "Leech Lake Reservation": "214652 2",
+    //        "Crow Reservation": "241297 2",
+    //        "Spirit Lake Reservation": "325730 2",
+    //        "Menominee Reservation": "477708 2",
+    //        "Fond du Lac Reservation": "211630 2",
+    //        "Lummi Reservation": "451484 2",
+    //        "Standing Rock Reservation": "396712 2",
+    //        "Turtle Mountain Reservation": "329445 2",
+    //        "Blackfeet Indian Reservation": "24137 1",
+    //        "Winnebago Reservation": "14943 1",
+    //        "Barrow ANVSA": "27502 1",
+    //        "Creek OTSA": "13968 1",
+    //    }
+    //    return stns[this.getNation.name]
+    //};
+
+    @computed get getDefaultStationFromNation() {
         let stns = {
-            "Flathead Reservation": "246640 2",
-            "L'Anse Reservation": "14858 1",
-            "Pine Ridge Reservation": "391972 2",
-            "Tohono O'odham Nation Reservation": "024675 2",
-            "Navajo Nation Reservation": "021248 2",
-            "Fort Belknap Reservation": "241722 2",
-            "Leech Lake Reservation": "214652 2",
-            "Crow Reservation": "241297 2",
-            "Spirit Lake Reservation": "325730 2",
-            "Menominee Reservation": "477708 2",
-            "Fond du Lac Reservation": "211630 2",
-            "Lummi Reservation": "451484 2",
-            "Standing Rock Reservation": "396712 2",
-            "Turtle Mountain Reservation": "329445 2",
-            "Blackfeet Indian Reservation": "24137 1",
-            "Winnebago Reservation": "14943 1",
-            "Barrow ANVSA": "27502 1",
-            "Creek OTSA": "13968 1",
+            "Flathead Reservation": {"uid":"12082","name":"POLSON KERR DAM"},
+            "L'Anse Reservation": {"uid":"29678","name":"HANCOCK HOUGHTON COUNTY AP"},
+            "Pine Ridge Reservation": {"uid":"16756","name":"COTTONWOOD 2 E"},
+            "Tohono O'odham Nation Reservation": {"uid":"1274","name":"KITT PEAK"},
+            "Navajo Nation Reservation": {"uid":"171","name":"CANYON DE CHELLY"},
+            "Fort Belknap Reservation": {"uid":"12221","name":"CHINOOK"},
+            "Leech Lake Reservation": {"uid":"10561","name":"LEECH LAKE"},
+            "Crow Reservation": {"uid":"11733","name":"BUSBY"},
+            "Spirit Lake Reservation": {"uid":"13595","name":"MC HENRY 3W"},
+            "Menominee Reservation": {"uid":"19892","name":"SHAWANO 2SSW"},
+            "Fond du Lac Reservation": {"uid":"10517","name":"CLOQUET"},
+            "Lummi Reservation": {"uid":"26258","name":"CLEARBROOK"},
+            "Standing Rock Reservation": {"uid":"16965","name":"POLLOCK"},
+            "Turtle Mountain Reservation": {"uid":"13691","name":"WILLOW CITY"},
+            "Blackfeet Indian Reservation": {"uid":"12237","name":"CUT BANK AIRPORT"},
+            "Winnebago Reservation": {"uid":"6939","name":"SIOUX CITY AP"},
+            "Barrow ANVSA": {"uid":"21127","name":"BARROW WSO AP"},
+            "Creek OTSA": {"uid":"14134","name":"TULSA INTL AIRPORT"},
         }
         return stns[this.getNation.name]
     };
@@ -200,6 +224,28 @@ export class AppStore {
                 fillOpacity: 0.5,
             };
         }
+
+    nationFeatureStyle_selected = (feature) => {
+        if (feature.properties.NAMELSAD===this.getNation.name) {
+            return {
+                weight: 2,
+                opacity: 0.2,
+                color: 'black',
+                dashArray: '1',
+                fillColor: 'brown',
+                fillOpacity: 0.5,
+            };
+        } else {
+            return {
+                weight: 2,
+                opacity: 0.0,
+                color: 'black',
+                dashArray: '1',
+                fillColor: 'brown',
+                fillOpacity: 0.0,
+            };
+        }
+    }
 
     // show the location picker modal map
     @observable showModalMap=false;
@@ -351,25 +397,25 @@ export class AppStore {
     }
 
     // Wx Grapher tool data download - set parameters
-    @computed get wxgraph_getAcisParams() {
-            let elems
-            //let numdays
-            elems = [
-                {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-                {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-                {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
-                {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
-            ]
-            return {
-                //"sid":this.getLocation.uid.toString(),
-                "sid": this.getStationFromNation,
-                //"meta":"sids,name,state,ll,valid_daterange",
-                "meta":"name,state",
-                "sdate":"por",
-                "edate":"por",
-                "elems":elems
-            }
-        }
+    //@computed get wxgraph_getAcisParams() {
+    //        let elems
+    //        //let numdays
+    //        elems = [
+    //            {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
+    //        ]
+    //        return {
+    //            //"sid":this.getLocation.uid.toString(),
+    //            "sid": this.getStationFromNation,
+    //            //"meta":"sids,name,state,ll,valid_daterange",
+    //            "meta":"name,state",
+    //            "sdate":"por",
+    //            "edate":"por",
+    //            "elems":elems
+    //        }
+    //    }
 
     // data is loading - boolean - to control the spinner
     @observable wxgraph_dataIsLoading = false
@@ -458,30 +504,44 @@ export class AppStore {
         }
 
     // Past data download - set parameters
-    @computed get getAcisParamsPast() {
-            let elems
-            elems = [
+    //@computed get getAcisParamsPast(uid) {
+    //        let elems
+    //        elems = [
+    //            {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
+    //        ]
+    //        return {
+    //            //"sid": this.getStationFromNation,
+    //            "uid": uid,
+    //            "meta":"name,state",
+    //            "sdate":"por",
+    //            "edate":"por",
+    //            "elems":elems
+    //        }
+    //    }
+
+    // Past data download - download data using parameters
+    @action loadPastData = (uid) => {
+        console.log("Call loadPastData")
+        if (this.getLoaderPast === false) { this.updateLoaderPast(true); }
+        this.emptyPastData()
+        let params = {
+            "uid": uid,
+            "meta":"name,state",
+            "sdate":"por",
+            "edate":"por",
+            "elems":[
                 {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
                 {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
                 {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
                 {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
-            ]
-            return {
-                "sid": this.getStationFromNation,
-                "meta":"name,state",
-                "sdate":"por",
-                "edate":"por",
-                "elems":elems
-            }
-        }
-
-    // Past data download - download data using parameters
-    @action loadPastData = () => {
-        console.log("Call loadPastData")
-        if (this.getLoaderPast === false) { this.updateLoaderPast(true); }
-        this.emptyPastData()
+              ]
+          }
         return axios
-          .post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPast)
+          //.post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPast(uid))
+          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PAST DATA from ACIS');
             let i,thisDate
@@ -621,38 +681,57 @@ export class AppStore {
         }
 
     // Present data download - set parameters
-    @computed get getAcisParamsPresent() {
-            let elems
-            let startdate = moment();
-            startdate = startdate.subtract(90, "days");
-            startdate = startdate.format("YYYY-MM-DD");
-            let enddate = moment()
-            enddate = enddate.format("YYYY-MM-DD")
-            elems = [
-                //{"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+    //@computed get getAcisParamsPresent(uid) {
+    //        let elems
+    //        let startdate = moment();
+    //        startdate = startdate.subtract(90, "days");
+    //        startdate = startdate.format("YYYY-MM-DD");
+    //        let enddate = moment()
+    //        enddate = enddate.format("YYYY-MM-DD")
+    //        elems = [
+    //            //{"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"maxt"},
+    //            {"name":"mint"},
+    //            {"name":"pcpn"},
+    //            {"name":"maxt","normal":"1"},
+    //            {"name":"mint","normal":"1"},
+    //            // add extremes
+    //        ]
+    //        return {
+    //            "uid": uid,
+    //            "meta":"name,state",
+    //            "sdate":startdate,
+    //            "edate":enddate,
+    //            "elems":elems
+    //        }
+    //    }
+
+    // Present data download - download data using parameters
+    @action loadPresentData = (uid) => {
+        console.log("Call loadPresentData")
+        if (this.getLoaderPresent === false) { this.updateLoaderPresent(true); }
+        this.emptyPresentData()
+        let startdate = moment();
+        startdate = startdate.subtract(90, "days");
+        startdate = startdate.format("YYYY-MM-DD");
+        let enddate = moment()
+        enddate = enddate.format("YYYY-MM-DD")
+        let params = {
+            "uid": uid,
+            "meta":"name,state",
+            "sdate":startdate,
+            "edate":enddate,
+            "elems": [
                 {"name":"maxt"},
                 {"name":"mint"},
                 {"name":"pcpn"},
                 {"name":"maxt","normal":"1"},
                 {"name":"mint","normal":"1"},
-                // add extremes
-            ]
-            return {
-                "sid": this.getStationFromNation,
-                "meta":"name,state",
-                "sdate":startdate,
-                "edate":enddate,
-                "elems":elems
-            }
-        }
-
-    // Present data download - download data using parameters
-    @action loadPresentData = () => {
-        console.log("Call loadPresentData")
-        if (this.getLoaderPresent === false) { this.updateLoaderPresent(true); }
-        this.emptyPresentData()
+              ]
+          }
         return axios
-          .post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresent)
+          //.post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresent(uid))
+          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PRESENT DATA from ACIS');
             //console.log(res);
@@ -692,28 +771,39 @@ export class AppStore {
     }
 
     // Present extremes download - set parameters
-    @computed get getAcisParamsPresentExtremes() {
-            let elems
-            elems = [
-                {"name":"maxt","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"max"},"smry_only":"1","groupby":"year"},
-                {"name":"mint","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"min"},"smry_only":"1","groupby":"year"}
-            ]
-            return {
-                "sid": this.getStationFromNation,
-                "meta":"name,state",
-                "sdate":"por",
-                "edate":"por",
-                "elems":elems
-            }
-        }
+    //@computed get getAcisParamsPresentExtremes(uid) {
+    //        let elems
+    //        elems = [
+    //            {"name":"maxt","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"max"},"smry_only":"1","groupby":"year"},
+    //            {"name":"mint","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"min"},"smry_only":"1","groupby":"year"}
+    //        ]
+    //        return {
+    //            "uid": uid,
+    //            "meta":"name,state",
+    //            "sdate":"por",
+    //            "edate":"por",
+    //            "elems":elems
+    //        }
+    //    }
 
     // Present extremes download - download data using parameters
-    @action loadPresentExtremes = () => {
+    @action loadPresentExtremes = (uid) => {
         console.log("Call loadPresentExtremes")
         if (this.getLoaderPresentExtremes === false) { this.updateLoaderPresentExtremes(true); }
         this.emptyPresentExtremes()
+        let params = {
+            "uid": uid,
+            "meta":"name,state",
+            "sdate":"por",
+            "edate":"por",
+            "elems":[
+                {"name":"maxt","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"max"},"smry_only":"1","groupby":"year"},
+                {"name":"mint","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"min"},"smry_only":"1","groupby":"year"}
+              ]
+          }
         return axios
-          .post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresentExtremes)
+          //.post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresentExtremes)
+          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PRESENT EXTREMES from ACIS');
             console.log(res);
@@ -1042,14 +1132,11 @@ export class AppStore {
         this.loadProjections_2000_2100(id,'rcp45','min');
     }
 
-    @action climview_loadData = () => {
-        //this.emptyPastData()
-        //this.emptyPresentData()
-        //this.emptyProjectionData()
-        this.loadPastData();
-        this.loadPresentData();
-        this.loadPresentExtremes();
-        this.loadProjections(this.getStateId);
+    @action climview_loadData = (getObs,getProj,uid) => {
+        if (getObs) {this.loadPastData(uid)};
+        if (getObs) {this.loadPresentData(uid)};
+        if (getObs) {this.loadPresentExtremes(uid)};
+        if (getProj) {this.loadProjections(this.getStateId)};
     }
 
     // run these on initial load

@@ -34,7 +34,7 @@ class Tool1 extends Component {
     }
 
     componentDidMount() {
-        app.climview_loadData();
+        app.climview_loadData(1,1,app.getDefaultStationFromNation.uid);
     }
 
     render() {

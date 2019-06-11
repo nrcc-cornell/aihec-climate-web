@@ -5,6 +5,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { inject, observer} from 'mobx-react';
 import { withStyles } from '@material-ui/core/styles';
+import { withRouter } from "react-router-dom";
+import Button from '@material-ui/core/Button';
+import green from '@material-ui/core/colors/green';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -25,15 +28,25 @@ const styles = theme => ({
   group: {
     margin: `${theme.spacing.unit}px 0`,
   },
+  button: {
+    color: green[500],
+  },
 });
 
 var app;
+var history;
 
 @inject('store') @observer
 class VarPicker extends React.Component {
   constructor(props) {
       super(props);
       app = this.props.store.app;
+      history = this.props.history;
+  }
+
+  onChangeClick = () => {
+    app.setActivePage(0);
+    history.push('/');
   }
 
   render() {
@@ -41,8 +54,15 @@ class VarPicker extends React.Component {
 
     return (
       <Grid container direction="row" justify="space-evenly" alignItems="center" spacing={24}>
-        <Grid item>
-          <StationPickerMap/>
+        <Grid container item direction="column" alignItems="center" spacing={8}>
+          <Grid item>
+            <Button className={classes.button} onClick={this.onChangeClick}>
+              Change Nation
+            </Button>
+          </Grid>
+          <Grid item>
+            <StationPickerMap/>
+          </Grid>
         </Grid>
         <Grid item>
       <div className={classes.root}>
@@ -91,4 +111,4 @@ VarPicker.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(VarPicker);
+export default withRouter(withStyles(styles)(VarPicker));
