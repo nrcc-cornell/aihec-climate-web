@@ -2,9 +2,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React, { Component } from 'react';
-import { toJS } from 'mobx';
+//import { toJS } from 'mobx';
 import { inject, observer} from 'mobx-react';
-import moment from 'moment';
+//import moment from 'moment';
 //import Grid from '@material-ui/core/Grid';
 import Highcharts from 'highcharts/highstock';
 //import HC_exporting from 'highcharts/modules/exporting'
@@ -28,7 +28,7 @@ class PresentCharts extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
-        this.chart;
+        //this.chart;
         this.exportChart = () => {
           this.chart.exportChart();
         };
@@ -83,7 +83,7 @@ class PresentCharts extends Component {
             return header + tips;
         }
 
-        if (!app.isPresentLoading && app.getPresentData['date']!=[] && app.getPresentExtremes['date']!=[]) {
+        if (!app.isPresentLoading && app.getPresentData['date']!==[] && app.getPresentExtremes['date']!==[]) {
 
         const options = {
                  plotOptions: {
@@ -125,6 +125,9 @@ class PresentCharts extends Component {
                          }
                      }
                  },
+          chart: {
+            marginBottom: 70
+          },
           title: {
             text: 'Recent conditions @ '+station
           },
@@ -143,7 +146,8 @@ class PresentCharts extends Component {
               xDateFormat:"%b %d, %Y", shape: 'rect',
               crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
-          legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 30 },
+          //legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 30 },
+          legend: { align: 'center', floating: true, verticalAlign: 'bottom', layout: 'horizontal', x: 0, y: 0 },
           //legend: { align: 'left', symbolRadius: 0, floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
           xAxis: { type: 'datetime', crosshair: true, startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
                    dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
@@ -152,9 +156,9 @@ class PresentCharts extends Component {
               title:{ text:'Temperature (F)', style:{"font-size":"14px", color:"#000000"}},
             },
           series: [{
-              name: "Observed Temp Range", data: {}, color: '#D3D3D3', lineWidth: 0, marker : {symbol: 'square', lineWidth: 2, lineColor: '#000000', fillColor: '#000000', radius: 2 }
+              name: "Observed Range", data: {}, color: '#D3D3D3', lineWidth: 0, marker : {symbol: 'square', lineWidth: 2, lineColor: '#000000', fillColor: '#000000', radius: 2 }
           },{
-              name: 'Observed Temp Range',
+              name: 'Observed Range',
               data: (!app.isPresentLoading) ? createRanges(cdata['obs']['date'],cdata['obs']['mint'],cdata['obs']['maxt']): [],
               type: 'columnrange',
               linkedTo: ':previous',
@@ -165,14 +169,14 @@ class PresentCharts extends Component {
                 enabled: false,
               },
               zIndex: 1,
-              visible: app.chartViewIsPresent,
+              visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: false,
           },{
-              name: "Normal Temp Range", data: {}, color: '#D3D3D3', lineWidth: 0, marker : {symbol: 'square', lineWidth: 2, lineColor: 'rgba(0,0,0,0.1)', fillColor: 'rgba(0,0,0,0.1)', radius: 12 }
+              name: "Normal Range", data: {}, color: '#D3D3D3', lineWidth: 0, marker : {symbol: 'square', lineWidth: 2, lineColor: 'rgba(0,0,0,0.1)', fillColor: 'rgba(0,0,0,0.1)', radius: 12 }
           },{
-              name: 'Normal Temp Range',
+              name: 'Normal Range',
               data: (!app.isPresentLoading) ? createRanges(cdata['normal']['date'],cdata['normal']['mint'],cdata['normal']['maxt']): [],
-              marker : {symbol: 'square', radius: 12 },
+              //marker : {symbol: 'square', radius: 12 },
               type: "arearange",
               linkedTo: ':previous',
               lineWidth:0,
@@ -185,10 +189,10 @@ class PresentCharts extends Component {
                 symbol: 'square',
                 radius: 2,
               },
-              visible: app.chartViewIsPresent,
+              visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: false,
           },{
-              name: 'Record High Temp',
+              name: 'Record High',
               data: (!app.isPresentLoading) ? createSeries(edata['extreme']['date'],edata['extreme']['maxt']): [],
               type: "line",
               lineWidth:0,
@@ -201,10 +205,10 @@ class PresentCharts extends Component {
                 symbol: 'circle',
                 radius: 2,
               },
-              visible: app.chartViewIsPresent,
+              visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: app.chartViewIsPresent,
           },{
-              name: 'Record Low Temp',
+              name: 'Record Low',
               data: (!app.isPresentLoading) ? createSeries(edata['extreme']['date'],edata['extreme']['mint']): [],
               type: "line",
               lineWidth:0,
@@ -217,7 +221,7 @@ class PresentCharts extends Component {
                 symbol: 'circle',
                 radius: 2,
               },
-              visible: app.chartViewIsPresent,
+              visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: app.chartViewIsPresent,
           }]
         };
@@ -236,7 +240,7 @@ class PresentCharts extends Component {
 
         return(false);
 
-        };
+        }
 
     }
 }

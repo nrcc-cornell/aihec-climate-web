@@ -4,7 +4,7 @@
 import React, { Component } from 'react';
 import { toJS } from 'mobx';
 import { inject, observer} from 'mobx-react';
-import moment from 'moment';
+//import moment from 'moment';
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -26,7 +26,7 @@ class FutureCharts extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
-        this.chart;
+        //this.chart;
         this.exportChart = () => {
           this.chart.exportChart();
         };
@@ -85,7 +85,7 @@ class FutureCharts extends Component {
             return header + tips;
         }
 
-        if (!app.isProjectionLoading && app.getProjectionData['date']!=[]) {
+        if (!app.isProjectionLoading && app.getProjectionData['date']!==[]) {
 
         const options = {
                  plotOptions: {
@@ -197,7 +197,7 @@ class FutureCharts extends Component {
 
         return(false);
 
-        };
+        }
 
     }
 }

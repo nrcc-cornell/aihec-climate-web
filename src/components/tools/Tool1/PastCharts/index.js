@@ -2,9 +2,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React, { Component } from 'react';
-import { toJS } from 'mobx';
+//import { toJS } from 'mobx';
 import { inject, observer} from 'mobx-react';
-import moment from 'moment';
+//import moment from 'moment';
 //import { ResponsiveContainer, ComposedChart, AreaChart, LineChart, BarChart, Bar, Line, Area, XAxis, YAxis, Surface, Symbols, CartesianGrid, Tooltip, Legend, Brush } from 'recharts';
 //import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, } from 'recharts';
 //import Grid from '@material-ui/core/Grid';
@@ -30,7 +30,7 @@ class PastCharts extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
-        this.chart;
+        //this.chart;
         this.exportChart = () => {
           this.chart.exportChart();
         };
@@ -45,7 +45,7 @@ class PastCharts extends Component {
         let varName = app.wxgraph_getVar
         let varLabel = app.wxgraph_getVarLabels[app.wxgraph_getVar]
         let station = (app.getPastData) ? app.getPastData['stn'][0] : ''
-        let today = new Date()
+        //let today = new Date()
 
         var odata = app.getPastData
 
@@ -77,7 +77,7 @@ class PastCharts extends Component {
             return header + tips;
         }
 
-        if (!app.isPastLoading && app.getPastData['date']!=[]) {
+        if (!app.isPastLoading && app.getPastData['date']!==[]) {
 
         const options = {
                  plotOptions: {
@@ -119,6 +119,9 @@ class PastCharts extends Component {
                          }
                      }
                  },
+          chart: {
+            marginBottom: 70
+          },
           title: {
             text: varLabel+' @ '+station
           },
@@ -134,13 +137,17 @@ class PastCharts extends Component {
               xDateFormat:"%b %d, %Y", shape: 'rect',
               crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
-          legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
+          //legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
+          legend: { align: 'center', floating: true, verticalAlign: 'bottom', layout: 'horizontal', x: 0, y: 0 },
           xAxis: { type: 'datetime', crosshair: true, startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
                      dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
                  },
+          yAxis: {
+              title:{ text:app.wxgraph_getVarLabels[app.wxgraph_getVar]+' ('+app.wxgraph_getVarUnits[app.wxgraph_getVar]+')', style:{"font-size":"14px", color:"#000000"}},
+            },
           series: [{
-              name: app.wxgraph_getVarLabels[app.wxgraph_getVar],
-              data: (app.getPastData['date']!=[]) ? createPastSeries(odata['date'],odata[varName]) : [],
+              name: 'Observed',
+              data: (app.getPastData['date']!==[]) ? createPastSeries(odata['date'],odata[varName]) : [],
               color: '#000000',
               step: false,
               lineWidth: 0,
@@ -164,7 +171,7 @@ class PastCharts extends Component {
 
         return(false);
 
-        };
+        }
 
     }
 }

@@ -10,7 +10,7 @@ import 'leaflet/dist/leaflet.css';
 //import Control from 'react-leaflet-control';
 //import { Map, GeoJSON, LayersControl, TileLayer } from 'react-leaflet';
 //import { Map, GeoJSON, TileLayer } from 'react-leaflet';
-import { Map, GeoJSON, Marker, Popup, TileLayer, ZoomControl } from 'react-leaflet';
+import { Map, GeoJSON, Marker, TileLayer, ZoomControl } from 'react-leaflet';
 //import LegendControl from '../LegendControl';
 
 // Styles
@@ -29,9 +29,9 @@ L.Icon.Default.mergeOptions({
 // end: added code to work with markers
 
 const mapContainer = 'map-container';
-const zoomLevel = 4;
-const minZoomLevel = 4;
-const maxZoomLevel = 16;
+//const zoomLevel = 4;
+//const minZoomLevel = 4;
+//const maxZoomLevel = 16;
 var app;
 var history;
 

@@ -42,6 +42,10 @@ class VarPicker extends React.Component {
       super(props);
       app = this.props.store.app;
       history = this.props.history;
+      // set the station box to 4x4 degrees
+      //app.setStationBox(4.,4.);
+      //console.log('getStationBox');
+      //console.log(app.getStationBox);
   }
 
   onChangeClick = () => {
@@ -49,8 +53,17 @@ class VarPicker extends React.Component {
     history.push('/');
   }
 
+  getStationBox = (width,height) => {
+      let sLat = parseFloat(app.getNation.ll[0]) - (height/2.)
+      let nLat = parseFloat(app.getNation.ll[0]) + (height/2.)
+      let wLon = parseFloat(app.getNation.ll[1]) - (width/2.)
+      let eLon = parseFloat(app.getNation.ll[1]) + (width/2.)
+      return [wLon.toString(),sLat.toString(),eLon.toString(),nLat.toString()].join(',')
+  }
+
   render() {
     const { classes } = this.props;
+    //let v = app.wxgraph_getVar;
 
     return (
       <Grid container direction="row" justify="space-evenly" alignItems="center" spacing={24}>
@@ -61,7 +74,9 @@ class VarPicker extends React.Component {
             </Button>
           </Grid>
           <Grid item>
-            <StationPickerMap/>
+            {app.wxgraph_getVar &&
+              <StationPickerMap type={app.wxgraph_getVar} period={['2019-04-01','2019-06-01']} bounds={this.getStationBox(4.,4.)} />
+            }
           </Grid>
         </Grid>
         <Grid item>

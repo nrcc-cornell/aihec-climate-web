@@ -47,7 +47,7 @@ class ToolContents extends Component {
     }
 
     render() {
-      const { classes, theme } = this.props;
+      //const { classes, theme } = this.props;
 
       if (app.getNations) {
         return (

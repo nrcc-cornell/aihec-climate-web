@@ -31,7 +31,7 @@ class OutputSelect extends Component {
     }
 
     render() {
-        const { classes, theme } = this.props;
+        const { classes } = this.props;
 
         return (
           <form className={classes.root} autoComplete="off">

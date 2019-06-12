@@ -8,13 +8,13 @@ import { MuiThemeProvider, createMuiTheme, withStyles, withTheme  } from "@mater
 import brown from '@material-ui/core/colors/brown';
 import Highcharts from 'highcharts/highstock';
 //import HC_exporting from 'highcharts/modules/exporting'
-import HighchartsReact from 'highcharts-react-official';
+//import HighchartsReact from 'highcharts-react-official';
 
 // import route Components here
 import {
   BrowserRouter as Router,
   Route,
-  Link,
+  //Link,
   Switch,
   Redirect
 } from 'react-router-dom'
@@ -48,17 +48,17 @@ const styles = theme => ({
   toolbar: theme.mixins.toolbar,
 });
 
-var app;
+//var app;
 
 @inject('store') @observer
 class App extends Component {
-    constructor(props) {
-        super(props);
-        app = this.props.store.app;
-    }
+    //constructor(props) {
+    //    super(props);
+    //    //app = this.props.store.app;
+    //}
 
     render() {
-        const { classes } = this.props;
+        //const { classes } = this.props;
 
         return (
           <Router basename={process.env.PUBLIC_URL}>

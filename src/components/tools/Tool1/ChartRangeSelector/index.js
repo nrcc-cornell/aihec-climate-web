@@ -13,7 +13,7 @@ import Button from '@material-ui/core/Button';
 import Grid from "@material-ui/core/Grid";
 //import Typography from "@material-ui/core/Typography";
 
-import ReactModal from 'react-modal';
+//import ReactModal from 'react-modal';
 
 // Styles
 //import '../../styles/ChartRangeSelector.css';
@@ -40,7 +40,7 @@ const styles = theme => ({
 });
 
 var app;
-var history;
+//var history;
 
 @inject('store') @observer
 class ChartRangeSelector extends Component {
@@ -48,7 +48,7 @@ class ChartRangeSelector extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
-        history = this.props.history;
+        //history = this.props.history;
     }
 
     onChangeClick = (v) => {

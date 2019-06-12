@@ -11,7 +11,7 @@ import axios from 'axios';
 import L from 'leaflet';
 
 import 'leaflet/dist/leaflet.css';
-import { Map, GeoJSON, CircleMarker, Marker, Popup, TileLayer, ZoomControl } from 'react-leaflet';
+import { Map, GeoJSON, CircleMarker, TileLayer, ZoomControl } from 'react-leaflet';
 
 // start: added code to work with markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -40,11 +40,11 @@ const styles = theme => ({
 
 const protocol = window.location.protocol;
 const mapContainer = 'map-container';
-const zoomLevel = 6;
-const minZoomLevel = 4;
-const maxZoomLevel = 16;
+//const zoomLevel = 6;
+//const minZoomLevel = 4;
+//const maxZoomLevel = 16;
 var app;
-var history;
+//var history;
 
 @inject('store') @observer
 class StationPickerMap extends Component {
@@ -52,11 +52,14 @@ class StationPickerMap extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
-        history = this.props.history;
+        //history = this.props.history;
         this.state = {
             width: window.innerWidth,
             height: window.innerHeight,
-            stations: null,
+            stations_temp_past: null,
+            stations_temp_present: null,
+            stations_precip_past: null,
+            stations_precip_present: null,
             station: app.getDefaultStationFromNation.name
         };
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
@@ -70,13 +73,15 @@ class StationPickerMap extends Component {
         this.zoomLevel = 6;
         this.minZoomLevel = 3;
         this.maxZoomLevel = 16;
+        //this.stations = {'temp': {'past':null, 'present':null}, 'precip': {'past':null, 'present':null}}
+        this.getStations('temp')
+        this.getStations('precip')
     }
 
     componentDidMount() {
       this.updateWindowDimensions();
       window.addEventListener('resize', this.updateWindowDimensions);
       this.map = this.mapInstance.leafletElement
-      this.getStations()
     }
 
     componentWillUnmount() {
@@ -100,16 +105,16 @@ class StationPickerMap extends Component {
         return [wLon.toString(),sLat.toString(),eLon.toString(),nLat.toString()].join(',')
     }
 
-    getStations = () => {
+    getStations = (v) => {
+        // v: variable name ('temp' or 'precip')
         // first, get list of current stations
         let params = {
             "meta":"name,ll,uid",
-            "elems":"maxt,mint,pcpn",
+            "elems":(v==='temp') ? 'avgt' : 'pcpn',
             "output":"json",
-            "sdate":"1940-01-01",
-            "edate":"1949-12-31",
-            //"bbox":"-104,40,-100,45"
-            "bbox":this.getBoundingBox()
+            "sdate":this.props.period[0],
+            "edate":this.props.period[1],
+            "bbox":this.props.bounds
         }
         return axios
           .post(`${protocol}//data.rcc-acis.org/StnMeta`, params)
@@ -117,8 +122,13 @@ class StationPickerMap extends Component {
             console.log('SUCCESS downloading STATIONS IN BBOX from ACIS');
             console.log(res);
             let uidList = res.data.meta.map((s,i) => (s.uid.toString()))
+            if (v==='temp') {
+              this.setState({ stations_temp_present: res.data.meta });
+            } else {
+              this.setState({ stations_precip_present: res.data.meta });
+            }
             // get long-term stations
-            this.getStationsLongTerm(uidList.join(","));
+            this.getStationsLongTerm(v,uidList.join(","))
           })
           .catch(err => {
             console.log(
@@ -127,15 +137,16 @@ class StationPickerMap extends Component {
           });
     }
 
-    getStationsLongTerm = (sList) => {
-        // string with list of stations
-        // e.g. "1234,5432,11256"
+    getStationsLongTerm = (v,sList) => {
+        // v: variable name ('temp' or 'precip')
+        // sList: string with list of stations
+        //        e.g. "1234,5432,11256"
         let params = {
             "meta":"name,ll,uid",
-            "elems":"maxt,mint,pcpn",
+            "elems":(v==='temp') ? 'avgt' : 'pcpn',
             "output":"json",
-            "sdate":"2019-04-01",
-            "edate":"2019-06-01",
+            "sdate":"1850-01-01",
+            "edate":"1960-01-01",
             "uids":sList
         }
         return axios
@@ -143,7 +154,11 @@ class StationPickerMap extends Component {
           .then(res => {
             console.log('SUCCESS downloading LONG-TERM STATIONS from ACIS');
             console.log(res);
-            this.setState({stations:res.data.meta})
+            if (v==='temp') {
+              this.setState({ stations_temp_past: res.data.meta });
+            } else {
+              this.setState({ stations_precip_past: res.data.meta });
+            }
           })
           .catch(err => {
             console.log(
@@ -183,8 +198,44 @@ class StationPickerMap extends Component {
                             data={app.getNationGeojson}
                             style={app.nationFeatureStyle_selected}
                         />
-                        {this.state.stations &&
-                          this.state.stations.map((s,i) => (
+                        {['avgt','maxt','mint','temp'].includes(app.wxgraph_getVar) && app.chartViewIsPresent && this.state.stations_temp_present &&
+                          this.state.stations_temp_present.map((s,i) => (
+                            <CircleMarker
+                              key={i+"marker"}
+                              center={[s.ll[1],s.ll[0]]}
+                              radius={3}
+                              color={(s.name===this.state.station) ? "red" : "black"}
+                              onClick={() => {this.handleStationClick(s)}}
+                            >
+                            </CircleMarker>
+                          ))
+                        }
+                        {['avgt','maxt','mint','temp'].includes(app.wxgraph_getVar) && app.chartViewIsPast && this.state.stations_temp_past &&
+                          this.state.stations_temp_past.map((s,i) => (
+                            <CircleMarker
+                              key={i+"marker"}
+                              center={[s.ll[1],s.ll[0]]}
+                              radius={3}
+                              color={(s.name===this.state.station) ? "red" : "black"}
+                              onClick={() => {this.handleStationClick(s)}}
+                            >
+                            </CircleMarker>
+                          ))
+                        }
+                        {['pcpn','precip'].includes(app.wxgraph_getVar) && app.chartViewIsPresent && this.state.stations_precip_present &&
+                          this.state.stations_precip_present.map((s,i) => (
+                            <CircleMarker
+                              key={i+"marker"}
+                              center={[s.ll[1],s.ll[0]]}
+                              radius={3}
+                              color={(s.name===this.state.station) ? "red" : "black"}
+                              onClick={() => {this.handleStationClick(s)}}
+                            >
+                            </CircleMarker>
+                          ))
+                        }
+                        {['pcpn','precip'].includes(app.wxgraph_getVar) && app.chartViewIsPast && this.state.stations_precip_past &&
+                          this.state.stations_precip_past.map((s,i) => (
                             <CircleMarker
                               key={i+"marker"}
                               center={[s.ll[1],s.ll[0]]}
@@ -197,7 +248,18 @@ class StationPickerMap extends Component {
                         }
                         <ZoomControl position="topleft" />
                     </Map>
-                    {!this.state.stations && <CircularProgress size={64} className={classes.mapProgress} />}
+                    {['avgt','maxt','mint','temp'].includes(app.wxgraph_getVar) && app.chartViewIsPast && !this.state.stations_temp_past &&
+                      <CircularProgress size={64} className={classes.mapProgress} />
+                    }
+                    {['avgt','maxt','mint','temp'].includes(app.wxgraph_getVar) && app.chartViewIsPresent && !this.state.stations_temp_present &&
+                      <CircularProgress size={64} className={classes.mapProgress} />
+                    }
+                    {['pcpn','precip'].includes(app.wxgraph_getVar) && app.chartViewIsPresent && !this.state.stations_precip_present &&
+                      <CircularProgress size={64} className={classes.mapProgress} />
+                    }
+                    {['pcpn','precip'].includes(app.wxgraph_getVar) && app.chartViewIsPast && !this.state.stations_precip_past &&
+                      <CircularProgress size={64} className={classes.mapProgress} />
+                    }
               </div>
         );
 

@@ -70,7 +70,7 @@ export class AppStore {
 
     getToolInfo = (name) => {
             let title, tagline, thumbnail, url, onclick
-            let pathToImages = './thumbnails/'
+            //let pathToImages = './thumbnails/'
             if (name==='climview') {
                 title = 'Climate Viewer'
                 tagline = 'Data observed near your nation over the past century.'
@@ -110,6 +110,19 @@ export class AppStore {
             if (this.getShowModalMap) { this.setShowModalMap(false) };
         };
     @computed get getNation() { return this.nation };
+
+    // get box centered on center of nation, where stations will be available
+    // width: length in w-e direction (degrees)
+    // height: length in n-s direction (degrees)
+    //@observable station_box = null;
+    //@action setStationBox = (width,height) => {
+    //    let sLat = parseFloat(this.getNation.ll[0]) - (height/2.)
+    //    let nLat = parseFloat(this.getNation.ll[0]) + (height/2.)
+    //    let wLon = parseFloat(this.getNation.ll[1]) - (width/2.)
+    //    let eLon = parseFloat(this.getNation.ll[1]) + (width/2.)
+    //    return [wLon.toString(),sLat.toString(),eLon.toString(),nLat.toString()].join(',')
+    //}
+    //@computed get getStationBox() { return this.station_box };
 
     // manage list of all nations
     @computed get getNations() {
@@ -312,10 +325,10 @@ export class AppStore {
     @computed get wxgraph_getVarUnits() {
         let varUnits = {}
         varUnits = {
-            avgt_units : '°F',
-            maxt_units : '°F',
-            mint_units : '°F',
-            pcpn_units : 'inches',
+            avgt : '°F',
+            maxt : '°F',
+            mint : '°F',
+            pcpn : 'inches',
         };
         return varUnits
     }
@@ -366,7 +379,8 @@ export class AppStore {
                 };
     @action wxgraph_setClimateSummary = (m) => {
         let dataIn = this.wxgraph_getClimateData
-        let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,snowValue
+        //let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,snowValue
+        let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue
         let dataObj = {}
         dataObj['stn']=[]
         dataObj['years']=[]
@@ -381,7 +395,7 @@ export class AppStore {
             maxtValue = (d[2]==='M') ? NaN : parseFloat(d[2])
             mintValue = (d[3]==='M') ? NaN : parseFloat(d[3])
             pcpnValue = (d[4]==='M') ? NaN : ((d[4]==='T') ? 0.00 : parseFloat(d[4]))
-            snowValue = NaN
+            //snowValue = NaN
             dataObj['stn'].push(stnValue)
             dataObj['years'].push(dateValue)
             dataObj['avgt'].push(avgtValue)
@@ -544,8 +558,10 @@ export class AppStore {
           .post(`${protocol}//data.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PAST DATA from ACIS');
-            let i,thisDate
-            let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,snowValue
+            //let i,thisDate
+            //let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,snowValue
+            let i
+            let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue
             let data = {}
             data['stn'] = []
             data['date'] = []
@@ -736,7 +752,8 @@ export class AppStore {
             console.log('SUCCESS downloading PRESENT DATA from ACIS');
             //console.log(res);
             let i,thisDate
-            let maxtObsValue,mintObsValue,pcpnObsValue,maxtNormalValue,mintNormalValue,maxtExtremeValue,mintExtremeValue
+            //let maxtObsValue,mintObsValue,pcpnObsValue,maxtNormalValue,mintNormalValue,maxtExtremeValue,mintExtremeValue
+            let maxtObsValue,mintObsValue,pcpnObsValue,maxtNormalValue,mintNormalValue
             let data = {}
             data['stn'] = res.data.meta.name+', '+res.data.meta.state
             data['date'] = []

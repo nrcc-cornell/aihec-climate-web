@@ -3,9 +3,9 @@
 
 import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
-import { withStyles } from '@material-ui/core/styles';
+//import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
+//import IconButton from '@material-ui/core/IconButton';
 import HomeIcon from '@material-ui/icons/Home';
 
 import Control from 'react-leaflet-control';

@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from "@material-ui/core/Grid";
-import Hidden from '@material-ui/core/Hidden';
+//import Hidden from '@material-ui/core/Hidden';
 
 // Components
 import NationPickerMap from '../../components/NationPickerMap';
@@ -38,7 +38,7 @@ class HomeContents extends Component {
     }
 
     render() {
-        const { classes, theme } = this.props;
+        const { classes } = this.props;
 
         return (
             <div className="HomeContents">
