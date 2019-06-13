@@ -7,16 +7,19 @@ import LoadingOverlay from 'react-loading-overlay';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
+//import { spacing } from '@material-ui/system';
 
 // Components
 import ChartRangeSelector from './ChartRangeSelector'
-import VarPicker from './VarPicker'
+//import VarPicker from './VarPicker'
+import UserInput from './UserInput'
 //import ToolSelect from '../common/ToolSelect'
 //import OutputSelect from '../common/OutputSelect'
 import VarPopover from './VarPopover'
 //import WxCharts from './WxCharts'
 import PastCharts from './PastCharts'
 import PresentCharts from './PresentCharts'
+import PresentChartsPrecip from './PresentChartsPrecip'
 import FutureCharts from './FutureCharts'
 import WxTables from './WxTables'
 
@@ -41,13 +44,14 @@ class Tool1 extends Component {
 
         let display;
         if (app.getOutputType==='chart' && app.getChartView==='past') { display = <PastCharts/> }
-        if (app.getOutputType==='chart' && app.getChartView==='present') { display = <PresentCharts/> }
+        if (app.getOutputType==='chart' && app.getChartView==='present' && app.wxgraph_getVar==='avgt') { display = <PresentCharts/> }
+        if (app.getOutputType==='chart' && app.getChartView==='present' && app.wxgraph_getVar==='pcpn') { display = <PresentChartsPrecip/> }
         if (app.getOutputType==='chart' && app.getChartView==='future') { display = <FutureCharts/> }
         //if (app.getOutputType==='chart') { display = <WxCharts/> }
         if (app.getOutputType==='table') { display = <WxTables /> }
-        let display_VarPicker;
-        if (app.getOutputType==='chart') { display_VarPicker = <VarPicker /> }
-        if (app.getOutputType==='table') { display_VarPicker = null }
+        let display_UserInput;
+        if (app.getOutputType==='chart') { display_UserInput = <UserInput /> }
+        if (app.getOutputType==='table') { display_UserInput = null }
         //let display_ToolSelect;
         //if (app.getOutputType==='chart') { display_ToolSelect = <ToolSelect /> }
         //if (app.getOutputType==='table') { display_ToolSelect = null }
@@ -60,18 +64,13 @@ class Tool1 extends Component {
 
         return (
             <Grid container direction="column" justify="center" alignItems="center">
-              <Grid container item direction="row" justify="center" alignItems="center">
+              <Grid item direction="row" justify="center" alignItems="center">
                 <ChartRangeSelector/>
               </Grid>
-              <Grid container item justify="center" alignItems="center">
+              <Grid container item justify="center" alignItems="flex-start">
                 <Grid item className="nothing" xs={0} md={3}>
                   <Hidden smDown>
-                    <Typography
-                      color="inherit"
-                      style={{ borderRight: '0.1em solid black', padding: '0.5em' }}
-                    >
-                      {display_VarPicker}
-                    </Typography>
+                      {display_UserInput}
                   </Hidden>
                 </Grid>
                 <Grid item container className="nothing" direction="row" justify="center" xs={12} md={9}>
@@ -81,6 +80,10 @@ class Tool1 extends Component {
                       </Hidden>
                     </Grid>
                     <Grid item>
+                     <Typography
+                        color="inherit"
+                        style={{ borderLeft: '0.1em solid gray', padding: '0.5em' }}
+                      >
                         <LoadingOverlay
                           active={app.isPastLoading}
                           spinner
@@ -90,6 +93,7 @@ class Tool1 extends Component {
                           >
                             {display}
                         </LoadingOverlay>
+                      </Typography>
                     </Grid>
                 </Grid>
               </Grid>

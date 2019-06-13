@@ -2,10 +2,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React, { Component } from 'react';
-import { toJS } from 'mobx';
+//import { toJS } from 'mobx';
 import { inject, observer} from 'mobx-react';
 //import moment from 'moment';
+//import Grid from '@material-ui/core/Grid';
 import Highcharts from 'highcharts/highstock';
+//import HC_exporting from 'highcharts/modules/exporting'
 import HighchartsReact from 'highcharts-react-official';
 
 //Components
@@ -21,7 +23,7 @@ HighchartsMore(Highcharts);
 var app;
 
 @inject('store') @observer
-class FutureCharts extends Component {
+class PresentChartsPrecip extends Component {
 
     constructor(props) {
         super(props);
@@ -38,56 +40,38 @@ class FutureCharts extends Component {
 
     render() {
 
-        let varName = app.wxgraph_getVar
-        let varLabel = app.wxgraph_getVarLabels[app.wxgraph_getVar]
-        let nation = app.getNation.name
-        let startYear = new Date(2000,0,1)
+        let station = (app.getPresentPrecip) ? app.getPresentPrecip['stn'] : ''
+        let cdata = app.getPresentPrecip
 
-        let scenario = app.getModelScenario
-
-        var odata = app.getLivnehData
-        var pdata = app.getProjectionData
-
-        let createProjectionSeries = (y,a,syear) => {
+        let createSeries = (y,a) => {
             let i
-            let series = [];
+            let oseries = [];
             if (a) {
                 for (i=0; i<y.length; i++) {
-                    if (y[i]>=syear) {series.push([y[i],a[i]])};
+                    oseries.push([y[i],a[i]])
                 };
             }
-            return series;
-        }
-
-        let createProjectionRanges = (y,a,b,syear) => {
-            let i;
-            let ranges = [];
-            if (a && b) {
-                for (i=0; i<y.length; i++) {
-                    if (y[i]>=syear) {ranges.push([y[i],a[i],b[i]])};
-                };
-            }
-            return ranges;
+            return oseries;
         }
 
         function tooltipFormatter() {
             var i, item;
-            var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%Y', this.x) + '</span>';
+            var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%b %d, %Y', this.x) + '</span>';
             var tips = "";
             for (i=0; i<this.points.length; i++) {
                 item = this.points[i];
                 //console.log(item);
-                if ( item.series.name.includes("range") ) {
-                    tips += '<br/>' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
-                    //tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span> : ' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0);
+                if ( item.series.name.includes("Range") ) {
+                    tips += '<br/>' + item.point.low.toFixed(2) + '-' + item.point.high.toFixed(2) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
+                    //tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span> : ' + item.point.low.toFixed(2) + '-' + item.point.high.toFixed(2);
                 } else {
-                    tips += '<br/>' + item.y.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
+                    tips += '<br/>' + item.y.toFixed(2) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 }
             }
             return header + tips;
         }
 
-        if (!app.isProjectionLoading && app.getProjectionData['date']!==[]) {
+        if (!app.isPresentLoading && app.getPresentPrecip['date']!==[]) {
 
         const options = {
                  plotOptions: {
@@ -133,10 +117,10 @@ class FutureCharts extends Component {
             marginBottom: 70
           },
           title: {
-            text: varLabel+' @ '+nation
+            text: (app.getPresentPrecip.stn==="") ? 'No Data Available - Please try another station.' : 'Recent precipitation @ '+station
           },
           subtitle: {
-            text: (app.getModelScenario==='rcp85') ? 'High Emission Model Scenario (RCP 8.5)' : 'Low Emission Model Scenario (RCP 4.5)'
+            text: (app.getPresentPrecip.stn==="") ? '' : 'Accumulation since Jan 1'
           },
           exporting: {
             //showTable: true,
@@ -150,50 +134,46 @@ class FutureCharts extends Component {
               xDateFormat:"%b %d, %Y", shape: 'rect',
               crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
-          //legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
           legend: { align: 'center', floating: true, verticalAlign: 'bottom', layout: 'horizontal', x: 0, y: 0 },
           xAxis: { type: 'datetime', gridLineWidth: 1, crosshair: true, startOnTick: false, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
-               dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
+                   dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
             },
           yAxis: {
-               min: (!app.isProjectionLoading) ? Math.min(...pdata['rcp85']['min'][varName]) : null,
-               max: (!app.isProjectionLoading) ? Math.max(...pdata['rcp85']['max'][varName]) : null,
-               title:{ text:app.wxgraph_getVarLabels[app.wxgraph_getVar]+' ('+app.wxgraph_getVarUnits[app.wxgraph_getVar]+')', style:{"font-size":"14px", color:"#000000"}},
+              title:{ text:'Precipitation (inches)', style:{"font-size":"14px", color:"#000000"}},
             },
           series: [{
               name: 'Observed',
-              data: (!app.isProjectionLoading) ? createProjectionSeries(odata['years'],odata[varName],startYear): [],
-              color: '#000000',
-              step: false,
-              lineWidth: 0,
-              marker: { enabled: true },
-              zIndex: 24,
-              visible: app.chartViewIsFuture,
-              showInLegend: app.chartViewIsFuture,
-          },{
-              name: 'Climate model average',
-              data: (!app.isProjectionLoading) ? createProjectionSeries(pdata[scenario]['mean']['years'],pdata[scenario]['mean'][varName],startYear): [],
-              type: "line",
-              zIndex: 24,
-              lineWidth: 1,
-              color: "#000000",
-              shadow: false,
-              marker: { enabled: false, fillColor: "#00dd00", lineWidth: 2, lineColor: "#00dd00", radius:2, symbol:"circle" },
-              visible: app.chartViewIsFuture,
-              showInLegend: app.chartViewIsFuture,
-          },{
-              name: 'Climate model range',
-              data: (!app.isProjectionLoading) ? createProjectionRanges(toJS(pdata)[scenario]['min']['years'],toJS(pdata)[scenario]['min'][varName],toJS(pdata)[scenario]['max'][varName],startYear): [],
-              marker : {symbol: 'square', radius: 12 },
-              type: "arearange",
-              linkedTo: ':previous',
-              lineWidth:0,
-              color: 'rgba(0,0,0,0.2)',
-              fillColor: 'rgba(0,0,0,0.2)',
-              fillOpacity: 0.1,
+              data: (!app.isPresentLoading) ? createSeries(cdata['obs']['date'],cdata['obs']['pcpn']): [],
+              type: "area",
+              //linkedTo: ':previous',
+              lineWidth:3,
+              color: 'rgba(0,128,0,1.0)',
+              fillColor: 'rgba(0,128,0,0.3)',
+              //fillOpacity: 0.1,
               zIndex: 0,
-              visible: app.chartViewIsFuture,
-              showInLegend: app.chartViewIsFuture,
+              marker: {
+                enabled: false,
+                symbol: 'square',
+                radius: 2,
+              },
+              //visible: !app.isPresentLoading && app.chartViewIsPresent,
+              //showInLegend: false,
+          },{
+              name: 'Normal',
+              data: (!app.isPresentLoading) ? createSeries(cdata['normal']['date'],cdata['normal']['pcpn']): [],
+              type: "line",
+              lineWidth:3,
+              //linkedTo: ':previous',
+              color: '#654321',
+              //fillOpacity: 0.0,
+              zIndex: 2,
+              marker: {
+                enabled: false,
+                symbol: 'circle',
+                radius: 2,
+              },
+              //visible: !app.isPresentLoading && app.chartViewIsPresent,
+              //showInLegend: app.chartViewIsPresent,
           }]
         };
 
@@ -216,5 +196,5 @@ class FutureCharts extends Component {
     }
 }
 
-export default FutureCharts;
+export default PresentChartsPrecip;
 

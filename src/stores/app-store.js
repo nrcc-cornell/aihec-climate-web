@@ -306,6 +306,16 @@ export class AppStore {
             //this.wxgraph_downloadData()
         }
     }
+    @action wxgraph_setVarFromInput = (e) => {
+        let t = e.target.value;
+        // has the var changed?
+        let changed = (this.wxgraph_getVar===t) ? false : true
+        // only update and download data if time frame has changed
+        if (changed===true) {
+            this.wxgraph_var = t;
+            //this.wxgraph_downloadData()
+        }
+    }
     @computed get wxgraph_getVar() { return this.wxgraph_var };
 
     /// which output type is active?
@@ -371,11 +381,11 @@ export class AppStore {
     @observable wxgraph_climateSummary = {
                 'stn': '',
                 'years': [moment().format('YYYY-MM-DD')],
-                'avgt': [NaN],
-                'maxt': [NaN],
-                'mint': [NaN],
-                'pcpn': [NaN],
-                'snow': [NaN],
+                'avgt': [null],
+                'maxt': [null],
+                'mint': [null],
+                'pcpn': [null],
+                'snow': [null],
                 };
     @action wxgraph_setClimateSummary = (m) => {
         let dataIn = this.wxgraph_getClimateData
@@ -391,11 +401,11 @@ export class AppStore {
         dataIn.forEach(function (d) {
             stnValue = m.name+', '+m.state
             dateValue = Date.UTC(d[0],0,1)
-            avgtValue = (d[1]==='M') ? NaN : parseFloat(d[1])
-            maxtValue = (d[2]==='M') ? NaN : parseFloat(d[2])
-            mintValue = (d[3]==='M') ? NaN : parseFloat(d[3])
-            pcpnValue = (d[4]==='M') ? NaN : ((d[4]==='T') ? 0.00 : parseFloat(d[4]))
-            //snowValue = NaN
+            avgtValue = (d[1]==='M') ? null : parseFloat(d[1])
+            maxtValue = (d[2]==='M') ? null : parseFloat(d[2])
+            mintValue = (d[3]==='M') ? null : parseFloat(d[3])
+            pcpnValue = (d[4]==='M') ? null : ((d[4]==='T') ? 0.00 : parseFloat(d[4]))
+            //snowValue = null
             dataObj['stn'].push(stnValue)
             dataObj['years'].push(dateValue)
             dataObj['avgt'].push(avgtValue)
@@ -572,10 +582,10 @@ export class AppStore {
             for (i=0; i<res.data.data.length; i++) {
                 stnValue = res.data.meta.name+', '+res.data.meta.state
                 dateValue = Date.UTC(res.data.data[i][0],0,1)
-                avgtValue = (res.data.data[i][1]==='M') ? NaN : parseFloat(res.data.data[i][1])
-                maxtValue = (res.data.data[i][2]==='M') ? NaN : parseFloat(res.data.data[i][2])
-                mintValue = (res.data.data[i][3]==='M') ? NaN : parseFloat(res.data.data[i][3])
-                pcpnValue = (res.data.data[i][4]==='M') ? NaN : ((res.data.data[i][4]==='T') ? 0.00 : parseFloat(res.data.data[i][4]))
+                avgtValue = (res.data.data[i][1]==='M') ? null : parseFloat(res.data.data[i][1])
+                maxtValue = (res.data.data[i][2]==='M') ? null : parseFloat(res.data.data[i][2])
+                mintValue = (res.data.data[i][3]==='M') ? null : parseFloat(res.data.data[i][3])
+                pcpnValue = (res.data.data[i][4]==='M') ? null : ((res.data.data[i][4]==='T') ? 0.00 : parseFloat(res.data.data[i][4]))
                 data['stn'].push(stnValue)
                 data['date'].push(dateValue)
                 data['avgt'].push(avgtValue)
@@ -610,7 +620,6 @@ export class AppStore {
             newData['obs']['date'] = d['date']
             newData['obs']['maxt'] = d['maxt_obs']
             newData['obs']['mint'] = d['mint_obs']
-            newData['obs']['pcpn'] = d['pcpn_obs']
             newData['normal']['date'] = d['date']
             newData['normal']['maxt'] = d['maxt_normal']
             newData['normal']['mint'] = d['mint_normal']
@@ -622,7 +631,6 @@ export class AppStore {
             data['date'] = []
             data['maxt'] = []
             data['mint'] = []
-            data['pcpn'] = []
             this.present_data = {
                     'stn' : "",
                     'obs' : data,
@@ -633,7 +641,37 @@ export class AppStore {
             return this.present_data
         }
 
-    // store downloaded present data
+    // store downloaded present precip data
+    // these contain the obs and normals for precipitation
+    @observable present_precip_data = null;
+    @action updatePresentPrecip = (d) => {
+            let newData = {}
+            newData = {}
+            newData['stn'] = d['stn']
+            newData['obs'] = {}
+            newData['normal'] = {}
+            newData['obs']['date'] = d['date']
+            newData['obs']['pcpn'] = d['pcpn_obs']
+            newData['normal']['date'] = d['date']
+            newData['normal']['pcpn'] = d['pcpn_normal']
+            this.present_precip_data = newData
+        }
+    @action emptyPresentPrecip = () => {
+            if (this.getPresentPrecip) { this.present_precip_data = null }
+            let data = {}
+            data['date'] = []
+            data['pcpn'] = []
+            this.present_precip_data = {
+                    'stn' : "",
+                    'obs' : data,
+                    'normal' : data,
+                };
+        }
+    @computed get getPresentPrecip() {
+            return this.present_precip_data
+        }
+
+    // store downloaded present extreme data
     // these contain the obs and normals
     @observable present_extremes = null;
     @action updatePresentExtremes = (d) => {
@@ -664,10 +702,12 @@ export class AppStore {
 
     // Check if a present data is loading
     @computed get isPresentLoading() {
-        if (this.getPresentData && this.getPresentExtremes) {
-            if (this.getPresentData.obs.date.length > 0 &&
-                this.getPresentExtremes.extreme.date.length > 0 &&
-                !this.getLoaderPresent &&
+        if (this.getPresentData && this.getPresentPrecip && this.getPresentExtremes) {
+            //if (this.getPresentData.obs.date.length > 0 &&
+            //    this.getPresentPrecip.obs.date.length > 0 &&
+            //    this.getPresentExtremes.extreme.date.length > 0 &&
+            if (!this.getLoaderPresent &&
+                !this.getLoaderPresentPrecip &&
                 !this.getLoaderPresentExtremes) {
                     return false;
             } else {
@@ -685,6 +725,15 @@ export class AppStore {
         }
     @computed get getLoaderPresent() {
             return this.loader_present
+        }
+
+    // Logic for displaying spinner (present)
+    @observable loader_present_precip=false;
+    @action updateLoaderPresentPrecip = (l) => {
+            this.loader_present_precip = l;
+        }
+    @computed get getLoaderPresentPrecip() {
+            return this.loader_present_precip
         }
 
     // Logic for displaying spinner (present)
@@ -740,7 +789,6 @@ export class AppStore {
             "elems": [
                 {"name":"maxt"},
                 {"name":"mint"},
-                {"name":"pcpn"},
                 {"name":"maxt","normal":"1"},
                 {"name":"mint","normal":"1"},
               ]
@@ -750,34 +798,32 @@ export class AppStore {
           .post(`${protocol}//data.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PRESENT DATA from ACIS');
-            //console.log(res);
-            let i,thisDate
-            //let maxtObsValue,mintObsValue,pcpnObsValue,maxtNormalValue,mintNormalValue,maxtExtremeValue,mintExtremeValue
-            let maxtObsValue,mintObsValue,pcpnObsValue,maxtNormalValue,mintNormalValue
-            let data = {}
-            data['stn'] = res.data.meta.name+', '+res.data.meta.state
-            data['date'] = []
-            data['maxt_obs'] = []
-            data['mint_obs'] = []
-            data['pcpn_obs'] = []
-            data['maxt_normal'] = []
-            data['mint_normal'] = []
-            for (i=0; i<res.data.data.length; i++) {
+            console.log(res);
+            if (!res.data.hasOwnProperty('error')) {
+              let i,thisDate
+              let maxtObsValue,mintObsValue,maxtNormalValue,mintNormalValue
+              let data = {}
+              data['stn'] = res.data.meta.name+', '+res.data.meta.state
+              data['date'] = []
+              data['maxt_obs'] = []
+              data['mint_obs'] = []
+              data['maxt_normal'] = []
+              data['mint_normal'] = []
+              for (i=0; i<res.data.data.length; i++) {
                 thisDate = res.data.data[i][0];
-                maxtObsValue = (res.data.data[i][1]==='M') ? NaN : parseFloat(res.data.data[i][1])
-                mintObsValue = (res.data.data[i][2]==='M') ? NaN : parseFloat(res.data.data[i][2])
-                pcpnObsValue = (res.data.data[i][3]==='M') ? NaN : ((res.data.data[i][4]==='T') ? 0.00 : parseFloat(res.data.data[i][3]))
-                maxtNormalValue = (res.data.data[i][4]==='M') ? NaN : parseFloat(res.data.data[i][4])
-                mintNormalValue = (res.data.data[i][5]==='M') ? NaN : parseFloat(res.data.data[i][5])
+                maxtObsValue = (res.data.data[i][1]==='M') ? null : parseFloat(res.data.data[i][1])
+                mintObsValue = (res.data.data[i][2]==='M') ? null : parseFloat(res.data.data[i][2])
+                maxtNormalValue = (res.data.data[i][3]==='M') ? null : parseFloat(res.data.data[i][3])
+                mintNormalValue = (res.data.data[i][4]==='M') ? null : parseFloat(res.data.data[i][4])
                 data['date'].push(Date.UTC( thisDate.substr(0,4), thisDate.substr(5,2)-1, thisDate.substr(8,2) ))
                 data['maxt_obs'].push(maxtObsValue)
                 data['mint_obs'].push(mintObsValue)
-                data['pcpn_obs'].push(pcpnObsValue)
                 data['maxt_normal'].push(maxtNormalValue)
                 data['mint_normal'].push(mintNormalValue)
+              }
+              this.updatePresentData(data);
+              //console.log(this.getPresentData);
             }
-            this.updatePresentData(data);
-            //console.log(this.getPresentData);
             if (this.getLoaderPresent === true) { this.updateLoaderPresent(false); }
           })
           .catch(err => {
@@ -787,21 +833,52 @@ export class AppStore {
           });
     }
 
-    // Present extremes download - set parameters
-    //@computed get getAcisParamsPresentExtremes(uid) {
-    //        let elems
-    //        elems = [
-    //            {"name":"maxt","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"max"},"smry_only":"1","groupby":"year"},
-    //            {"name":"mint","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"min"},"smry_only":"1","groupby":"year"}
-    //        ]
-    //        return {
-    //            "uid": uid,
-    //            "meta":"name,state",
-    //            "sdate":"por",
-    //            "edate":"por",
-    //            "elems":elems
-    //        }
-    //    }
+    // Present precipitation download - download data using parameters
+    @action loadPresentPrecip = (uid) => {
+        console.log("Call loadPresentPrecip")
+        if (this.getLoaderPresentPrecip === false) { this.updateLoaderPresentPrecip(true); }
+        this.emptyPresentPrecip()
+        let params = {
+            "uid": uid,
+            "meta":"name,state",
+            "sdate":"2019-01-01",
+            "edate":"2019-06-13",
+            "elems":[
+                {"name":"pcpn","interval":[0,0,1],"duration":"ytd","reduce":"sum"},
+                {"name":"pcpn","interval":[0,0,1],"duration":"ytd","reduce":"sum","normal":"1"}
+              ]
+          }
+        return axios
+          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
+          .then(res => {
+            console.log('SUCCESS downloading PRESENT PRECIP from ACIS');
+            console.log(res);
+            if (!res.data.hasOwnProperty('error')) {
+              let i,thisDate
+              let pcpnObsValue,pcpnNormalValue
+              let data = {}
+              data['stn'] = res.data.meta.name+', '+res.data.meta.state
+              data['date'] = []
+              data['pcpn_obs'] = []
+              data['pcpn_normal'] = []
+              for (i=0; i<res.data.data.length; i++) {
+                thisDate = res.data.data[i][0];
+                pcpnObsValue = (res.data.data[i][1]==='M') ? null : ((res.data.data[i][1]==='T') ? 0.00 : parseFloat(res.data.data[i][1]))
+                pcpnNormalValue = (res.data.data[i][2]==='M') ? null : ((res.data.data[i][2]==='T') ? 0.00 : parseFloat(res.data.data[i][2]))
+                data['date'].push(Date.UTC( thisDate.substr(0,4), thisDate.substr(5,2)-1, thisDate.substr(8,2) ))
+                data['pcpn_obs'].push(pcpnObsValue)
+                data['pcpn_normal'].push(pcpnNormalValue)
+              }
+              this.updatePresentPrecip(data);
+            }
+            if (this.getLoaderPresentPrecip === true) { this.updateLoaderPresentPrecip(false); }
+          })
+          .catch(err => {
+            console.log(
+              "Request Error: " + (err.response.data || err.response.statusText)
+            );
+          });
+    }
 
     // Present extremes download - download data using parameters
     @action loadPresentExtremes = (uid) => {
@@ -824,29 +901,30 @@ export class AppStore {
           .then(res => {
             console.log('SUCCESS downloading PRESENT EXTREMES from ACIS');
             console.log(res);
-            let i,startDate,thisDate,thisDateDT,lastYear,thisYear,extremeDate,todayDate
-            let maxtExtremeValue,mintExtremeValue
-            let data = {}
-            // today's date as MM-DD
-            todayDate=moment().format('MM-DD')
-            startDate=moment()
-            startDate = startDate.subtract(90, "days");
-            // this year as YYYY string
-            thisYear=moment().format('YYYY')
-            // last year as YYYY string
-            lastYear=parseInt(thisYear,10) - 1
-            lastYear=lastYear.toString()
-            data['stn'] = res.data.meta.name+', '+res.data.meta.state
-            data['date'] = []
-            data['maxt_extreme'] = []
-            data['mint_extreme'] = []
-            // max temperature extremes
-            for (i=0; i<res.data.smry[0].length; i++) {
+            if (!res.data.hasOwnProperty('error')) {
+              let i,startDate,thisDate,thisDateDT,lastYear,thisYear,extremeDate,todayDate
+              let maxtExtremeValue,mintExtremeValue
+              let data = {}
+              // today's date as MM-DD
+              todayDate=moment().format('MM-DD')
+              startDate=moment()
+              startDate = startDate.subtract(90, "days");
+              // this year as YYYY string
+              thisYear=moment().format('YYYY')
+              // last year as YYYY string
+              lastYear=parseInt(thisYear,10) - 1
+              lastYear=lastYear.toString()
+              data['stn'] = res.data.meta.name+', '+res.data.meta.state
+              data['date'] = []
+              data['maxt_extreme'] = []
+              data['mint_extreme'] = []
+              // max temperature extremes
+              for (i=0; i<res.data.smry[0].length; i++) {
                 extremeDate = res.data.smry[0][i][1];
                 // this date as 'MM-DD'
                 thisDate = extremeDate.slice(-5);
-                maxtExtremeValue = (res.data.smry[0][i][0]==='M') ? NaN : parseFloat(res.data.smry[0][i][0])
-                mintExtremeValue = (res.data.smry[1][i][0]==='M') ? NaN : parseFloat(res.data.smry[1][i][0])
+                maxtExtremeValue = (res.data.smry[0][i][0]==='M') ? null : parseFloat(res.data.smry[0][i][0])
+                mintExtremeValue = (res.data.smry[1][i][0]==='M') ? null : parseFloat(res.data.smry[1][i][0])
                 if (thisDate <= todayDate) {
                     thisDateDT = Date.UTC( thisYear, thisDate.substr(0,2)-1, thisDate.substr(3,2) );
                 } else {
@@ -857,8 +935,9 @@ export class AppStore {
                     data['maxt_extreme'].push(maxtExtremeValue)
                     data['mint_extreme'].push(mintExtremeValue)
                 }
+              }
+              this.updatePresentExtremes(data);
             }
-            this.updatePresentExtremes(data);
             if (this.getLoaderPresentExtremes === true) { this.updateLoaderPresentExtremes(false); }
           })
           .catch(err => {
@@ -879,6 +958,16 @@ export class AppStore {
     @computed get getStateId() {
             return this.state_id
         }
+
+    // model scenario management
+    // 'rcp85' : High emissions scenario, RCP 8.5
+    // 'rcp45' : Low emissions scenario, RCP 4.5
+    @observable model_scenario = 'rcp85';
+    @action setModelScenario = (changeEvent) => {
+        console.log('Changing model scenario to ', changeEvent.target.value)
+        this.model_scenario = changeEvent.target.value
+    }
+    @computed get getModelScenario() { return this.model_scenario };
 
     // store downloaded livneh data
     @observable livneh_data = null;
@@ -1091,7 +1180,8 @@ export class AppStore {
     };
 
     return axios
-      .post("http://grid2.rcc-acis.org/GridData", params)
+      //.post("http://grid2.rcc-acis.org/GridData", params)
+      .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
       .then(res => {
         console.log('successful download of livneh data 2000-2013');
         let i
@@ -1152,6 +1242,7 @@ export class AppStore {
     @action climview_loadData = (getObs,getProj,uid) => {
         if (getObs) {this.loadPastData(uid)};
         if (getObs) {this.loadPresentData(uid)};
+        if (getObs) {this.loadPresentPrecip(uid)};
         if (getObs) {this.loadPresentExtremes(uid)};
         if (getProj) {this.loadProjections(this.getStateId)};
     }

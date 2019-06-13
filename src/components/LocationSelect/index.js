@@ -10,6 +10,7 @@ import green from '@material-ui/core/colors/green';
 import Button from '@material-ui/core/Button';
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
+import Hidden from '@material-ui/core/Hidden';
 
 //import ReactModal from 'react-modal';
 //import StationPicker from '../../components/StationPicker';
@@ -87,9 +88,11 @@ class LocationSelect extends Component {
                 <Grid item>
                   <Typography variant='h2' className={classes.nationText} noWrap>
                     @ {app.getNation.name}
-                    <Button className={classes.button} onClick={this.onChangeClick}>
-                      Change
-                    </Button>
+                    <Hidden mdUp>
+                      <Button className={classes.button} onClick={this.onChangeClick}>
+                        Change
+                      </Button>
+                    </Hidden>
                   </Typography>
                 </Grid>
               </Grid>

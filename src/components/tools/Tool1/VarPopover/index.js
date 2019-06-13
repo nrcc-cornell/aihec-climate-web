@@ -7,7 +7,8 @@ import MenuIcon from '@material-ui/icons/Menu';
 //import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
 //import ExtremeSwitch from '../ExtremeSwitch'
-import VarPicker from '../VarPicker'
+//import VarPicker from '../VarPicker'
+import UserInput from '../UserInput'
 //import OutputSelect from '../../common/OutputSelect'
 
 const styles = theme => ({
@@ -62,7 +63,7 @@ class VarPopover extends React.Component {
             horizontal: 'center',
           }}
         >
-          <VarPicker/>
+          <UserInput/>
         </Popover>
       </div>
     );

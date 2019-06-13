@@ -129,7 +129,7 @@ class PresentCharts extends Component {
             marginBottom: 70
           },
           title: {
-            text: 'Recent conditions @ '+station
+            text: (cdata.stn==="" || edata.stn==="") ? 'No Data Available - Please try another station.' : 'Recent temperature @ '+station
           },
           exporting: {
             //showTable: true,
@@ -139,21 +139,16 @@ class PresentCharts extends Component {
               }
             },
           },
-          //tooltip: { useHtml:true, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
-          //    xDateFormat:"%b %d, %Y", positioner:function(){return {x:80, y:60}}, shape: 'rect',
-          //    crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           tooltip: { useHtml:true, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
               xDateFormat:"%b %d, %Y", shape: 'rect',
               crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
-          //legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 30 },
           legend: { align: 'center', floating: true, verticalAlign: 'bottom', layout: 'horizontal', x: 0, y: 0 },
-          //legend: { align: 'left', symbolRadius: 0, floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
-          xAxis: { type: 'datetime', crosshair: true, startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
+          xAxis: { type: 'datetime', gridLineWidth: 1, crosshair: true, startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
                    dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
             },
           yAxis: {
-              title:{ text:'Temperature (F)', style:{"font-size":"14px", color:"#000000"}},
+              title:{ text:'Temperature (°F)', style:{"font-size":"14px", color:"#000000"}},
             },
           series: [{
               name: "Observed Range", data: {}, color: '#D3D3D3', lineWidth: 0, marker : {symbol: 'square', lineWidth: 2, lineColor: '#000000', fillColor: '#000000', radius: 2 }
@@ -169,7 +164,7 @@ class PresentCharts extends Component {
                 enabled: false,
               },
               zIndex: 1,
-              visible: !app.isPresentLoading && app.chartViewIsPresent,
+              //visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: false,
           },{
               name: "Normal Range", data: {}, color: '#D3D3D3', lineWidth: 0, marker : {symbol: 'square', lineWidth: 2, lineColor: 'rgba(0,0,0,0.1)', fillColor: 'rgba(0,0,0,0.1)', radius: 12 }
@@ -189,7 +184,7 @@ class PresentCharts extends Component {
                 symbol: 'square',
                 radius: 2,
               },
-              visible: !app.isPresentLoading && app.chartViewIsPresent,
+              //visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: false,
           },{
               name: 'Record High',
@@ -205,7 +200,7 @@ class PresentCharts extends Component {
                 symbol: 'circle',
                 radius: 2,
               },
-              visible: !app.isPresentLoading && app.chartViewIsPresent,
+              //visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: app.chartViewIsPresent,
           },{
               name: 'Record Low',
@@ -221,7 +216,7 @@ class PresentCharts extends Component {
                 symbol: 'circle',
                 radius: 2,
               },
-              visible: !app.isPresentLoading && app.chartViewIsPresent,
+              //visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: app.chartViewIsPresent,
           }]
         };

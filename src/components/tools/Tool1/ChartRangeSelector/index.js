@@ -70,7 +70,7 @@ class ChartRangeSelector extends Component {
         const { classes } = this.props;
 
         return (
-          <div>
+          <div style={{"margin-bottom":10}}>
               <Grid container item spacing="24" direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
                 <Grid item>
                   <div className={classes.wrapper}>
