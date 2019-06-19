@@ -15,15 +15,16 @@ import {
   BrowserRouter as Router,
   Route,
   //Link,
-  Switch,
-  Redirect
+  //Switch,
+  //Redirect
 } from 'react-router-dom'
 
 // Components
+import Navigation from '../../components/Navigation';
 import Header from '../../components/Header';
-import HomeContents from '../../components/HomeContents';
-import AboutContents from '../../components/AboutContents';
-import ToolContents from '../../components/ToolContents';
+//import HomeContents from '../../components/HomeContents';
+//import AboutContents from '../../components/AboutContents';
+//import ToolContents from '../../components/ToolContents';
 import Footer from '../../components/Footer';
 
 // Styles
@@ -65,16 +66,7 @@ class App extends Component {
             <MuiThemeProvider theme={theme}>
               <div className="App">
                 <Header />
-
-                <Switch>
-                  <Route exact path="/" component={HomeContents} />
-                  <Route path="/about" component={AboutContents} />
-                  <Route exact path="/tools" render={(props) => <ToolContents {...props} name={'climview'} />} />
-                  <Route path="/tools/climate-viewer" render={(props) => <ToolContents {...props} name={'climview'} />} />
-                  <Route path="/tools/tool2" render={(props) => <ToolContents {...props} name={'tool2'} />} />
-                  <Route render={() => <Redirect to="/" />} />
-                </Switch>
-
+                <Route render={(props) => <Navigation {...props} />} />
                 <Footer />
               </div>
             </MuiThemeProvider>

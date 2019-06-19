@@ -1,0 +1,34 @@
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+import React, { Component } from 'react';
+//import { inject, observer} from 'mobx-react';
+
+// Components
+import HomeContents from '../../components/HomeContents';
+import AboutContents from '../../components/AboutContents';
+import ToolContents from '../../components/ToolContents';
+
+function Navigation({props}) {
+
+    console.log(this.props);
+
+    let path = this.props.location.pathname
+
+    if (path==='/') {
+      return <HomeContents />;
+    } else if (path==='/about' || path==='/about/') {
+      return <AboutContents />;
+    } else if (path==='/tools' || path==='/tools/') {
+      return <ToolContents {...this.props} name={'climview'} />;
+    } else if (path==='/tools/climate-viewer' || path==='/tools/climate-viewer/') {
+      return <ToolContents {...this.props} name={'climview'} />;
+    } else if (path==='/tools/tool2' || path==='/tools/tool2/') {
+      return <ToolContents {...this.props} name={'tool2'} />;
+    } else {
+      return <HomeContents />;
+    }
+
+}
+
+export default Navigation;
