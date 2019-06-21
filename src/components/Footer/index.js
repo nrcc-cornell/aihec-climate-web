@@ -70,12 +70,11 @@ class Footer extends Component {
 
 const styles = theme => ({
   root: {
-    boxShadow: '0 50vh 0 50vh '+`${theme.palette.primary[300]}`,
+    boxShadow: '0 50vh 0 50vh '+theme.palette.primary[300],
     //display: 'flex',
     marginTop: 30,
     //width: '100%',
-    //backgroundColor: `${theme.palette.primary[500]}`,
-    backgroundColor: `${theme.palette.primary[300]}`,
+    backgroundColor: theme.palette.primary[300],
     borderTop: 'solid 3px #999999',
     paddingTop: '16px',
     overflowX: 'hidden'

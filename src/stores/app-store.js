@@ -53,13 +53,6 @@ export class AppStore {
             this.toolName = n
         };
     // set toolName from select menu
-    //@action setSelectedToolName = (t) => {
-    //        if (this.getToolName !== t) {
-    //            this.toolName = t.value;
-    //            if (this.getToolName==='climview') { this.wxgraph_downloadData() }
-    //        }
-    //    };
-    // set toolName from select menu
     @action setSelectedToolName = (e) => {
             if (this.getToolName !== e.target.value) {
                 this.toolName = e.target.value;
@@ -111,19 +104,6 @@ export class AppStore {
         };
     @computed get getNation() { return this.nation };
 
-    // get box centered on center of nation, where stations will be available
-    // width: length in w-e direction (degrees)
-    // height: length in n-s direction (degrees)
-    //@observable station_box = null;
-    //@action setStationBox = (width,height) => {
-    //    let sLat = parseFloat(this.getNation.ll[0]) - (height/2.)
-    //    let nLat = parseFloat(this.getNation.ll[0]) + (height/2.)
-    //    let wLon = parseFloat(this.getNation.ll[1]) - (width/2.)
-    //    let eLon = parseFloat(this.getNation.ll[1]) + (width/2.)
-    //    return [wLon.toString(),sLat.toString(),eLon.toString(),nLat.toString()].join(',')
-    //}
-    //@computed get getStationBox() { return this.station_box };
-
     // manage list of all nations
     @computed get getNations() {
         let nationsObject = this.getNationGeojson
@@ -150,30 +130,6 @@ export class AppStore {
         return nations
     };
 
-    //@computed get getStationFromNation() {
-    //    let stns = {
-    //        "Flathead Reservation": "246640 2",
-    //        "L'Anse Reservation": "14858 1",
-    //        "Pine Ridge Reservation": "391972 2",
-    //        "Tohono O'odham Nation Reservation": "024675 2",
-    //        "Navajo Nation Reservation": "021248 2",
-    //        "Fort Belknap Reservation": "241722 2",
-    //        "Leech Lake Reservation": "214652 2",
-    //        "Crow Reservation": "241297 2",
-    //        "Spirit Lake Reservation": "325730 2",
-    //        "Menominee Reservation": "477708 2",
-    //        "Fond du Lac Reservation": "211630 2",
-    //        "Lummi Reservation": "451484 2",
-    //        "Standing Rock Reservation": "396712 2",
-    //        "Turtle Mountain Reservation": "329445 2",
-    //        "Blackfeet Indian Reservation": "24137 1",
-    //        "Winnebago Reservation": "14943 1",
-    //        "Barrow ANVSA": "27502 1",
-    //        "Creek OTSA": "13968 1",
-    //    }
-    //    return stns[this.getNation.name]
-    //};
-
     @computed get getDefaultStationFromNation() {
         let stns = {
             "Flathead Reservation": {"uid":"12082","name":"POLSON KERR DAM"},
@@ -197,35 +153,6 @@ export class AppStore {
         }
         return stns[this.getNation.name]
     };
-
-    //@action nationOnEachFeature = (feature, layer) => {
-    //    let nation = layer.bindPopup(feature.properties.NAMELSAD);
-    //    layer.on({
-    //        click: () => {
-    //            this.setNation(feature.properties.NAMELSAD);
-    //            this.loadProjections(this.getStateId);
-    //            if (this.getShowModalMap) { this.setShowModalMap(false) };
-    //        },
-    //        mouseover: () => {
-    //                nation.openPopup();
-    //            },
-    //        mouseout: () => {
-    //                nation.closePopup();
-    //            },
-    //    })
-    //}
-
-    //@action nationOnEachFeature_explorer = (feature, layer) => {
-    //    let nation = layer.bindPopup(feature.properties.NAMELSAD);
-    //    layer.on({
-    //        mouseover: () => {
-    //                nation.openPopup();
-    //            },
-    //        mouseout: () => {
-    //                nation.closePopup();
-    //            },
-    //    })
-    //}
 
     nationFeatureStyle = (feature) => {
             return {
@@ -258,19 +185,6 @@ export class AppStore {
                 fillOpacity: 0.0,
             };
         }
-    }
-
-    // show the location picker modal map
-    @observable showModalMap=false;
-    @action setShowModalMap = (b) => {
-            this.showModalMap=b
-            if (!this.getShowModalMap) {
-            //    if (this.getToolName==='gddtool') { this.gddtool_downloadData() }
-            //    if (this.getToolName==='climview') { this.wxgraph_downloadData() }
-            }
-        }
-    @computed get getShowModalMap() {
-        return this.showModalMap
     }
 
     ///////////////////////////////////////////////////////
@@ -339,6 +253,7 @@ export class AppStore {
             maxt : '°F',
             mint : '°F',
             pcpn : 'inches',
+            snow : 'inches',
         };
         return varUnits
     }
@@ -349,125 +264,8 @@ export class AppStore {
           maxt : 'Max Air Temperature',
           mint : 'Min Air Temperature',
           pcpn : 'Total Precipitation',
+          snow : 'Total Snowfall',
         };
-    }
-
-    // climate data saved in this var
-    // - the full request downloaded from ACIS
-    @observable wxgraph_climateData = null;
-    @action wxgraph_setClimateData = (res) => {
-        this.wxgraph_climateData = res
-    }
-    @computed get wxgraph_getClimateData() {
-        return this.wxgraph_climateData
-    }
-
-    // summary for weather grapher daily data saved here
-    // - data includes:
-    //     date : date of observation
-    //     avgt : annual average temperature (F)
-    //     mint : annual average min temperature (F)
-    //     maxt : annual average max temperature (F)
-    //     pcpn : annual accumulated precipitation (in)
-    //     snow : annual accumulated snowfall (in)
-    //@observable wxgraph_climateSummary = [{
-    //            'date': moment().format('YYYY-MM-DD'),
-    //            'avgt': NaN,
-    //            'maxt': NaN,
-    //            'mint': NaN,
-    //            'pcpn': NaN,
-    //            'snow': NaN,
-    //            }];
-    @observable wxgraph_climateSummary = {
-                'stn': '',
-                'years': [moment().format('YYYY-MM-DD')],
-                'avgt': [null],
-                'maxt': [null],
-                'mint': [null],
-                'pcpn': [null],
-                'snow': [null],
-                };
-    @action wxgraph_setClimateSummary = (m) => {
-        let dataIn = this.wxgraph_getClimateData
-        //let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,snowValue
-        let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue
-        let dataObj = {}
-        dataObj['stn']=[]
-        dataObj['years']=[]
-        dataObj['avgt']=[]
-        dataObj['maxt']=[]
-        dataObj['mint']=[]
-        dataObj['pcpn']=[]
-        dataIn.forEach(function (d) {
-            stnValue = m.name+', '+m.state
-            dateValue = Date.UTC(d[0],0,1)
-            avgtValue = (d[1]==='M') ? null : parseFloat(d[1])
-            maxtValue = (d[2]==='M') ? null : parseFloat(d[2])
-            mintValue = (d[3]==='M') ? null : parseFloat(d[3])
-            pcpnValue = (d[4]==='M') ? null : ((d[4]==='T') ? 0.00 : parseFloat(d[4]))
-            //snowValue = null
-            dataObj['stn'].push(stnValue)
-            dataObj['years'].push(dateValue)
-            dataObj['avgt'].push(avgtValue)
-            dataObj['maxt'].push(maxtValue)
-            dataObj['mint'].push(mintValue)
-            dataObj['pcpn'].push(pcpnValue)
-        });
-
-        this.wxgraph_climateSummary = dataObj
-    }
-    @computed get wxgraph_getClimateSummary() {
-        return this.wxgraph_climateSummary
-    }
-
-    // Wx Grapher tool data download - set parameters
-    //@computed get wxgraph_getAcisParams() {
-    //        let elems
-    //        //let numdays
-    //        elems = [
-    //            {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
-    //        ]
-    //        return {
-    //            //"sid":this.getLocation.uid.toString(),
-    //            "sid": this.getStationFromNation,
-    //            //"meta":"sids,name,state,ll,valid_daterange",
-    //            "meta":"name,state",
-    //            "sdate":"por",
-    //            "edate":"por",
-    //            "elems":elems
-    //        }
-    //    }
-
-    // data is loading - boolean - to control the spinner
-    @observable wxgraph_dataIsLoading = false
-    @action wxgraph_setDataIsLoading = (b) => {
-        this.wxgraph_dataIsLoading = b;
-    }
-    @computed get wxgraph_getDataIsLoading() {
-        return this.wxgraph_dataIsLoading;
-    }
-
-    // GDD tool data download - download data using parameters
-    @action wxgraph_downloadData = () => {
-        console.log("Call wxgraph_downloadData")
-        this.wxgraph_setDataIsLoading(true);
-        return axios
-          .post(`${protocol}//data.rcc-acis.org/StnData`, this.wxgraph_getAcisParams)
-          .then(res => {
-            console.log('SUCCESS downloading from ACIS');
-            console.log(res);
-            this.wxgraph_setClimateData(res.data.data.slice(0));
-            this.wxgraph_setClimateSummary(res.data.meta)
-            this.wxgraph_setDataIsLoading(false);
-          })
-          .catch(err => {
-            console.log(
-              "Request Error: " + (err.response.data || err.response.statusText)
-            );
-          });
     }
 
     //////////////////////////////////
@@ -526,25 +324,6 @@ export class AppStore {
     @computed get getLoaderPast() {
             return this.loader_past
         }
-
-    // Past data download - set parameters
-    //@computed get getAcisParamsPast(uid) {
-    //        let elems
-    //        elems = [
-    //            {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
-    //        ]
-    //        return {
-    //            //"sid": this.getStationFromNation,
-    //            "uid": uid,
-    //            "meta":"name,state",
-    //            "sdate":"por",
-    //            "edate":"por",
-    //            "elems":elems
-    //        }
-    //    }
 
     // Past data download - download data using parameters
     @action loadPastData = (uid) => {
@@ -703,9 +482,6 @@ export class AppStore {
     // Check if a present data is loading
     @computed get isPresentLoading() {
         if (this.getPresentData && this.getPresentPrecip && this.getPresentExtremes) {
-            //if (this.getPresentData.obs.date.length > 0 &&
-            //    this.getPresentPrecip.obs.date.length > 0 &&
-            //    this.getPresentExtremes.extreme.date.length > 0 &&
             if (!this.getLoaderPresent &&
                 !this.getLoaderPresentPrecip &&
                 !this.getLoaderPresentExtremes) {
@@ -745,32 +521,6 @@ export class AppStore {
             return this.loader_present_extremes
         }
 
-    // Present data download - set parameters
-    //@computed get getAcisParamsPresent(uid) {
-    //        let elems
-    //        let startdate = moment();
-    //        startdate = startdate.subtract(90, "days");
-    //        startdate = startdate.format("YYYY-MM-DD");
-    //        let enddate = moment()
-    //        enddate = enddate.format("YYYY-MM-DD")
-    //        elems = [
-    //            //{"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"maxt"},
-    //            {"name":"mint"},
-    //            {"name":"pcpn"},
-    //            {"name":"maxt","normal":"1"},
-    //            {"name":"mint","normal":"1"},
-    //            // add extremes
-    //        ]
-    //        return {
-    //            "uid": uid,
-    //            "meta":"name,state",
-    //            "sdate":startdate,
-    //            "edate":enddate,
-    //            "elems":elems
-    //        }
-    //    }
-
     // Present data download - download data using parameters
     @action loadPresentData = (uid) => {
         console.log("Call loadPresentData")
@@ -794,7 +544,6 @@ export class AppStore {
               ]
           }
         return axios
-          //.post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresent(uid))
           .post(`${protocol}//data.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PRESENT DATA from ACIS');
@@ -1071,9 +820,6 @@ export class AppStore {
 
     const params = {
       "grid": "loca:"+varReduce+":"+scen,
-      //"state":id,
-      //"loc":this.getNation.ll[1].toString()+','+this.getNation.ll[0].toString(),
-      //"bbox":"-103.001027,42.987359,-101.227336,43.796737",
       // bounding box over entire selected nation
       //"bbox":this.getNation.llbounds[0][0].toString()+','+this.getNation.llbounds[0][1].toString()+','+this.getNation.llbounds[1][0].toString()+','+this.getNation.llbounds[1][1].toString(),
       // limit bounding box to 1x1 degree, using interior point as center of bounding box
@@ -1081,10 +827,6 @@ export class AppStore {
       "sdate": "2000",
       "edate": "2099",
       "elems": [
-        //{ "name":"avgt","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
-        //{ "name":"maxt","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
-        //{ "name":"mint","interval":[1],"duration":1,"reduce":"mean","area_reduce":"state_mean" },
-        //{ "name":"pcpn","interval":[1],"duration":1,"reduce":"sum","area_reduce":"state_mean" }
         { "name":"avgt","interval":[1],"duration":1,"reduce":"mean" },
         { "name":"maxt","interval":[1],"duration":1,"reduce":"mean" },
         { "name":"mint","interval":[1],"duration":1,"reduce":"mean" },
@@ -1096,7 +838,6 @@ export class AppStore {
     console.log(params);
 
     return axios
-      //.post("http://grid2.rcc-acis.org/GridData", params)
       .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
       .then(res => {
         console.log('successful download of projection data : ' + scen + ' ' + re + ' 2000-2100');
@@ -1109,7 +850,6 @@ export class AppStore {
         data['mint'] = []
         data['pcpn'] = []
         for (i=0; i<res.data.data.length; i++) {
-            //data['years'].push(res.data.data[i][0])
             data['years'].push(Date.UTC(res.data.data[i][0],0,1))
 
             // when I was testing with state averages
@@ -1136,7 +876,6 @@ export class AppStore {
             data['pcpn'].push(arrAvg(arrFlat))
         }
         this.updateProjectionData(data,re,scen);
-        console.log(this.getProjectionData);
         if (this.getLoaderProjections === true) { this.updateLoaderProjections(false); }
       })
       .catch(err => {
@@ -1147,8 +886,6 @@ export class AppStore {
   @action loadLivnehData = (id) => {
 
     if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
-    //console.log('getNation')
-    //console.log(this.getNation);
 
     //calculate bounding box from center point of nation
     let wLon = parseFloat(this.getNation.ll[1]) - 0.50
@@ -1240,6 +977,8 @@ export class AppStore {
     }
 
     @action climview_loadData = (getObs,getProj,uid) => {
+        // getObs: boolean, whether to load observations
+        // getProj: boolean, whether to load projections
         if (getObs) {this.loadPastData(uid)};
         if (getObs) {this.loadPresentData(uid)};
         if (getObs) {this.loadPresentPrecip(uid)};

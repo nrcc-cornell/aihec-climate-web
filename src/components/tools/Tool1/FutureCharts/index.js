@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { toJS } from 'mobx';
 import { inject, observer} from 'mobx-react';
 //import moment from 'moment';
-import Highcharts from 'highcharts/highstock';
+import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 //Components
@@ -16,7 +16,7 @@ import '../../../../styles/WxCharts.css';
 var HighchartsMore = require('highcharts-more');
 HighchartsMore(Highcharts);
 
-//require("highcharts/modules/exporting")(Highcharts);
+require("highcharts/modules/exporting")(Highcharts);
 
 var app;
 

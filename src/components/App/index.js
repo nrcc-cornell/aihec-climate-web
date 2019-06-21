@@ -6,25 +6,26 @@ import { inject, observer} from 'mobx-react';
 import { MuiThemeProvider, createMuiTheme, withStyles, withTheme  } from "@material-ui/core/styles";
 //import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import brown from '@material-ui/core/colors/brown';
-import Highcharts from 'highcharts/highstock';
+//import Highcharts from 'highcharts/highstock';
+import Highcharts from 'highcharts';
 //import HC_exporting from 'highcharts/modules/exporting'
 //import HighchartsReact from 'highcharts-react-official';
 
 // import route Components here
 import {
-  BrowserRouter as Router,
+  //BrowserRouter as Router,
+  HashRouter as Router,
   Route,
   //Link,
-  //Switch,
-  //Redirect
+  Switch,
+  Redirect
 } from 'react-router-dom'
 
 // Components
-import Navigation from '../../components/Navigation';
 import Header from '../../components/Header';
-//import HomeContents from '../../components/HomeContents';
-//import AboutContents from '../../components/AboutContents';
-//import ToolContents from '../../components/ToolContents';
+import HomeContents from '../../components/HomeContents';
+import AboutContents from '../../components/AboutContents';
+import ToolContents from '../../components/ToolContents';
 import Footer from '../../components/Footer';
 
 // Styles
@@ -66,7 +67,16 @@ class App extends Component {
             <MuiThemeProvider theme={theme}>
               <div className="App">
                 <Header />
-                <Route render={(props) => <Navigation {...props} />} />
+
+                <Switch>
+                  <Route exact path="/" component={HomeContents} />
+                  <Route path="/about" component={AboutContents} />
+                  <Route exact path="/tools" render={(props) => <ToolContents {...props} name={'climview'} />} />
+                  <Route path="/tools/climate-viewer" render={(props) => <ToolContents {...props} name={'climview'} />} />
+                  <Route path="/tools/tool2" render={(props) => <ToolContents {...props} name={'tool2'} />} />
+                  <Route render={() => <Redirect to="/" />} />
+                </Switch>
+
                 <Footer />
               </div>
             </MuiThemeProvider>
