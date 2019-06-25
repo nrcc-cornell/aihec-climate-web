@@ -21,7 +21,7 @@ import PastCharts from './PastCharts'
 import PresentCharts from './PresentCharts'
 import PresentChartsPrecip from './PresentChartsPrecip'
 import FutureCharts from './FutureCharts'
-import WxTables from './WxTables'
+//import WxTables from './WxTables'
 
 // Styles
 import '../../../styles/Tool1Tool.css';
@@ -43,24 +43,23 @@ class Tool1 extends Component {
     render() {
 
         let display;
-        if (app.getOutputType==='chart' && app.getChartView==='past') { display = <PastCharts/> }
-        if (app.getOutputType==='chart' && app.getChartView==='present' && app.wxgraph_getVar==='avgt') { display = <PresentCharts/> }
-        if (app.getOutputType==='chart' && app.getChartView==='present' && app.wxgraph_getVar==='pcpn') { display = <PresentChartsPrecip/> }
-        if (app.getOutputType==='chart' && app.getChartView==='future') { display = <FutureCharts/> }
-        //if (app.getOutputType==='chart') { display = <WxCharts/> }
-        if (app.getOutputType==='table') { display = <WxTables /> }
-        let display_UserInput;
-        if (app.getOutputType==='chart') { display_UserInput = <UserInput /> }
-        if (app.getOutputType==='table') { display_UserInput = null }
-        //let display_ToolSelect;
-        //if (app.getOutputType==='chart') { display_ToolSelect = <ToolSelect /> }
-        //if (app.getOutputType==='table') { display_ToolSelect = null }
-        //let display_OutputSelect;
-        //if (app.getOutputType==='chart') { display_OutputSelect = <OutputSelect /> }
-        //if (app.getOutputType==='table') { display_OutputSelect = null }
-        let display_VarPopover;
-        if (app.getOutputType==='chart') { display_VarPopover = <VarPopover /> }
-        if (app.getOutputType==='table') { display_VarPopover = null }
+        if (app.getChartView==='past') { display = <PastCharts/> }
+        if (app.getChartView==='present' && app.wxgraph_getVar==='avgt') { display = <PresentCharts/> }
+        if (app.getChartView==='present' && app.wxgraph_getVar==='pcpn') { display = <PresentChartsPrecip/> }
+        if (app.getChartView==='future') { display = <FutureCharts/> }
+        //if (app.getOutputType==='chart' && app.getChartView==='past') { display = <PastCharts/> }
+        //if (app.getOutputType==='chart' && app.getChartView==='present' && app.wxgraph_getVar==='avgt') { display = <PresentCharts/> }
+        //if (app.getOutputType==='chart' && app.getChartView==='present' && app.wxgraph_getVar==='pcpn') { display = <PresentChartsPrecip/> }
+        //if (app.getOutputType==='chart' && app.getChartView==='future') { display = <FutureCharts/> }
+        //if (app.getOutputType==='table') { display = <WxTables /> }
+        let display_UserInput = <UserInput />;
+        let display_VarPopover = <VarPopover />;
+        //let display_UserInput;
+        //if (app.getOutputType==='chart') { display_UserInput = <UserInput /> }
+        //if (app.getOutputType==='table') { display_UserInput = null }
+        //let display_VarPopover;
+        //if (app.getOutputType==='chart') { display_VarPopover = <VarPopover /> }
+        //if (app.getOutputType==='table') { display_VarPopover = null }
 
         return (
             <Grid container direction="column" justify="center" alignItems="center">

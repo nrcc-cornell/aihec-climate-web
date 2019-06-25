@@ -13,8 +13,8 @@ import Highcharts from 'highcharts';
 
 // import route Components here
 import {
-  //BrowserRouter as Router,
-  HashRouter as Router,
+  BrowserRouter as Router,
+  //HashRouter as Router,
   Route,
   //Link,
   Switch,

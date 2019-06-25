@@ -46,6 +46,7 @@ class OutputSelect extends Component {
                 }}
               >
                 <MenuItem value='chart'>Chart</MenuItem>
+                <MenuItem value='table'>Chart & Table</MenuItem>
               </Select>
             </FormControl>
           </form>

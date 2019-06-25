@@ -128,6 +128,7 @@ class PastCharts extends Component {
           },
           exporting: {
             //showTable: true,
+            showTable: app.getOutputType==='chart' ? false : true,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'

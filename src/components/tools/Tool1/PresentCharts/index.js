@@ -127,6 +127,7 @@ class PresentCharts extends Component {
                      }
                  },
           chart: {
+            height: '56%',
             marginBottom: 70
           },
           title: {
@@ -134,7 +135,8 @@ class PresentCharts extends Component {
           },
           exporting: {
             enabled: true,
-            showTable: false,
+            //showTable: false,
+            showTable: app.getOutputType==='chart' ? false : true,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'
