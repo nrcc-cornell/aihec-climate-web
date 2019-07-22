@@ -44,7 +44,7 @@ class AboutContents extends Component {
 
         return (
             <div className="about-contents">
-            <Grid container className={classes.root} spacing={32}>
+            <Grid container className={classes.root} spacing={4}>
               <Grid item sm={12} md={6}>
                     <Typography align="left" paragraph variant="h2" className={classes.aboutHeaderText}>
                       Purpose of these tools

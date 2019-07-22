@@ -52,7 +52,7 @@ class ToolContents extends Component {
       if (app.getNations) {
         return (
             <div className='tool-contents'>
-            <Grid container spacing="8">
+            <Grid container spacing="1">
               <Grid item xs={12}>
                 <LocationSelect />
               </Grid>

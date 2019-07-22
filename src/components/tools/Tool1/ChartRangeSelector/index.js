@@ -71,7 +71,7 @@ class ChartRangeSelector extends Component {
 
         return (
           <div style={{"margin-bottom":10}}>
-              <Grid container item spacing="24" direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
+              <Grid container item spacing="3" direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
                 <Grid item>
                   <div className={classes.wrapper}>
                     <Button

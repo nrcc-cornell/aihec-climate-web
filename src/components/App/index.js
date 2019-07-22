@@ -85,4 +85,4 @@ class App extends Component {
     }
 }
 
-export default withStyles(styles)(withTheme()(App));
+export default withStyles(styles)(withTheme(App));

@@ -66,6 +66,11 @@ class Tool1 extends Component {
               <Grid item direction="row" justify="center" alignItems="center">
                 <ChartRangeSelector/>
               </Grid>
+              <Grid container item justify="flex-start" alignItems="flex-start">
+                <Hidden mdUp>
+                  {display_VarPopover}
+                </Hidden>
+              </Grid>
               <Grid container item justify="center" alignItems="flex-start">
                 <Grid item className="nothing" xs={0} md={3}>
                   <Hidden smDown>
@@ -74,14 +79,8 @@ class Tool1 extends Component {
                 </Grid>
                 <Grid item container className="nothing" direction="row" justify="center" xs={12} md={9}>
                     <Grid item>
-                      <Hidden mdUp>
-                        {display_VarPopover}
-                      </Hidden>
-                    </Grid>
-                    <Grid item>
                      <Typography
                         color="inherit"
-                        style={{ borderLeft: '0.1em solid gray', padding: '0.5em' }}
                       >
                         <LoadingOverlay
                           active={app.isPastLoading}

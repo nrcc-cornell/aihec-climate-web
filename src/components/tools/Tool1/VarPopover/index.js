@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 //import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-//import Button from '@material-ui/core/Button';
+//import MenuIcon from '@material-ui/icons/Menu';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
 //import ExtremeSwitch from '../ExtremeSwitch'
 //import VarPicker from '../VarPicker'
@@ -41,14 +42,15 @@ class VarPopover extends React.Component {
 
     return (
       <div>
-         <IconButton
-          color="inherit"
-          aria-label="Open drawer"
+        <Button
+          variant="text"
+          color="secondary"
+          size="small"
           onClick={this.handleClick}
-          className={classes.menuButton}
         >
-          <MenuIcon />
-        </IconButton>
+          <ExpandMore />
+          Select chart details
+        </Button>
         <Popover
           id="simple-popper"
           open={open}
@@ -56,11 +58,11 @@ class VarPopover extends React.Component {
           onClose={this.handleClose}
           anchorOrigin={{
             vertical: 'bottom',
-            horizontal: 'center',
+            horizontal: 'left',
           }}
           transformOrigin={{
             vertical: 'top',
-            horizontal: 'center',
+            horizontal: 'left',
           }}
         >
           <UserInput/>

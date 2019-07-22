@@ -7,13 +7,16 @@ import { inject, observer} from 'mobx-react';
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from "react-router-dom";
 import Button from '@material-ui/core/Button';
-import green from '@material-ui/core/colors/green';
+//import green from '@material-ui/core/colors/green';
+import red from '@material-ui/core/colors/red';
 //import Radio from '@material-ui/core/Radio';
 //import RadioGroup from '@material-ui/core/RadioGroup';
 //import FormControlLabel from '@material-ui/core/FormControlLabel';
 //import FormControl from '@material-ui/core/FormControl';
 //import FormLabel from '@material-ui/core/FormLabel';
 import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
+import { borders } from '@material-ui/system';
 
 import StationPickerMap from '../../common/StationPickerMap';
 import VarPicker from '../VarPicker';
@@ -31,7 +34,7 @@ const styles = theme => ({
     margin: `${theme.spacing.unit}px 0`,
   },
   button: {
-    color: green[500],
+    color: red[500],
   },
 });
 
@@ -68,10 +71,11 @@ class UserInput extends React.Component {
     //let v = app.wxgraph_getVar;
 
     return (
-      <Grid container direction="column" justify="center" alignItems="center" spacing={24}>
-        <Grid container item direction="column" alignItems="center" spacing={8}>
+      <Box m={0} border={1} borderRadius={4} borderColor="primary.main">
+      <Grid container direction="column" justify="space-around" alignItems="center" spacing={3}>
+        <Grid container item direction="column" justify="space-around" alignItems="center" spacing={1}>
           <Grid item>
-            <Button className={classes.button} onClick={this.onChangeClick}>
+            <Button className={classes.button} variant="outlined" color="secondary" size="small" onClick={this.onChangeClick}>
               Change Nation
             </Button>
           </Grid>
@@ -90,6 +94,7 @@ class UserInput extends React.Component {
           }
         </Grid>
       </Grid>
+      </Box>
     );
   }
 }

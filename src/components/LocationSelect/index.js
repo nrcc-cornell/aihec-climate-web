@@ -6,7 +6,8 @@ import { withRouter } from "react-router-dom";
 import { inject, observer} from 'mobx-react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import green from '@material-ui/core/colors/green';
+//import green from '@material-ui/core/colors/green';
+import red from '@material-ui/core/colors/red';
 import Button from '@material-ui/core/Button';
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -26,7 +27,9 @@ const styles = theme => ({
   button: {
     //margin: theme.spacing.unit,
     //background: green[500],
-    color: green[500],
+    //color: green[500],
+    color: red[500],
+    fontWeight: 'bold',
   },
   titleText: {
     //color: 'black',
@@ -71,7 +74,7 @@ class LocationSelect extends Component {
 
         return (
           <div>
-              <Grid container item spacing="24" direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
+              <Grid container item spacing="3" direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
                 <Grid item>
                   <ToolSelect/>
                 </Grid>
@@ -79,7 +82,7 @@ class LocationSelect extends Component {
                   <OutputSelect/>
                 </Grid>
               </Grid>
-              <Grid container item spacing="8" direction="column" justify="flex-start" alignItems="center">
+              <Grid container item spacing="1" direction="column" justify="flex-start" alignItems="center">
                 <Grid item>
                   <Typography variant='h2' className={classes.titleText} noWrap>
                     {app.getToolInfo(app.getToolName).title}
@@ -89,7 +92,7 @@ class LocationSelect extends Component {
                   <Typography variant='h2' className={classes.nationText} noWrap>
                     @ {app.getNation.name}
                     <Hidden mdUp>
-                      <Button className={classes.button} onClick={this.onChangeClick}>
+                      <Button className={classes.button} variant="text" color="secondary" size="small" onClick={this.onChangeClick}>
                         Change
                       </Button>
                     </Hidden>

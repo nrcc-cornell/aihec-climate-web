@@ -43,7 +43,7 @@ class HomeContents extends Component {
         return (
             <div className="HomeContents">
                    <div style={{ paddingTop: 20, paddingBottom: 40 }}>
-                     <Grid container spacing={8} justify="center" xs={12} alignItems="center">
+                     <Grid container spacing={1} justify="center" xs={12} alignItems="center">
                       <Grid item>
                           <Typography variant="h2" className={classes.labelText}>
                             Nation :
@@ -54,7 +54,7 @@ class HomeContents extends Component {
                       </Grid>
                      </Grid>
                   </div>
-                  <Grid container direction="column" spacing="24" alignItems="center">
+                  <Grid container direction="column" spacing="3" alignItems="center">
                       <Grid item xs={12}>
                         { this.props.store.app.getNations && (<NationPickerMap />)}
                       </Grid>
