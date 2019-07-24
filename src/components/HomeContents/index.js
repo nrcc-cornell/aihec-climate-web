@@ -34,7 +34,7 @@ class HomeContents extends Component {
       super(props);
       app = this.props.store.app;
       // set site's active page
-      app.setActivePage(0);
+      app.setActivePage(2);
     }
 
     render() {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 //import { inject, observer } from 'mobx-react';
 import { withStyles } from '@material-ui/core/styles';
-import PropTypes from 'prop-types';
 import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -18,7 +18,7 @@ const styles = theme => ({
 });
 
 
-class ScenarioPicker extends Component {
+class TimescalePicker extends Component {
 
     //constructor(props) {
     //    super(props);
@@ -30,17 +30,18 @@ class ScenarioPicker extends Component {
         return (
           <form className={classes.root} autoComplete="off">
             <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="scenario">Model Scenario</InputLabel>
+              <InputLabel htmlFor="timescale">Timescale</InputLabel>
               <Select
                 value={this.props.value}
                 onChange={this.props.onchange}
                 inputProps={{
-                  name: 'scenario',
-                  id: 'scenario',
+                  name: 'timescale',
+                  id: 'timescale',
                 }}
               >
-                <MenuItem value='rcp85'>High Emissions (RCP 8.5)</MenuItem>
-                <MenuItem value='rcp45'>Low Emissions (RCP 4.5)</MenuItem>
+                <MenuItem value='annual'>Annual</MenuItem>
+                <MenuItem value='seasonal'>Seasonal</MenuItem>
+                <MenuItem value='monthly'>Monthly</MenuItem>
               </Select>
             </FormControl>
           </form>
@@ -49,9 +50,9 @@ class ScenarioPicker extends Component {
 
 };
 
-ScenarioPicker.propTypes = {
+TimescalePicker.propTypes = {
   value: PropTypes.string.isRequired,
   onchange: PropTypes.func.isRequired,
 }
 
-export default withStyles(styles)(ScenarioPicker);
+export default withStyles(styles)(TimescalePicker);

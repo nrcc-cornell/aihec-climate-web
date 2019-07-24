@@ -52,12 +52,12 @@ class ToolContents extends Component {
       if (app.getNations) {
         return (
             <div className='tool-contents'>
-            <Grid container spacing="1">
+            <Grid container spacing={1}>
               <Grid item xs={12}>
                 <LocationSelect />
               </Grid>
               <Grid item xs={12}>
-                { this.props.name==='climview' && (<Tool1 />) }
+                { this.props.name==='climview' && (<Tool1 nation={app.getNation} />) }
                 { this.props.name==='tool2' && (<Tool2 />) }
                 { this.props.name==='tool3' && (<Tool3 />) }
               </Grid>

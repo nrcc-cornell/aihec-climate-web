@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from "react-router-dom";
+import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
 import axios from 'axios';
@@ -40,11 +41,7 @@ const styles = theme => ({
 
 const protocol = window.location.protocol;
 const mapContainer = 'map-container';
-//const zoomLevel = 6;
-//const minZoomLevel = 4;
-//const maxZoomLevel = 16;
 var app;
-//var history;
 
 @inject('store') @observer
 class StationPickerMap extends Component {
@@ -52,17 +49,12 @@ class StationPickerMap extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
-        //history = this.props.history;
         this.state = {
-            width: window.innerWidth,
-            height: window.innerHeight,
             stations_temp_past: null,
             stations_temp_present: null,
             stations_precip_past: null,
             stations_precip_present: null,
-            station: app.getDefaultStationFromNation.name
         };
-        this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.handleStationClick = this.handleStationClick.bind(this);
         // CONUS
         this.maxBounds = [
@@ -79,29 +71,22 @@ class StationPickerMap extends Component {
     }
 
     componentDidMount() {
-      this.updateWindowDimensions();
-      window.addEventListener('resize', this.updateWindowDimensions);
       this.map = this.mapInstance.leafletElement
     }
 
-    componentWillUnmount() {
-      window.removeEventListener('resize', this.updateWindowDimensions);
-    }
-
-    updateWindowDimensions() {
-      this.setState({ width: window.innerWidth, height: window.innerHeight });
-    }
+    //componentWillUnmount() {
+    //   this._isMounted = false;
+    //}
 
     handleStationClick = (s) => {
-        this.setState({ station: s.name })
-        app.climview_loadData(1,0,s.uid);
+        this.props.onchange_station(s);
     }
 
     getBoundingBox = () => {
-        let sLat = parseFloat(app.getNation.ll[0]) - 2.
-        let nLat = parseFloat(app.getNation.ll[0]) + 2.
-        let wLon = parseFloat(app.getNation.ll[1]) - 2.
-        let eLon = parseFloat(app.getNation.ll[1]) + 2.
+        let sLat = parseFloat(this.props.selected_nation.ll[0]) - 2.
+        let nLat = parseFloat(this.props.selected_nation.ll[0]) + 2.
+        let wLon = parseFloat(this.props.selected_nation.ll[1]) - 2.
+        let eLon = parseFloat(this.props.selected_nation.ll[1]) + 2.
         return [wLon.toString(),sLat.toString(),eLon.toString(),nLat.toString()].join(',')
     }
 
@@ -171,8 +156,8 @@ class StationPickerMap extends Component {
 
         const { classes } = this.props;
 
-        let centerLat = (app.getNation) ? app.getNation.ll[0] : 0.0
-        let centerLon = (app.getNation) ? app.getNation.ll[1] : 0.0
+        let centerLat = (this.props.selected_nation) ? this.props.selected_nation.ll[0] : 0.0
+        let centerLon = (this.props.selected_nation) ? this.props.selected_nation.ll[1] : 0.0
 
         return (
               <div className={classes.wrapper}>
@@ -198,49 +183,49 @@ class StationPickerMap extends Component {
                             data={app.getNationGeojson}
                             style={app.nationFeatureStyle_selected}
                         />
-                        {['avgt','maxt','mint','temp'].includes(app.wxgraph_getVar) && app.chartViewIsPresent && this.state.stations_temp_present &&
+                        {['avgt','maxt','mint','temp'].includes(this.props.selected_variable) && this.props.selected_view==='present' && this.state.stations_temp_present &&
                           this.state.stations_temp_present.map((s,i) => (
                             <CircleMarker
                               key={i+"marker"}
                               center={[s.ll[1],s.ll[0]]}
                               radius={3}
-                              color={(s.name===this.state.station) ? "red" : "black"}
+                              color={(s.name===this.props.selected_station.name) ? "red" : "black"}
                               onClick={() => {this.handleStationClick(s)}}
                             >
                             </CircleMarker>
                           ))
                         }
-                        {['avgt','maxt','mint','temp'].includes(app.wxgraph_getVar) && app.chartViewIsPast && this.state.stations_temp_past &&
+                        {['avgt','maxt','mint','temp'].includes(this.props.selected_variable) && this.props.selected_view==='past' && this.state.stations_temp_past &&
                           this.state.stations_temp_past.map((s,i) => (
                             <CircleMarker
                               key={i+"marker"}
                               center={[s.ll[1],s.ll[0]]}
                               radius={3}
-                              color={(s.name===this.state.station) ? "red" : "black"}
+                              color={(s.name===this.props.selected_station.name) ? "red" : "black"}
                               onClick={() => {this.handleStationClick(s)}}
                             >
                             </CircleMarker>
                           ))
                         }
-                        {['pcpn','precip'].includes(app.wxgraph_getVar) && app.chartViewIsPresent && this.state.stations_precip_present &&
+                        {['pcpn','precip'].includes(this.props.selected_variable) && this.props.selected_view==='present' && this.state.stations_precip_present &&
                           this.state.stations_precip_present.map((s,i) => (
                             <CircleMarker
                               key={i+"marker"}
                               center={[s.ll[1],s.ll[0]]}
                               radius={3}
-                              color={(s.name===this.state.station) ? "red" : "black"}
+                              color={(s.name===this.props.selected_station.name) ? "red" : "black"}
                               onClick={() => {this.handleStationClick(s)}}
                             >
                             </CircleMarker>
                           ))
                         }
-                        {['pcpn','precip'].includes(app.wxgraph_getVar) && app.chartViewIsPast && this.state.stations_precip_past &&
+                        {['pcpn','precip'].includes(this.props.selected_variable) && this.props.selected_view==='past' && this.state.stations_precip_past &&
                           this.state.stations_precip_past.map((s,i) => (
                             <CircleMarker
                               key={i+"marker"}
                               center={[s.ll[1],s.ll[0]]}
                               radius={3}
-                              color={(s.name===this.state.station) ? "red" : "black"}
+                              color={(s.name===this.props.selected_station.name) ? "red" : "black"}
                               onClick={() => {this.handleStationClick(s)}}
                             >
                             </CircleMarker>
@@ -248,22 +233,33 @@ class StationPickerMap extends Component {
                         }
                         <ZoomControl position="topleft" />
                     </Map>
-                    {['avgt','maxt','mint','temp'].includes(app.wxgraph_getVar) && app.chartViewIsPast && !this.state.stations_temp_past &&
+                    {['avgt','maxt','mint','temp'].includes(this.props.selected_variable) && this.props.selected_view==='past' && !this.state.stations_temp_past &&
                       <CircularProgress size={64} className={classes.mapProgress} />
                     }
-                    {['avgt','maxt','mint','temp'].includes(app.wxgraph_getVar) && app.chartViewIsPresent && !this.state.stations_temp_present &&
+                    {['avgt','maxt','mint','temp'].includes(this.props.selected_variable) && this.props.selected_view==='present' && !this.state.stations_temp_present &&
                       <CircularProgress size={64} className={classes.mapProgress} />
                     }
-                    {['pcpn','precip'].includes(app.wxgraph_getVar) && app.chartViewIsPresent && !this.state.stations_precip_present &&
+                    {['pcpn','precip'].includes(this.props.selected_variable) && this.props.selected_view==='present' && !this.state.stations_precip_present &&
                       <CircularProgress size={64} className={classes.mapProgress} />
                     }
-                    {['pcpn','precip'].includes(app.wxgraph_getVar) && app.chartViewIsPast && !this.state.stations_precip_past &&
+                    {['pcpn','precip'].includes(this.props.selected_variable) && this.props.selected_view==='past' && !this.state.stations_precip_past &&
                       <CircularProgress size={64} className={classes.mapProgress} />
                     }
               </div>
         );
 
     }
+}
+
+StationPickerMap.propTypes = {
+  type: PropTypes.string.isRequired,
+  period: PropTypes.array.isRequired,
+  bounds: PropTypes.string.isRequired,
+  selected_nation: PropTypes.object.isRequired,
+  selected_variable: PropTypes.string.isRequired,
+  selected_view: PropTypes.string.isRequired,
+  selected_station: PropTypes.object.isRequired,
+  onchange_station: PropTypes.func.isRequired,
 }
 
 export default withRouter(withStyles(styles)(StationPickerMap));

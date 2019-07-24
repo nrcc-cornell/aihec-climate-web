@@ -2,13 +2,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { toJS } from 'mobx';
 import { inject, observer} from 'mobx-react';
-//import moment from 'moment';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-
-//Components
 
 // Styles
 import '../../../../styles/WxCharts.css';
@@ -16,7 +14,9 @@ import '../../../../styles/WxCharts.css';
 var HighchartsMore = require('highcharts-more');
 HighchartsMore(Highcharts);
 
+require("highcharts/modules/accessibility")(Highcharts);
 require("highcharts/modules/exporting")(Highcharts);
+require("highcharts/modules/export-data")(Highcharts);
 
 var app;
 
@@ -26,24 +26,19 @@ class FutureCharts extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
-        //this.chart;
         this.exportChart = () => {
           this.chart.exportChart();
         };
     }
 
-    //componentDidMount() {
-    //  this.chart = this.refs.chart.chart;
-    //}
-
     render() {
 
-        let varName = app.wxgraph_getVar
+        let varName = this.props.variable
         let varLabel = app.wxgraph_getVarLabels[app.wxgraph_getVar]
-        let nation = app.getNation.name
-        let startYear = new Date(2000,0,1)
+        let nation = this.props.nation.name
+        let startYear = new Date(1980,0,1)
 
-        let scenario = app.getModelScenario
+        let scenario = this.props.scenario
 
         var odata = app.getLivnehData
         var pdata = app.getProjectionData
@@ -76,10 +71,8 @@ class FutureCharts extends Component {
             var tips = "";
             for (i=0; i<this.points.length; i++) {
                 item = this.points[i];
-                //console.log(item);
                 if ( item.series.name.includes("range") ) {
                     tips += '<br/>' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
-                    //tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span> : ' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0);
                 } else {
                     tips += '<br/>' + item.y.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 }
@@ -136,7 +129,7 @@ class FutureCharts extends Component {
             text: varLabel+' @ '+nation
           },
           subtitle: {
-            text: (app.getModelScenario==='rcp85') ? 'High Emission Model Scenario (RCP 8.5)' : 'Low Emission Model Scenario (RCP 4.5)'
+            text: (this.props.scenario==='rcp85') ? 'High Emission Model Scenario (RCP 8.5)' : 'Low Emission Model Scenario (RCP 4.5)'
           },
           exporting: {
             //showTable: true,
@@ -154,12 +147,19 @@ class FutureCharts extends Component {
           //legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
           legend: { align: 'center', floating: true, verticalAlign: 'bottom', layout: 'horizontal', x: 0, y: 0 },
           xAxis: { type: 'datetime', gridLineWidth: 1, crosshair: true, startOnTick: false, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
+               plotLines:[{
+                   color: '#000000',
+                   width: 2,
+                   value: Date.UTC(2005),
+                   label: {text:'Projections Begin in 2005', rotation:0, x:6, y:30},
+                   zIndex: 10,
+               }],
                dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
             },
           yAxis: {
                min: (!app.isProjectionLoading) ? Math.min(...pdata['rcp85']['min'][varName]) : null,
                max: (!app.isProjectionLoading) ? Math.max(...pdata['rcp85']['max'][varName]) : null,
-               title:{ text:app.wxgraph_getVarLabels[app.wxgraph_getVar]+' ('+app.wxgraph_getVarUnits[app.wxgraph_getVar]+')', style:{"font-size":"14px", color:"#000000"}},
+               title:{ text:app.wxgraph_getVarLabels[this.props.variable]+' ('+app.wxgraph_getVarUnits[this.props.variable]+')', style:{"font-size":"14px", color:"#000000"}},
             },
           series: [{
               name: 'Observed',
@@ -169,8 +169,6 @@ class FutureCharts extends Component {
               lineWidth: 0,
               marker: { enabled: true },
               zIndex: 24,
-              visible: app.chartViewIsFuture,
-              showInLegend: app.chartViewIsFuture,
           },{
               name: 'Climate model average',
               data: (!app.isProjectionLoading) ? createProjectionSeries(pdata[scenario]['mean']['years'],pdata[scenario]['mean'][varName],startYear): [],
@@ -180,21 +178,26 @@ class FutureCharts extends Component {
               color: "#000000",
               shadow: false,
               marker: { enabled: false, fillColor: "#00dd00", lineWidth: 2, lineColor: "#00dd00", radius:2, symbol:"circle" },
-              visible: app.chartViewIsFuture,
-              showInLegend: app.chartViewIsFuture,
           },{
               name: 'Climate model range',
               data: (!app.isProjectionLoading) ? createProjectionRanges(toJS(pdata)[scenario]['min']['years'],toJS(pdata)[scenario]['min'][varName],toJS(pdata)[scenario]['max'][varName],startYear): [],
               marker : {symbol: 'square', radius: 12 },
               type: "arearange",
-              linkedTo: ':previous',
+              //linkedTo: ':previous',
               lineWidth:0,
-              color: 'rgba(0,0,0,0.2)',
-              fillColor: 'rgba(0,0,0,0.2)',
+              color: 'rgba(255,0,0,0.2)',
+              fillColor: 'rgba(255,0,0,0.2)',
               fillOpacity: 0.1,
               zIndex: 0,
-              visible: app.chartViewIsFuture,
-              showInLegend: app.chartViewIsFuture,
+              zoneAxis: 'x',
+              zones: [{
+                   value: Date.UTC(2005),
+                   color: 'rgba(0,0,255,0.2)',
+                   fillColor: 'rgba(0,0,255,0.2)',
+                }, {
+                   color: 'rgba(255,0,0,0.2)',
+                   fillColor: 'rgba(255,0,0,0.2)',
+                }]
           }]
         };
 
@@ -215,6 +218,12 @@ class FutureCharts extends Component {
         }
 
     }
+}
+
+FutureCharts.propTypes = {
+  variable: PropTypes.string.isRequired,
+  nation: PropTypes.object.isRequired,
+  scenario: PropTypes.string.isRequired,
 }
 
 export default FutureCharts;

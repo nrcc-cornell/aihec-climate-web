@@ -7,31 +7,27 @@ import { inject, observer} from 'mobx-react';
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from "react-router-dom";
 import Button from '@material-ui/core/Button';
-//import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
-//import Radio from '@material-ui/core/Radio';
-//import RadioGroup from '@material-ui/core/RadioGroup';
-//import FormControlLabel from '@material-ui/core/FormControlLabel';
-//import FormControl from '@material-ui/core/FormControl';
-//import FormLabel from '@material-ui/core/FormLabel';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-import { borders } from '@material-ui/system';
+//import { borders } from '@material-ui/system';
 
 import StationPickerMap from '../../common/StationPickerMap';
 import VarPicker from '../VarPicker';
 import ScenarioPicker from '../ScenarioPicker';
+import TimescalePicker from '../TimescalePicker';
+import PeriodPicker from '../PeriodPicker';
 
 const styles = theme => ({
   root: {
     display: 'flex',
   },
   formControl: {
-    //margin: theme.spacing.unit * 3,
-    margin: theme.spacing.unit,
+    //margin: theme.spacing.unit,
+    margin: theme.spacing(1),
   },
   group: {
-    margin: `${theme.spacing.unit}px 0`,
+    margin: `${theme.spacing(1)}px 0`,
   },
   button: {
     color: red[500],
@@ -47,14 +43,10 @@ class UserInput extends React.Component {
       super(props);
       app = this.props.store.app;
       history = this.props.history;
-      // set the station box to 4x4 degrees
-      //app.setStationBox(4.,4.);
-      //console.log('getStationBox');
-      //console.log(app.getStationBox);
   }
 
   onChangeClick = () => {
-    app.setActivePage(0);
+    //app.setActivePage(0);
     history.push('/');
   }
 
@@ -68,29 +60,51 @@ class UserInput extends React.Component {
 
   render() {
     const { classes } = this.props;
-    //let v = app.wxgraph_getVar;
 
     return (
-      <Box m={0} border={1} borderRadius={4} borderColor="primary.main">
-      <Grid container direction="column" justify="space-around" alignItems="center" spacing={3}>
-        <Grid container item direction="column" justify="space-around" alignItems="center" spacing={1}>
-          <Grid item>
+      <Box paddingTop={1} border={1} borderRadius={4} borderColor="primary.main">
+      <Grid container direction="column" justify="space-evenly" alignItems="center" spacing={1}>
+        <Grid item>
             <Button className={classes.button} variant="outlined" color="secondary" size="small" onClick={this.onChangeClick}>
               Change Nation
             </Button>
-          </Grid>
-          <Grid item>
-            {app.wxgraph_getVar &&
-              <StationPickerMap type={app.wxgraph_getVar} period={['2019-04-01','2019-06-01']} bounds={this.getStationBox(4.,4.)} />
+        </Grid>
+        <Grid item>
+            {this.props.selected_variable &&
+              <StationPickerMap
+                  type={this.props.selected_variable}
+                  period={['2019-04-01','2019-06-01']}
+                  bounds={this.getStationBox(4.,4.)}
+                  selected_nation={this.props.selected_nation}
+                  selected_variable={this.props.selected_variable}
+                  selected_view={this.props.selected_view}
+                  selected_station={this.props.selected_station}
+                  onchange_station={this.props.onchange_station}
+              />
             }
-          </Grid>
         </Grid>
         <Grid item>
-          <VarPicker />
+          <VarPicker selected_view={this.props.selected_view} value={this.props.selected_variable} onchange={this.props.onchange_variable} />
         </Grid>
         <Grid item>
-          {app.chartViewIsFuture &&
-            <ScenarioPicker />
+          {this.props.selected_view==='future' &&
+            <ScenarioPicker value={this.props.selected_scenario} onchange={this.props.onchange_scenario} />
+          }
+        </Grid>
+        <Grid item>
+          {this.props.selected_view!=='present' &&
+            <TimescalePicker value={this.props.selected_timescale} onchange={this.props.onchange_timescale} />
+          }
+        </Grid>
+        <Grid item>
+          {this.props.selected_view!=='present' && this.props.selected_timescale &&
+            <PeriodPicker
+                selected_timescale={this.props.selected_timescale}
+                value_month={this.props.selected_month}
+                value_season={this.props.selected_season}
+                onchange_month={this.props.onchange_month}
+                onchange_season={this.props.onchange_season}
+            />
           }
         </Grid>
       </Grid>
@@ -101,6 +115,20 @@ class UserInput extends React.Component {
 
 UserInput.propTypes = {
   classes: PropTypes.object.isRequired,
+  selected_nation: PropTypes.object.isRequired,
+  selected_view: PropTypes.string.isRequired,
+  selected_station: PropTypes.object.isRequired,
+  selected_variable: PropTypes.string.isRequired,
+  selected_scenario: PropTypes.string.isRequired,
+  selected_timescale: PropTypes.string.isRequired,
+  selected_month: PropTypes.string.isRequired,
+  selected_season: PropTypes.string.isRequired,
+  onchange_station: PropTypes.func.isRequired,
+  onchange_variable: PropTypes.func.isRequired,
+  onchange_scenario: PropTypes.func.isRequired,
+  onchange_timescale: PropTypes.func.isRequired,
+  onchange_month: PropTypes.func.isRequired,
+  onchange_season: PropTypes.func.isRequired,
 };
 
 export default withRouter(withStyles(styles)(UserInput));

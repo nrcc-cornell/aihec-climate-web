@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
+import PropTypes from 'prop-types';
+//import { inject, observer } from 'mobx-react';
 import { withStyles } from '@material-ui/core/styles';
 import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
@@ -12,36 +13,28 @@ const styles = theme => ({
     flexWrap: 'wrap',
   },
   formControl: {
-    //margin: theme.spacing(1),
     minWidth: 120,
-  },
-  selectEmpty: {
-    //marginTop: theme.spacing(2),
   },
 });
 
-var app;
-
-@inject("store") @observer
 class VarPicker extends Component {
 
-    constructor(props) {
-        super(props);
-        app = this.props.store.app;
-    }
+    //constructor(props) {
+    //    super(props);
+    //}
 
     render() {
       const { classes } = this.props;
 
-      if (app.chartViewIsPast || app.chartViewIsFuture) {
+      if (this.props.selected_view==='past' || this.props.selected_view==='future') {
 
         return (
           <form className={classes.root} autoComplete="off">
             <FormControl className={classes.formControl}>
               <InputLabel htmlFor="variable">Variable</InputLabel>
               <Select
-                value={app.wxgraph_getVar}
-                onChange={app.wxgraph_setVarFromInput}
+                value={this.props.value}
+                onChange={this.props.onchange}
                 inputProps={{
                   name: 'variable',
                   id: 'variable',
@@ -56,11 +49,11 @@ class VarPicker extends Component {
           </form>
         )
 
-      } else if (app.chartViewIsPresent) {
+      } else if (this.props.selected_view==='present') {
 
         // check to see if variable is valid for this view. Reset if necessary.
-        if (app.wxgraph_getVar==='maxt' || app.wxgraph_getVar==='mint') {
-          app.wxgraph_setVar('avgt');
+        if (this.props.value==='maxt' || this.props.value==='mint') {
+          this.props.onchange({'target':{'value':'avgt'}});
         }
 
         return (
@@ -68,8 +61,8 @@ class VarPicker extends Component {
             <FormControl className={classes.formControl}>
               <InputLabel htmlFor="variable">Variable</InputLabel>
               <Select
-                value={app.wxgraph_getVar}
-                onChange={app.wxgraph_setVarFromInput}
+                value={this.props.value}
+                onChange={this.props.onchange}
                 inputProps={{
                   name: 'variable',
                   id: 'variable',
@@ -90,5 +83,11 @@ class VarPicker extends Component {
     }
 
 };
+
+VarPicker.propTypes = {
+  selected_view: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+  onchange: PropTypes.func.isRequired,
+}
 
 export default withStyles(styles)(VarPicker);

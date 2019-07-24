@@ -2,14 +2,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React, { Component } from 'react';
-import { inject, observer} from 'mobx-react';
+//import { inject, observer} from 'mobx-react';
 import { MuiThemeProvider, createMuiTheme, withStyles, withTheme  } from "@material-ui/core/styles";
-//import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import brown from '@material-ui/core/colors/brown';
-//import Highcharts from 'highcharts/highstock';
-import Highcharts from 'highcharts';
-//import HC_exporting from 'highcharts/modules/exporting'
-//import HighchartsReact from 'highcharts-react-official';
 
 // import route Components here
 import {
@@ -34,11 +29,9 @@ import Footer from '../../components/Footer';
 //import '../../styles/react-tabs.css';
 import '../../styles/App.css';
 
-// init the exporting module
-require("highcharts/modules/exporting")(Highcharts);
-
 const theme = createMuiTheme({
-  shadows: ["none"],
+  //shadows: ["none"],
+  shadows: Array(25).fill("none"),
   palette: {
     primary: brown,
     //secondary:
@@ -50,14 +43,7 @@ const styles = theme => ({
   toolbar: theme.mixins.toolbar,
 });
 
-//var app;
-
-@inject('store') @observer
 class App extends Component {
-    //constructor(props) {
-    //    super(props);
-    //    //app = this.props.store.app;
-    //}
 
     render() {
         //const { classes } = this.props;
@@ -66,7 +52,7 @@ class App extends Component {
           <Router basename={process.env.PUBLIC_URL}>
             <MuiThemeProvider theme={theme}>
               <div className="App">
-                <Header />
+                <Header theme={theme} />
 
                 <Switch>
                   <Route exact path="/" component={HomeContents} />

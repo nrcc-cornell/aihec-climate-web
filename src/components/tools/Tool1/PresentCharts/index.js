@@ -2,15 +2,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React, { Component } from 'react';
-//import { toJS } from 'mobx';
+import PropTypes from 'prop-types';
 import { inject, observer} from 'mobx-react';
-//import moment from 'moment';
-//import Grid from '@material-ui/core/Grid';
-//import Highcharts from 'highcharts/highstock';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-
-//Components
 
 // Styles
 import '../../../../styles/WxCharts.css';
@@ -19,6 +14,7 @@ var HighchartsMore = require('highcharts-more');
 HighchartsMore(Highcharts);
 
 require("highcharts/modules/accessibility")(Highcharts);
+require("highcharts/modules/exporting")(Highcharts);
 require("highcharts/modules/export-data")(Highcharts);
 
 var app;
@@ -29,19 +25,14 @@ class PresentCharts extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
-        //this.chart;
         this.exportChart = () => {
           this.chart.exportChart();
         };
     }
 
-    //componentDidMount() {
-    //  this.chart = this.refs.chart.chart;
-    //}
-
     render() {
 
-        let station = (app.getPresentData) ? app.getPresentData['stn'] : ''
+        let station = this.props.station
         let cdata = app.getPresentData
         let edata = app.getPresentExtremes
 
@@ -73,10 +64,8 @@ class PresentCharts extends Component {
             var tips = "";
             for (i=0; i<this.points.length; i++) {
                 item = this.points[i];
-                //console.log(item);
                 if ( item.series.name.includes("Range") ) {
                     tips += '<br/>' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
-                    //tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span> : ' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0);
                 } else {
                     tips += '<br/>' + item.y.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 }
@@ -131,7 +120,7 @@ class PresentCharts extends Component {
             marginBottom: 70
           },
           title: {
-            text: (cdata.stn==="" || edata.stn==="") ? 'No Data Available - Please try another station.' : 'Recent temperature @ '+station
+            text: (cdata.stn==="" || edata.stn==="") ? 'No Data Available - Please try another station.' : 'Recent temperature @ '+station.name
           },
           exporting: {
             enabled: true,
@@ -145,19 +134,6 @@ class PresentCharts extends Component {
             csv: {
               dateFormat: "%Y-%m-%d"
             },
-            //menuItemDefinitions:{
-            //  downloadCSV: {
-            //    onclick: function() {
-            //      this.getCSV()
-            //    },
-            //    text: 'Download CSV',
-            //  }
-            //},
-            //buttons:{
-            //  contextButton:{
-            //    menuItems: ['downloadPNG', 'downloadSVG', 'separator', 'downloadCSV']
-            //  }
-            //},
           },
           accessibility: {
             description: 'Shows how temperatures over the last 90 days compare to those normally observed over the same period. Temperature records are also provided for each day, showing if temperatures from this year approached or set new all-time records.'
@@ -185,12 +161,10 @@ class PresentCharts extends Component {
                 enabled: false,
               },
               zIndex: 1,
-              //visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: true,
           },{
               name: 'Normal Range',
               data: (!app.isPresentLoading) ? createRanges(cdata['normal']['date'],cdata['normal']['mint'],cdata['normal']['maxt']): [],
-              //marker : {symbol: 'square', radius: 12 },
               type: "arearange",
               linkedTo: ':previous',
               lineWidth:0,
@@ -203,14 +177,12 @@ class PresentCharts extends Component {
                 symbol: 'square',
                 radius: 2,
               },
-              //visible: !app.isPresentLoading && app.chartViewIsPresent,
               showInLegend: true,
           },{
               name: 'Record High',
               data: (!app.isPresentLoading) ? createSeries(edata['extreme']['date'],edata['extreme']['maxt']): [],
               type: "line",
               lineWidth:0,
-              //linkedTo: ':previous',
               color: '#ff0000',
               fillOpacity: 0.0,
               zIndex: 2,
@@ -219,14 +191,12 @@ class PresentCharts extends Component {
                 symbol: 'circle',
                 radius: 2,
               },
-              //visible: !app.isPresentLoading && app.chartViewIsPresent,
-              showInLegend: app.chartViewIsPresent,
           },{
               name: 'Record Low',
               data: (!app.isPresentLoading) ? createSeries(edata['extreme']['date'],edata['extreme']['mint']): [],
               type: "line",
               lineWidth:0,
-              linkedTo: ':previous',
+              //linkedTo: ':previous',
               color: '#0000ff',
               fillOpacity: 0.0,
               zIndex: 2,
@@ -235,8 +205,6 @@ class PresentCharts extends Component {
                 symbol: 'circle',
                 radius: 2,
               },
-              //visible: !app.isPresentLoading && app.chartViewIsPresent,
-              showInLegend: app.chartViewIsPresent,
           }]
         };
 
@@ -257,6 +225,10 @@ class PresentCharts extends Component {
         }
 
     }
+}
+
+PresentCharts.propTypes = {
+  station: PropTypes.object.isRequired,
 }
 
 export default PresentCharts;

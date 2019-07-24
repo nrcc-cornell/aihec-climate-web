@@ -2,18 +2,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React, { Component } from 'react';
-//import { toJS } from 'mobx';
+import PropTypes from 'prop-types';
 import { inject, observer} from 'mobx-react';
-//import moment from 'moment';
-//import { ResponsiveContainer, ComposedChart, AreaChart, LineChart, BarChart, Bar, Line, Area, XAxis, YAxis, Surface, Symbols, CartesianGrid, Tooltip, Legend, Brush } from 'recharts';
-//import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, } from 'recharts';
-//import Grid from '@material-ui/core/Grid';
 //import Highcharts from 'highcharts/highstock';
 import Highcharts from 'highcharts';
-//import HC_exporting from 'highcharts/modules/exporting'
 import HighchartsReact from 'highcharts-react-official';
-
-//Components
 
 // Styles
 import '../../../../styles/WxCharts.css';
@@ -21,7 +14,9 @@ import '../../../../styles/WxCharts.css';
 var HighchartsMore = require('highcharts-more');
 HighchartsMore(Highcharts);
 
+require("highcharts/modules/accessibility")(Highcharts);
 require("highcharts/modules/exporting")(Highcharts);
+require("highcharts/modules/export-data")(Highcharts);
 
 var app;
 
@@ -31,22 +26,16 @@ class PastCharts extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
-        //this.chart;
         this.exportChart = () => {
           this.chart.exportChart();
         };
     }
 
-    //componentDidMount() {
-    //  this.chart = this.refs.chart.chart;
-    //}
-
     render() {
 
-        let varName = app.wxgraph_getVar
-        let varLabel = app.wxgraph_getVarLabels[app.wxgraph_getVar]
-        let station = (app.getPastData) ? app.getPastData['stn'][0] : ''
-        //let today = new Date()
+        let varName = this.props.variable
+        let varLabel = app.wxgraph_getVarLabels[this.props.variable]
+        let station = this.props.station.name
 
         var odata = app.getPastData
 
@@ -67,10 +56,8 @@ class PastCharts extends Component {
             var tips = "";
             for (i=0; i<this.points.length; i++) {
                 item = this.points[i];
-                //console.log(item);
                 if ( item.series.name.includes("range") ) {
                     tips += '<br/>' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
-                    //tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span> : ' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0);
                 } else {
                     tips += '<br/>' + item.y.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 }
@@ -126,9 +113,11 @@ class PastCharts extends Component {
           title: {
             text: varLabel+' @ '+station
           },
+          subtitle: {
+            text: 'June Averages, 1910-2018'
+          },
           exporting: {
             //showTable: true,
-            showTable: app.getOutputType==='chart' ? false : true,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'
@@ -139,23 +128,41 @@ class PastCharts extends Component {
               xDateFormat:"%b %d, %Y", shape: 'rect',
               crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
-          //legend: { align: 'left', floating: true, verticalAlign: 'top', layout: 'vertical', x: 65, y: 50 },
           legend: { align: 'center', floating: true, verticalAlign: 'bottom', layout: 'horizontal', x: 0, y: 0 },
           xAxis: { type: 'datetime', gridLineWidth: 1, crosshair: true, startOnTick: true, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
                      dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
                  },
           yAxis: {
-              title:{ text:app.wxgraph_getVarLabels[app.wxgraph_getVar]+' ('+app.wxgraph_getVarUnits[app.wxgraph_getVar]+')', style:{"font-size":"14px", color:"#000000"}},
+              title:{ text:app.wxgraph_getVarLabels[this.props.variable]+' ('+app.wxgraph_getVarUnits[this.props.variable]+')', style:{"font-size":"14px", color:"#000000"}},
             },
           series: [{
               name: 'Observed',
+              type: 'column',
               data: (app.getPastData['date']!==[]) ? createPastSeries(odata['date'],odata[varName]) : [],
+              color: '#ff0000',
+              negativeColor: '#0088ff',
+              threshold: (app.getPastData['date']!==[]) ? odata[varName+'_normal'][0] : 0,
+              step: false,
+              showInLegend: false,
+          },{
+              name: 'Normal',
+              type: 'line',
+              marker: false,
+              data: (app.getPastData['date']!==[]) ? createPastSeries(odata['date'],odata[varName+'_normal']) : [],
               color: '#000000',
               step: false,
+          },{
+              name : "Observed > Normal",
+              data : [],
+              color: '#ff0000',
               lineWidth: 0,
-              marker: { enabled: true },
-              visible: app.chartViewIsPast,
-              showInLegend: app.chartViewIsPast,
+              marker : {symbol:'square',radius:12}
+          },{
+              name : "Observed < Normal",
+              data : [],
+              color: '#0088ff',
+              lineWidth: 0,
+              marker : {symbol:'square',radius:12}
           }]
         };
 
@@ -176,6 +183,11 @@ class PastCharts extends Component {
         }
 
     }
+}
+
+PastCharts.propTypes = {
+  variable: PropTypes.string.isRequired,
+  station: PropTypes.object.isRequired,
 }
 
 export default PastCharts;

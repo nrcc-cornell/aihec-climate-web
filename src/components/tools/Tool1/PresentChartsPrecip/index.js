@@ -2,15 +2,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React, { Component } from 'react';
-//import { toJS } from 'mobx';
+import PropTypes from 'prop-types';
 import { inject, observer} from 'mobx-react';
-//import moment from 'moment';
-//import Grid from '@material-ui/core/Grid';
 import Highcharts from 'highcharts';
-//import HC_exporting from 'highcharts/modules/exporting'
 import HighchartsReact from 'highcharts-react-official';
-
-//Components
 
 // Styles
 import '../../../../styles/WxCharts.css';
@@ -18,7 +13,9 @@ import '../../../../styles/WxCharts.css';
 var HighchartsMore = require('highcharts-more');
 HighchartsMore(Highcharts);
 
+require("highcharts/modules/accessibility")(Highcharts);
 require("highcharts/modules/exporting")(Highcharts);
+require("highcharts/modules/export-data")(Highcharts);
 
 var app;
 
@@ -40,7 +37,7 @@ class PresentChartsPrecip extends Component {
 
     render() {
 
-        let station = (app.getPresentPrecip) ? app.getPresentPrecip['stn'] : ''
+        let station = this.props.station.name
         let cdata = app.getPresentPrecip
 
         let createSeries = (y,a) => {
@@ -117,10 +114,10 @@ class PresentChartsPrecip extends Component {
             marginBottom: 70
           },
           title: {
-            text: (app.getPresentPrecip.stn==="") ? 'No Data Available - Please try another station.' : 'Recent precipitation @ '+station
+            text: (station.name==="") ? 'No Data Available - Please try another station.' : 'Recent precipitation @ '+station.name
           },
           subtitle: {
-            text: (app.getPresentPrecip.stn==="") ? '' : 'Accumulation since Jan 1'
+            text: (station.name==="") ? '' : 'Accumulation since Jan 1'
           },
           exporting: {
             //showTable: true,
@@ -146,35 +143,27 @@ class PresentChartsPrecip extends Component {
               name: 'Observed',
               data: (!app.isPresentLoading) ? createSeries(cdata['obs']['date'],cdata['obs']['pcpn']): [],
               type: "area",
-              //linkedTo: ':previous',
               lineWidth:3,
               color: 'rgba(0,128,0,1.0)',
               fillColor: 'rgba(0,128,0,0.3)',
-              //fillOpacity: 0.1,
               zIndex: 0,
               marker: {
                 enabled: false,
                 symbol: 'square',
                 radius: 2,
               },
-              //visible: !app.isPresentLoading && app.chartViewIsPresent,
-              //showInLegend: false,
           },{
               name: 'Normal',
               data: (!app.isPresentLoading) ? createSeries(cdata['normal']['date'],cdata['normal']['pcpn']): [],
               type: "line",
               lineWidth:3,
-              //linkedTo: ':previous',
               color: '#654321',
-              //fillOpacity: 0.0,
               zIndex: 2,
               marker: {
                 enabled: false,
                 symbol: 'circle',
                 radius: 2,
               },
-              //visible: !app.isPresentLoading && app.chartViewIsPresent,
-              //showInLegend: app.chartViewIsPresent,
           }]
         };
 
@@ -195,6 +184,10 @@ class PresentChartsPrecip extends Component {
         }
 
     }
+}
+
+PresentChartsPrecip.propTypes = {
+  station: PropTypes.object.isRequired,
 }
 
 export default PresentChartsPrecip;

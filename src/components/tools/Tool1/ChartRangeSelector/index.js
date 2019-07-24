@@ -51,9 +51,9 @@ class ChartRangeSelector extends Component {
         //history = this.props.history;
     }
 
-    onChangeClick = (v) => {
-        app.setChartView(v);
-    }
+    //onChangeClick = (v) => {
+    //    app.setChartView(v);
+    //}
 
     getButtonVariant = (b) => {
         let v
@@ -70,15 +70,15 @@ class ChartRangeSelector extends Component {
         const { classes } = this.props;
 
         return (
-          <div style={{"margin-bottom":10}}>
-              <Grid container item spacing="3" direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
+          <div style={{"marginBottom":10}}>
+              <Grid container item spacing={3} direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
                 <Grid item>
                   <div className={classes.wrapper}>
                     <Button
-                      variant={this.getButtonVariant(app.chartViewIsPast)}
+                      variant={this.getButtonVariant(this.props.selected_view==='past')}
                       color='primary'
                       disabled={app.isPastLoading}
-                      onClick={() => {this.onChangeClick('past')}}
+                      onClick={() => {this.props.onchange('past')}}
                     >
                       Past
                     </Button>
@@ -88,10 +88,10 @@ class ChartRangeSelector extends Component {
                 <Grid item>
                   <div className={classes.wrapper}>
                     <Button
-                      variant={this.getButtonVariant(app.chartViewIsPresent)}
+                      variant={this.getButtonVariant(this.props.selected_view==='present')}
                       color='primary'
                       disabled={app.isPresentLoading}
-                      onClick={() => {this.onChangeClick('present')}}
+                      onClick={() => {this.props.onchange('present')}}
                     >
                       Recent
                     </Button>
@@ -101,10 +101,10 @@ class ChartRangeSelector extends Component {
                 <Grid item>
                   <div className={classes.wrapper}>
                     <Button
-                      variant={this.getButtonVariant(app.chartViewIsFuture)}
+                      variant={this.getButtonVariant(this.props.selected_view==='future')}
                       color='primary'
                       disabled={app.isProjectionLoading}
-                      onClick={() => {this.onChangeClick('future')}}
+                      onClick={() => {this.props.onchange('future')}}
                     >
                       Future
                     </Button>
@@ -119,6 +119,8 @@ class ChartRangeSelector extends Component {
 
 ChartRangeSelector.propTypes = {
   classes: PropTypes.object.isRequired,
+  selected_view: PropTypes.string.isRequired,
+  onchange: PropTypes.func.isRequired,
 };
 
 export default withRouter(withStyles(styles)(ChartRangeSelector));

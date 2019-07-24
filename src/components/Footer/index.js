@@ -57,7 +57,7 @@ class Footer extends Component {
         <Grid className={classes.subFooter} item xs={12}>
           <Typography
             className={classes.white}
-            variant="subheading"
+            variant="subtitle1"
             component={'span'}
           >
             © {currentYear} Cornell University

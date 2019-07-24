@@ -64,7 +64,7 @@ class LocationSelect extends Component {
     }
 
     onChangeClick = () => {
-      app.setActivePage(0);
+      app.setActivePage(2);
       history.push('/');
     }
 
@@ -74,7 +74,7 @@ class LocationSelect extends Component {
 
         return (
           <div>
-              <Grid container item spacing="3" direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
+              <Grid container item spacing={3} direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
                 <Grid item>
                   <ToolSelect/>
                 </Grid>
@@ -82,7 +82,7 @@ class LocationSelect extends Component {
                   <OutputSelect/>
                 </Grid>
               </Grid>
-              <Grid container item spacing="1" direction="column" justify="flex-start" alignItems="center">
+              <Grid container item spacing={1} direction="column" justify="flex-start" alignItems="center">
                 <Grid item>
                   <Typography variant='h2' className={classes.titleText} noWrap>
                     {app.getToolInfo(app.getToolName).title}

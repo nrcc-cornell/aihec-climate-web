@@ -1,20 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-//import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-//import MenuIcon from '@material-ui/icons/Menu';
+//import IconButton from '@material-ui/core/IconButton';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
-//import ExtremeSwitch from '../ExtremeSwitch'
-//import VarPicker from '../VarPicker'
 import UserInput from '../UserInput'
-//import OutputSelect from '../../common/OutputSelect'
 
 const styles = theme => ({
   typography: {
-    margin: theme.spacing.unit * 2,
+    //margin: theme.spacing.unit * 2,
+    margin: theme.spacing(2),
   },
 });
 
@@ -36,7 +32,7 @@ class VarPopover extends React.Component {
   };
 
   render() {
-    const { classes } = this.props;
+    //const { classes } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
 
@@ -65,7 +61,7 @@ class VarPopover extends React.Component {
             horizontal: 'left',
           }}
         >
-          <UserInput/>
+          {this.props.content}
         </Popover>
       </div>
     );
@@ -73,7 +69,9 @@ class VarPopover extends React.Component {
 }
 
 VarPopover.propTypes = {
-  classes: PropTypes.object.isRequired,
+  //classes: PropTypes.object.isRequired,
+  //content: PropTypes.elementType.isRequired,
+  content: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(VarPopover);

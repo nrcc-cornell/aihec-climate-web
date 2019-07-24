@@ -268,6 +268,74 @@ export class AppStore {
         };
     }
 
+    // timescale
+    // annual, seasonal, or monthly
+    @observable timescale='annual'
+    @action updateTimescale = (t) => {
+        this.timescale = t
+    }
+    @action updateTimescaleFromMenu = (e) => {
+        let t = e.target.value;
+        // has the timescale changed?
+        let changed = (this.timescale===t) ? false : true
+        // only update if timescale has changed
+        if (changed===true) {
+            this.timescale = t
+            console.log('timescale updated: ',this.getTimescale)
+        }
+    }
+    @computed get getTimescale() {
+        return this.timescale
+    }
+
+    // time period: month
+    // jan,feb,mar,...,oct,nov,dec
+    @observable period_month='jan'
+    @action updatePeriodMonth = (t) => {
+        this.period_month = t
+    }
+    @action updatePeriodMonthFromMenu = (e) => {
+        let t = e.target.value;
+        // has the month changed?
+        let changed = (this.period_month===t) ? false : true
+        // only update if timescale has changed
+        if (changed===true) {
+            this.period_month = t
+            if (this.chartViewIsPast) { this.loadPastData() }
+            //console.log('period_month updated: ',this.getPeriodMonth)
+        }
+    }
+    @computed get getPeriodMonth() {
+        return this.period_month
+    }
+    @computed get getPeriodMonthAsNumber() {
+        let monthNum = {
+          'jan':'01','feb':'02','mar':'03','apr':'04','may':'05','jun':'06',
+          'jul':'07','aug':'08','sep':'09','oct':'10','nov':'11','dec':'12'
+        }
+        return monthNum[this.period_month]
+    }
+
+    // time period: season
+    // djf,mam,jja,son
+    @observable period_season='djf'
+    @action updatePeriodSeason = (t) => {
+        this.period_season = t
+    }
+    @action updatePeriodSeasonFromMenu = (e) => {
+        let t = e.target.value;
+        // has the season changed?
+        let changed = (this.period_season===t) ? false : true
+        // only update if timescale has changed
+        if (changed===true) {
+            this.period_season = t
+            //console.log('period_season updated: ',this.getPeriodSeason)
+        }
+    }
+    @computed get getPeriodSeason() {
+        return this.period_season
+    }
+
     //////////////////////////////////
     // PAST DATA
     //////////////////////////////////
@@ -285,6 +353,10 @@ export class AppStore {
             newData['maxt'] = d['maxt']
             newData['mint'] = d['mint']
             newData['pcpn'] = d['pcpn']
+            newData['avgt_normal'] = d['avgt_normal']
+            newData['maxt_normal'] = d['maxt_normal']
+            newData['mint_normal'] = d['mint_normal']
+            newData['pcpn_normal'] = d['pcpn_normal']
             this.past_data = newData
         }
     @action emptyPastData = () => {
@@ -296,6 +368,10 @@ export class AppStore {
             data['maxt'] = []
             data['mint'] = []
             data['pcpn'] = []
+            data['avgt_normal'] = []
+            data['maxt_normal'] = []
+            data['mint_normal'] = []
+            data['pcpn_normal'] = []
             this.past_data = data
         }
     @computed get getPastData() {
@@ -325,12 +401,50 @@ export class AppStore {
             return this.loader_past
         }
 
+    // Past data download - set parameters
+    //@computed get getAcisParamsPast(uid) {
+    //        let elems
+    //        elems = [
+    //            {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
+    //            {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
+    //        ]
+    //        return {
+    //            //"sid": this.getStationFromNation,
+    //            "uid": uid,
+    //            "meta":"name,state",
+    //            "sdate":"por",
+    //            "edate":"por",
+    //            "elems":elems
+    //        }
+    //    }
+
     // Past data download - download data using parameters
     @action loadPastData = (uid) => {
         console.log("Call loadPastData")
         if (this.getLoaderPast === false) { this.updateLoaderPast(true); }
         this.emptyPastData()
-        let params = {
+        let params={}
+        if (this.getTimescale==='monthly') {
+          params = {
+            "uid": uid,
+            "meta":"name,state",
+            "sdate":"1850-"+this.getPeriodMonthAsNumber,
+            "edate":"por",
+            "elems":[
+                {"name":"avgt","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3"},
+                {"name":"maxt","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3"},
+                {"name":"mint","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3"},
+                {"name":"pcpn","interval":[0,12],"duration":1,"reduce":"sum","maxmissing":"3"},
+                {"name":"avgt","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3","normal":"1"},
+                {"name":"maxt","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3","normal":"1"},
+                {"name":"mint","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3","normal":"1"},
+                {"name":"pcpn","interval":[0,12],"duration":1,"reduce":"sum","maxmissing":"3","normal":"1"},
+              ]
+            }
+        } else {
+          params = {
             "uid": uid,
             "meta":"name,state",
             "sdate":"por",
@@ -338,10 +452,15 @@ export class AppStore {
             "elems":[
                 {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
                 {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-                {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
-                {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
+                {"name":"mint","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"pcpn","interval":[1],"duration":1,"reduce":{"reduce":"sum"},"maxmissing":10},
+                {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10,"normal":"1"},
+                {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10,"normal":"1"},
+                {"name":"mint","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10,"normal":"1"},
+                {"name":"pcpn","interval":[1],"duration":1,"reduce":{"reduce":"sum"},"maxmissing":10,"normal":"1"},
               ]
-          }
+            }
+        }
         return axios
           //.post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPast(uid))
           .post(`${protocol}//data.rcc-acis.org/StnData`, params)
@@ -350,7 +469,7 @@ export class AppStore {
             //let i,thisDate
             //let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,snowValue
             let i
-            let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue
+            let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,avgtNormal,maxtNormal,mintNormal,pcpnNormal
             let data = {}
             data['stn'] = []
             data['date'] = []
@@ -358,19 +477,31 @@ export class AppStore {
             data['maxt'] = []
             data['mint'] = []
             data['pcpn'] = []
+            data['avgt_normal'] = []
+            data['maxt_normal'] = []
+            data['mint_normal'] = []
+            data['pcpn_normal'] = []
             for (i=0; i<res.data.data.length; i++) {
                 stnValue = res.data.meta.name+', '+res.data.meta.state
-                dateValue = Date.UTC(res.data.data[i][0],0,1)
+                dateValue = Date.UTC(res.data.data[i][0].slice(0,4),res.data.data[i][0].slice(5)-1,1)
                 avgtValue = (res.data.data[i][1]==='M') ? null : parseFloat(res.data.data[i][1])
                 maxtValue = (res.data.data[i][2]==='M') ? null : parseFloat(res.data.data[i][2])
                 mintValue = (res.data.data[i][3]==='M') ? null : parseFloat(res.data.data[i][3])
                 pcpnValue = (res.data.data[i][4]==='M') ? null : ((res.data.data[i][4]==='T') ? 0.00 : parseFloat(res.data.data[i][4]))
+                avgtNormal= (res.data.data[i][5]==='M') ? null : parseFloat(res.data.data[i][5])
+                maxtNormal = (res.data.data[i][6]==='M') ? null : parseFloat(res.data.data[i][6])
+                mintNormal = (res.data.data[i][7]==='M') ? null : parseFloat(res.data.data[i][7])
+                pcpnNormal = (res.data.data[i][8]==='M') ? null : ((res.data.data[i][8]==='T') ? 0.00 : parseFloat(res.data.data[i][8]))
                 data['stn'].push(stnValue)
                 data['date'].push(dateValue)
                 data['avgt'].push(avgtValue)
                 data['maxt'].push(maxtValue)
                 data['mint'].push(mintValue)
                 data['pcpn'].push(pcpnValue)
+                data['avgt_normal'].push(avgtNormal)
+                data['maxt_normal'].push(maxtNormal)
+                data['mint_normal'].push(mintNormal)
+                data['pcpn_normal'].push(pcpnNormal)
             }
             this.updatePastData(data);
             console.log(this.getPastData);
@@ -804,7 +935,7 @@ export class AppStore {
         }
     }
 
-  @action loadProjections_2000_2100 = (id,scen,re) => {
+  @action loadProjections_1980_2100 = (id,scen,re) => {
 
     if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
     let varReduce = ''
@@ -824,7 +955,7 @@ export class AppStore {
       //"bbox":this.getNation.llbounds[0][0].toString()+','+this.getNation.llbounds[0][1].toString()+','+this.getNation.llbounds[1][0].toString()+','+this.getNation.llbounds[1][1].toString(),
       // limit bounding box to 1x1 degree, using interior point as center of bounding box
       "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
-      "sdate": "2000",
+      "sdate": "1980",
       "edate": "2099",
       "elems": [
         { "name":"avgt","interval":[1],"duration":1,"reduce":"mean" },
@@ -840,7 +971,7 @@ export class AppStore {
     return axios
       .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
       .then(res => {
-        console.log('successful download of projection data : ' + scen + ' ' + re + ' 2000-2100');
+        console.log('successful download of projection data : ' + scen + ' ' + re + ' 1980-2100');
         let i
         let data = {}
         let arrFlat
@@ -879,7 +1010,7 @@ export class AppStore {
         if (this.getLoaderProjections === true) { this.updateLoaderProjections(false); }
       })
       .catch(err => {
-        console.log("Failed to load projection data 2000-2100 ", err);
+        console.log("Failed to load projection data 1980-2100 ", err);
       });
   }
 
@@ -902,7 +1033,7 @@ export class AppStore {
       //"bbox":this.getNation.llbounds[0][0].toString()+','+this.getNation.llbounds[0][1].toString()+','+this.getNation.llbounds[1][0].toString()+','+this.getNation.llbounds[1][1].toString(),
       // limit bounding box to 1x1 degree, using interior point as center of bounding box
       "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
-      "sdate": "2000",
+      "sdate": "1980",
       "edate": "2013",
       "elems": [
         //{ "name":"avgt","interval":"yly","duration":1,"reduce":"mean","area_reduce":"state_mean" },
@@ -920,7 +1051,7 @@ export class AppStore {
       //.post("http://grid2.rcc-acis.org/GridData", params)
       .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
       .then(res => {
-        console.log('successful download of livneh data 2000-2013');
+        console.log('successful download of livneh data 1980-2013');
         let i
         let data = {}
         let arrFlat
@@ -960,7 +1091,7 @@ export class AppStore {
         if (this.getLoaderProjections === true) { this.updateLoaderProjections(false); }
       })
       .catch(err => {
-        console.log("Failed to load livneh data 2000-2013 ", err);
+        console.log("Failed to load livneh data 1980-2013 ", err);
       });
   }
 
@@ -968,12 +1099,12 @@ export class AppStore {
         this.emptyProjectionData()
         this.emptyLivnehData()
         this.loadLivnehData(id);
-        this.loadProjections_2000_2100(id,'rcp85','mean');
-        this.loadProjections_2000_2100(id,'rcp85','max');
-        this.loadProjections_2000_2100(id,'rcp85','min');
-        this.loadProjections_2000_2100(id,'rcp45','mean');
-        this.loadProjections_2000_2100(id,'rcp45','max');
-        this.loadProjections_2000_2100(id,'rcp45','min');
+        this.loadProjections_1980_2100(id,'rcp85','mean');
+        this.loadProjections_1980_2100(id,'rcp85','max');
+        this.loadProjections_1980_2100(id,'rcp85','min');
+        this.loadProjections_1980_2100(id,'rcp45','mean');
+        this.loadProjections_1980_2100(id,'rcp45','max');
+        this.loadProjections_1980_2100(id,'rcp45','min');
     }
 
     @action climview_loadData = (getObs,getProj,uid) => {
