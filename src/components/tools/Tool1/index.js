@@ -41,18 +41,20 @@ class Tool1 extends Component {
     }
 
     componentDidMount() {
-        //app.climview_loadData(1,1,app.getDefaultStationFromNation.uid);
-        app.climview_loadData(1,1,this.state.station.uid);
+        //app.climview_loadData(1,1,this.state.station.uid);
+        app.climview_loadData(1,1,this.state.station.uid,this.state.timescale,this.state.season,this.state.month);
     }
 
     componentDidUpdate(prevProps,prevState) {
       if (prevState.station!==this.state.station) {
-            app.climview_loadData(1,0,this.state.station.uid);
+        //app.climview_loadData(1,0,this.state.station.uid);
+        app.climview_loadData(1,0,this.state.station.uid,this.state.timescale,this.state.season,this.state.month);
       }
       if (prevState.timescale!==this.state.timescale ||
           prevState.month!==this.state.month ||
           prevState.season!==this.state.season) {
-            app.climview_loadData(1,1,this.state.station.uid);
+            //app.climview_loadData(1,1,this.state.station.uid);
+            app.climview_loadData(1,1,this.state.station.uid,this.state.timescale,this.state.season,this.state.month);
       }
     }
 
@@ -91,6 +93,9 @@ class Tool1 extends Component {
             display = <PastCharts
                           variable={this.state.variable}
                           station={this.state.station}
+                          timescale={this.state.timescale}
+                          season={this.state.season}
+                          month={this.state.month}
                       />
         }
         if (this.state.view==='present' && this.state.variable==='avgt') {
@@ -108,6 +113,9 @@ class Tool1 extends Component {
                           nation={this.props.nation}
                           variable={this.state.variable}
                           scenario={this.state.scenario}
+                          timescale={this.state.timescale}
+                          season={this.state.season}
+                          month={this.state.month}
                       />
         }
         let display_UserInput = <UserInput

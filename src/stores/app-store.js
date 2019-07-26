@@ -421,26 +421,49 @@ export class AppStore {
     //    }
 
     // Past data download - download data using parameters
-    @action loadPastData = (uid) => {
+    @action loadPastData = (uid,timescale,season,month) => {
         console.log("Call loadPastData")
         if (this.getLoaderPast === false) { this.updateLoaderPast(true); }
         this.emptyPastData()
         let params={}
-        if (this.getTimescale==='monthly') {
+        // month numbers. For seasons, the last month is given (needed for ACIS query).
+        let monthNum = {
+          'jan':'01','feb':'02','mar':'03','apr':'04','may':'05','jun':'06',
+          'jul':'07','aug':'08','sep':'09','oct':'10','nov':'11','dec':'12',
+          'djf':'02','mam':'05','jja':'08','son':'11'
+        }
+        if (timescale==='monthly') {
           params = {
             "uid": uid,
             "meta":"name,state",
-            "sdate":"1850-"+this.getPeriodMonthAsNumber,
+            "sdate":"1850-"+monthNum[month],
             "edate":"por",
             "elems":[
-                {"name":"avgt","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3"},
-                {"name":"maxt","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3"},
-                {"name":"mint","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3"},
-                {"name":"pcpn","interval":[0,12],"duration":1,"reduce":"sum","maxmissing":"3"},
-                {"name":"avgt","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3","normal":"1"},
-                {"name":"maxt","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3","normal":"1"},
-                {"name":"mint","interval":[0,12],"duration":1,"reduce":"mean","maxmissing":"3","normal":"1"},
-                {"name":"pcpn","interval":[0,12],"duration":1,"reduce":"sum","maxmissing":"3","normal":"1"},
+                {"name":"avgt","interval":[1,0],"duration":1,"reduce":"mean","maxmissing":"3"},
+                {"name":"maxt","interval":[1,0],"duration":1,"reduce":"mean","maxmissing":"3"},
+                {"name":"mint","interval":[1,0],"duration":1,"reduce":"mean","maxmissing":"3"},
+                {"name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum","maxmissing":"3"},
+                {"name":"avgt","interval":[1,0],"duration":1,"reduce":"mean","normal":"1"},
+                {"name":"maxt","interval":[1,0],"duration":1,"reduce":"mean","normal":"1"},
+                {"name":"mint","interval":[1,0],"duration":1,"reduce":"mean","normal":"1"},
+                {"name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum","normal":"1"},
+              ]
+            }
+        } else if (timescale==='seasonal') {
+          params = {
+            "uid": uid,
+            "meta":"name,state",
+            "sdate":"1850-"+monthNum[season],
+            "edate":"por",
+            "elems":[
+                {"name":"avgt","interval":[1,0],"duration":3,"reduce":"mean","maxmissing":"10"},
+                {"name":"maxt","interval":[1,0],"duration":3,"reduce":"mean","maxmissing":"10"},
+                {"name":"mint","interval":[1,0],"duration":3,"reduce":"mean","maxmissing":"10"},
+                {"name":"pcpn","interval":[1,0],"duration":3,"reduce":"sum","maxmissing":"10"},
+                {"name":"avgt","interval":[1,0],"duration":3,"reduce":"mean","normal":"1"},
+                {"name":"maxt","interval":[1,0],"duration":3,"reduce":"mean","normal":"1"},
+                {"name":"mint","interval":[1,0],"duration":3,"reduce":"mean","normal":"1"},
+                {"name":"pcpn","interval":[1,0],"duration":3,"reduce":"sum","normal":"1"},
               ]
             }
         } else {
@@ -454,10 +477,10 @@ export class AppStore {
                 {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
                 {"name":"mint","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
                 {"name":"pcpn","interval":[1],"duration":1,"reduce":{"reduce":"sum"},"maxmissing":10},
-                {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10,"normal":"1"},
-                {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10,"normal":"1"},
-                {"name":"mint","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10,"normal":"1"},
-                {"name":"pcpn","interval":[1],"duration":1,"reduce":{"reduce":"sum"},"maxmissing":10,"normal":"1"},
+                {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"normal":"1"},
+                {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"normal":"1"},
+                {"name":"mint","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"normal":"1"},
+                {"name":"pcpn","interval":[1],"duration":1,"reduce":{"reduce":"sum"},"normal":"1"},
               ]
             }
         }
@@ -481,6 +504,7 @@ export class AppStore {
             data['maxt_normal'] = []
             data['mint_normal'] = []
             data['pcpn_normal'] = []
+            let validDataFound=false
             for (i=0; i<res.data.data.length; i++) {
                 stnValue = res.data.meta.name+', '+res.data.meta.state
                 dateValue = Date.UTC(res.data.data[i][0].slice(0,4),res.data.data[i][0].slice(5)-1,1)
@@ -492,16 +516,19 @@ export class AppStore {
                 maxtNormal = (res.data.data[i][6]==='M') ? null : parseFloat(res.data.data[i][6])
                 mintNormal = (res.data.data[i][7]==='M') ? null : parseFloat(res.data.data[i][7])
                 pcpnNormal = (res.data.data[i][8]==='M') ? null : ((res.data.data[i][8]==='T') ? 0.00 : parseFloat(res.data.data[i][8]))
-                data['stn'].push(stnValue)
-                data['date'].push(dateValue)
-                data['avgt'].push(avgtValue)
-                data['maxt'].push(maxtValue)
-                data['mint'].push(mintValue)
-                data['pcpn'].push(pcpnValue)
-                data['avgt_normal'].push(avgtNormal)
-                data['maxt_normal'].push(maxtNormal)
-                data['mint_normal'].push(mintNormal)
-                data['pcpn_normal'].push(pcpnNormal)
+                if (avgtValue || maxtValue || mintValue || pcpnValue) { validDataFound=true }
+                if (validDataFound) {
+                    data['stn'].push(stnValue)
+                    data['date'].push(dateValue)
+                    data['avgt'].push(avgtValue)
+                    data['maxt'].push(maxtValue)
+                    data['mint'].push(mintValue)
+                    data['pcpn'].push(pcpnValue)
+                    data['avgt_normal'].push(avgtNormal)
+                    data['maxt_normal'].push(maxtNormal)
+                    data['mint_normal'].push(mintNormal)
+                    data['pcpn_normal'].push(pcpnNormal)
+                }
             }
             this.updatePastData(data);
             console.log(this.getPastData);
@@ -935,7 +962,7 @@ export class AppStore {
         }
     }
 
-  @action loadProjections_1980_2100 = (id,scen,re) => {
+  @action loadProjections_1980_2100 = (id,scen,re,timescale,season,month) => {
 
     if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
     let varReduce = ''
@@ -943,27 +970,61 @@ export class AppStore {
     if (re==='max') { varReduce = 'allMax' }
     if (re==='min') { varReduce = 'allMin' }
 
+    let params={}
+
     //calculate bounding box from center point of nation
     let wLon = parseFloat(this.getNation.ll[1]) - 0.50
     let eLon = parseFloat(this.getNation.ll[1]) + 0.50
     let nLat = parseFloat(this.getNation.ll[0]) + 0.50
     let sLat = parseFloat(this.getNation.ll[0]) - 0.50
 
-    const params = {
-      "grid": "loca:"+varReduce+":"+scen,
-      // bounding box over entire selected nation
-      //"bbox":this.getNation.llbounds[0][0].toString()+','+this.getNation.llbounds[0][1].toString()+','+this.getNation.llbounds[1][0].toString()+','+this.getNation.llbounds[1][1].toString(),
-      // limit bounding box to 1x1 degree, using interior point as center of bounding box
-      "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
-      "sdate": "1980",
-      "edate": "2099",
-      "elems": [
-        { "name":"avgt","interval":[1],"duration":1,"reduce":"mean" },
-        { "name":"maxt","interval":[1],"duration":1,"reduce":"mean" },
-        { "name":"mint","interval":[1],"duration":1,"reduce":"mean" },
-        { "name":"pcpn","interval":[1],"duration":1,"reduce":"sum" }
-      ]
-    };
+    // month numbers. For seasons, the last month is given (needed for ACIS query).
+    let monthNum = {
+      'jan':'01','feb':'02','mar':'03','apr':'04','may':'05','jun':'06',
+      'jul':'07','aug':'08','sep':'09','oct':'10','nov':'11','dec':'12',
+      'djf':'02','mam':'05','jja':'08','son':'11'
+    }
+
+    if (timescale==='monthly') {
+        params = {
+          "grid": "loca:"+varReduce+":"+scen,
+          "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+          "sdate": "1980-"+monthNum[month],
+          "edate": "2099-"+monthNum[month],
+          "elems": [
+            { "name":"avgt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"maxt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"mint","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum" }
+          ]
+        };
+    } else if (timescale==='seasonal') {
+        params = {
+          "grid": "loca:"+varReduce+":"+scen,
+          "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+          "sdate": "1980-"+monthNum[season],
+          "edate": "2099-"+monthNum[season],
+          "elems": [
+            { "name":"avgt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"maxt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"mint","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum" }
+          ]
+        };
+    } else {
+        params = {
+          "grid": "loca:"+varReduce+":"+scen,
+          "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+          "sdate": "1980",
+          "edate": "2099",
+          "elems": [
+            { "name":"avgt","interval":[1],"duration":1,"reduce":"mean" },
+            { "name":"maxt","interval":[1],"duration":1,"reduce":"mean" },
+            { "name":"mint","interval":[1],"duration":1,"reduce":"mean" },
+            { "name":"pcpn","interval":[1],"duration":1,"reduce":"sum" }
+          ]
+        };
+    }
 
     console.log('loading projections: params');
     console.log(params);
@@ -981,7 +1042,11 @@ export class AppStore {
         data['mint'] = []
         data['pcpn'] = []
         for (i=0; i<res.data.data.length; i++) {
-            data['years'].push(Date.UTC(res.data.data[i][0],0,1))
+            if (timescale==='annual') {
+                data['years'].push(Date.UTC(res.data.data[i][0],0,1))
+            } else {
+                data['years'].push(Date.UTC(res.data.data[i][0].split('-')[0],0,1))
+            }
 
             // when I was testing with state averages
             //data['avgt'].push(res.data.data[i][1][params['state']])
@@ -1014,9 +1079,11 @@ export class AppStore {
       });
   }
 
-  @action loadLivnehData = (id) => {
+  @action loadLivnehData = (id,timescale,season,month) => {
 
     if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
+
+    let params={}
 
     //calculate bounding box from center point of nation
     let wLon = parseFloat(this.getNation.ll[1]) - 0.50
@@ -1024,28 +1091,54 @@ export class AppStore {
     let nLat = parseFloat(this.getNation.ll[0]) + 0.50
     let sLat = parseFloat(this.getNation.ll[0]) - 0.50
 
+    // month numbers. For seasons, the last month is given (needed for ACIS query).
+    let monthNum = {
+      'jan':'01','feb':'02','mar':'03','apr':'04','may':'05','jun':'06',
+      'jul':'07','aug':'08','sep':'09','oct':'10','nov':'11','dec':'12',
+      'djf':'02','mam':'05','jja':'08','son':'11'
+    }
+
     // FOR ANNUAL REQUESTS
-    const params = {
-      "grid": "livneh",
-      //"state":id,
-      //"loc":this.getNation.ll[1].toString()+','+this.getNation.ll[0].toString(),
-      // bounding box over entire selected nation
-      //"bbox":this.getNation.llbounds[0][0].toString()+','+this.getNation.llbounds[0][1].toString()+','+this.getNation.llbounds[1][0].toString()+','+this.getNation.llbounds[1][1].toString(),
-      // limit bounding box to 1x1 degree, using interior point as center of bounding box
-      "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
-      "sdate": "1980",
-      "edate": "2013",
-      "elems": [
-        //{ "name":"avgt","interval":"yly","duration":1,"reduce":"mean","area_reduce":"state_mean" },
-        //{ "name":"maxt","interval":"yly","duration":1,"reduce":"mean","area_reduce":"state_mean" },
-        //{ "name":"mint","interval":"yly","duration":1,"reduce":"mean","area_reduce":"state_mean" },
-        //{ "name":"pcpn","interval":"yly","duration":1,"reduce":"sum","area_reduce":"state_mean" },
-        { "name":"avgt","interval":"yly","duration":1,"reduce":"mean" },
-        { "name":"maxt","interval":"yly","duration":1,"reduce":"mean" },
-        { "name":"mint","interval":"yly","duration":1,"reduce":"mean" },
-        { "name":"pcpn","interval":"yly","duration":1,"reduce":"sum" },
-      ]
-    };
+    if (timescale==='monthly') {
+        params = {
+          "grid": "livneh",
+          "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+          "sdate": "1980-"+monthNum[month],
+          "edate": "2013-"+monthNum[month],
+          "elems": [
+            { "name":"avgt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"maxt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"mint","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum" },
+          ]
+        };
+    } else if (timescale==='seasonal') {
+        params = {
+          "grid": "livneh",
+          "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+          "sdate": "1980-"+monthNum[season],
+          "edate": "2013-"+monthNum[season],
+          "elems": [
+            { "name":"avgt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"maxt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"mint","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum" },
+          ]
+        };
+    } else {
+        params = {
+          "grid": "livneh",
+          "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+          "sdate": "1980",
+          "edate": "2013",
+          "elems": [
+            { "name":"avgt","interval":"yly","duration":1,"reduce":"mean" },
+            { "name":"maxt","interval":"yly","duration":1,"reduce":"mean" },
+            { "name":"mint","interval":"yly","duration":1,"reduce":"mean" },
+            { "name":"pcpn","interval":"yly","duration":1,"reduce":"sum" },
+          ]
+        };
+    }
 
     return axios
       //.post("http://grid2.rcc-acis.org/GridData", params)
@@ -1061,8 +1154,11 @@ export class AppStore {
         data['mint'] = []
         data['pcpn'] = []
         for (i=0; i<res.data.data.length; i++) {
-            //data['years'].push(res.data.data[i][0])
-            data['years'].push(Date.UTC(res.data.data[i][0],0,1))
+            if (timescale==='annual') {
+                data['years'].push(Date.UTC(res.data.data[i][0],0,1))
+            } else {
+                data['years'].push(Date.UTC(res.data.data[i][0].split('-')[0],0,1))
+            }
 
             // when I was testing with state averages
             //data['avgt'].push(res.data.data[i][1][params['state']])
@@ -1095,27 +1191,37 @@ export class AppStore {
       });
   }
 
-    @action loadProjections = (id) => {
+    @action loadProjections = (id,timescale,season,month) => {
         this.emptyProjectionData()
         this.emptyLivnehData()
-        this.loadLivnehData(id);
-        this.loadProjections_1980_2100(id,'rcp85','mean');
-        this.loadProjections_1980_2100(id,'rcp85','max');
-        this.loadProjections_1980_2100(id,'rcp85','min');
-        this.loadProjections_1980_2100(id,'rcp45','mean');
-        this.loadProjections_1980_2100(id,'rcp45','max');
-        this.loadProjections_1980_2100(id,'rcp45','min');
+        this.loadLivnehData(id,timescale,season,month);
+        this.loadProjections_1980_2100(id,'rcp85','mean',timescale,season,month);
+        this.loadProjections_1980_2100(id,'rcp85','max',timescale,season,month);
+        this.loadProjections_1980_2100(id,'rcp85','min',timescale,season,month);
+        this.loadProjections_1980_2100(id,'rcp45','mean',timescale,season,month);
+        this.loadProjections_1980_2100(id,'rcp45','max',timescale,season,month);
+        this.loadProjections_1980_2100(id,'rcp45','min',timescale,season,month);
     }
 
-    @action climview_loadData = (getObs,getProj,uid) => {
+    @action climview_loadData = (getObs,getProj,uid,timescale,season,month) => {
         // getObs: boolean, whether to load observations
         // getProj: boolean, whether to load projections
-        if (getObs) {this.loadPastData(uid)};
+        if (getObs) {this.loadPastData(uid,timescale,season,month)};
         if (getObs) {this.loadPresentData(uid)};
         if (getObs) {this.loadPresentPrecip(uid)};
         if (getObs) {this.loadPresentExtremes(uid)};
-        if (getProj) {this.loadProjections(this.getStateId)};
+        if (getProj) {this.loadProjections(this.getStateId,timescale,season,month)};
     }
+
+    //@action climview_loadData = (getObs,getProj,uid) => {
+    //    // getObs: boolean, whether to load observations
+    //    // getProj: boolean, whether to load projections
+    //    if (getObs) {this.loadPastData(uid)};
+    //    if (getObs) {this.loadPresentData(uid)};
+    //    if (getObs) {this.loadPresentPrecip(uid)};
+    //    if (getObs) {this.loadPresentExtremes(uid)};
+    //    if (getProj) {this.loadProjections(this.getStateId)};
+    //}
 
     // run these on initial load
     //constructor() {

@@ -31,6 +31,35 @@ class PastCharts extends Component {
         };
     }
 
+    getTimescaleText = (t,s,m) => {
+      // t: timescale selected
+      // s: season selected
+      // m: month selected
+      let result
+      let periodNames = {
+        'jan':'January','feb':'February','mar':'March','apr':'April',
+        'may':'May','jun':'June','jul':'July','aug':'August',
+        'sep':'September','oct':'October','nov':'November','dec':'December',
+        'djf':'Dec-Jan-Feb','mam':'Mar-Apr-May','jja':'Jun-Jul-Aug','son':'Sep-Oct-Nov'
+      }
+      if (t==='annual') {
+        result = 'Annual'
+      } else if (t==='seasonal') {
+        result = periodNames[s]
+      } else if (t==='monthly') {
+        result = periodNames[m]
+      }
+      return result
+    }
+
+    getReductionText = (v) => {
+      if (v==='pcpn') {
+        return 'total precipitation'
+      } else {
+        return 'averages'
+      }
+    }
+
     render() {
 
         let varName = this.props.variable
@@ -114,7 +143,7 @@ class PastCharts extends Component {
             text: varLabel+' @ '+station
           },
           subtitle: {
-            text: 'June Averages, 1910-2018'
+            text: this.getTimescaleText(this.props.timescale,this.props.season,this.props.month) + ' ' + this.getReductionText(this.props.variable)
           },
           exporting: {
             //showTable: true,
@@ -188,6 +217,9 @@ class PastCharts extends Component {
 PastCharts.propTypes = {
   variable: PropTypes.string.isRequired,
   station: PropTypes.object.isRequired,
+  timescale: PropTypes.string.isRequired,
+  season: PropTypes.string.isRequired,
+  month: PropTypes.string.isRequired,
 }
 
 export default PastCharts;

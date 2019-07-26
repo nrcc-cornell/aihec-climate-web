@@ -31,10 +31,39 @@ class FutureCharts extends Component {
         };
     }
 
+    getTimescaleText = (t,s,m) => {
+      // t: timescale selected
+      // s: season selected
+      // m: month selected
+      let result
+      let periodNames = {
+        'jan':'January','feb':'February','mar':'March','apr':'April',
+        'may':'May','jun':'June','jul':'July','aug':'August',
+        'sep':'September','oct':'October','nov':'November','dec':'December',
+        'djf':'Dec-Jan-Feb','mam':'Mar-Apr-May','jja':'Jun-Jul-Aug','son':'Sep-Oct-Nov'
+      }
+      if (t==='annual') {
+        result = 'Annual'
+      } else if (t==='seasonal') {
+        result = periodNames[s]
+      } else if (t==='monthly') {
+        result = periodNames[m]
+      }
+      return result
+    }
+
+    getScenarioText = (s) => {
+      if (s==='rcp85') {
+        return 'High Emission Model Scenario (RCP 8.5)'
+      } else {
+        return 'Low Emission Model Scenario (RCP 4.5)'
+      }
+    }
+
     render() {
 
         let varName = this.props.variable
-        let varLabel = app.wxgraph_getVarLabels[app.wxgraph_getVar]
+        let varLabel = app.wxgraph_getVarLabels[this.props.variable]
         let nation = this.props.nation.name
         let startYear = new Date(1980,0,1)
 
@@ -129,7 +158,9 @@ class FutureCharts extends Component {
             text: varLabel+' @ '+nation
           },
           subtitle: {
-            text: (this.props.scenario==='rcp85') ? 'High Emission Model Scenario (RCP 8.5)' : 'Low Emission Model Scenario (RCP 4.5)'
+            //text: (this.props.scenario==='rcp85') ? 'High Emission Model Scenario (RCP 8.5)' : 'Low Emission Model Scenario (RCP 4.5)'
+            //text: this.getTimescaleText(this.props.timescale,this.props.season,this.props.month) + ' : ' + this.getScenarioText(this.props.scenario)
+            text: this.getScenarioText(this.props.scenario) + ' : ' + this.getTimescaleText(this.props.timescale,this.props.season,this.props.month)
           },
           exporting: {
             //showTable: true,
@@ -151,8 +182,8 @@ class FutureCharts extends Component {
                    color: '#000000',
                    width: 2,
                    value: Date.UTC(2005),
-                   label: {text:'Projections Begin in 2005', rotation:0, x:6, y:30},
-                   zIndex: 10,
+                   label: {text:'2005: Projections Begin', verticalAlign:'bottom', rotation:0, x:6, y:-6},
+                   zIndex: 2,
                }],
                dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
             },
@@ -224,6 +255,9 @@ FutureCharts.propTypes = {
   variable: PropTypes.string.isRequired,
   nation: PropTypes.object.isRequired,
   scenario: PropTypes.string.isRequired,
+  timescale: PropTypes.string.isRequired,
+  season: PropTypes.string.isRequired,
+  month: PropTypes.string.isRequired,
 }
 
 export default FutureCharts;
