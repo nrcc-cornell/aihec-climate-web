@@ -91,14 +91,12 @@ export class AppStore {
     @action setNation = (l) => {
         if (this.getNation.name !== l.toString()) {
             this.nation = this.getNations.find(obj => obj.name === l);
-            //if (this.toolIsSelected && this.getToolName==='climview') { this.wxgraph_downloadData() }
         };
     }
     // set nation from select menu
     @action setSelectedNation = (t) => {
             if (this.getNation.name !== t.value) {
                 this.nation = this.getNations.find(obj => obj.name.toString() === t.value);
-                //if (this.toolIsSelected && this.getToolName==='climview') { this.wxgraph_downloadData() }
             }
             if (this.getShowModalMap) { this.setShowModalMap(false) };
         };
@@ -934,6 +932,42 @@ export class AppStore {
             return this.projection_data
         }
 
+    // store downloaded projection data
+    @observable projection_data_AK = null;
+    @action updateProjectionDataAK = (d,m,scen) => {
+            let newData = {}
+            newData[scen] = {}
+            newData[scen][m] = {}
+            newData[scen][m]['years'] = d['years']
+            newData[scen][m]['avgt'] = d['avgt']
+            newData[scen][m]['maxt'] = d['maxt']
+            newData[scen][m]['mint'] = d['mint']
+            newData[scen][m]['pcpn'] = d['pcpn']
+            this.projection_data_AK[scen][m] = newData[scen][m]
+        }
+    @action emptyProjectionDataAK = (d) => {
+            if (this.getProjectionDataAK) { this.projection_data_AK = null }
+            let data = {}
+            data['years'] = []
+            data['avgt'] = []
+            data['maxt'] = []
+            data['mint'] = []
+            data['pcpn'] = []
+            this.projection_data_AK = {
+                    'rcp45' : {
+                        'gfdl-cm3' : data,
+                        'ncar-ccsm4' : data,
+                        },
+                    'rcp85' : {
+                        'gfdl-cm3' : data,
+                        'ncar-ccsm4' : data,
+                        },
+                };
+        }
+    @computed get getProjectionDataAK() {
+            return this.projection_data_AK
+        }
+
     // Logic for displaying spinner (projections)
     @observable loader_projections=false;
     @action updateLoaderProjections = (l) => {
@@ -943,8 +977,19 @@ export class AppStore {
             return this.loader_projections
         }
 
+    // Logic for displaying spinner (projections)
+    @observable loader_projections_AK=false;
+    @action updateLoaderProjectionsAK = (l) => {
+            this.loader_projections_AK = l;
+        }
+    @computed get getLoaderProjectionsAK() {
+            return this.loader_projections_AK
+        }
+
     // Check if a projection is loading
     @computed get isProjectionLoading() {
+      if (parseFloat(this.getNation.ll[0]) < 51.0) {
+
         if (this.getProjectionData) {
             if (this.getProjectionData.rcp85.mean.years.length > 0 &&
                 this.getProjectionData.rcp85.min.years.length > 0 &&
@@ -960,9 +1005,40 @@ export class AppStore {
         } else {
             return true;
         }
+
+      } else {
+
+        if (this.getProjectionDataAK) {
+            if (this.getProjectionDataAK['rcp85']['gfdl-cm3'].years.length > 0 &&
+                this.getProjectionDataAK['rcp85']['ncar-ccsm4'].years.length > 0 &&
+                !this.getLoaderProjectionsAK) {
+                    return false;
+            } else {
+                    return true;
+            }
+        } else {
+            return true;
+        }
+
+      }
     }
 
-  @action loadProjections_1980_2100 = (id,scen,re,timescale,season,month) => {
+    // Check if a projection is loading for AK
+    @computed get isProjectionLoadingAK() {
+        if (this.getProjectionDataAK) {
+            if (this.getProjectionDataAK['rcp85']['gfdl-cm3'].years.length > 0 &&
+                this.getProjectionDataAK['rcp85']['ncar-ccsm4'].years.length > 0 &&
+                !this.getLoaderProjectionsAK) {
+                    return false;
+            } else {
+                    return true;
+            }
+        } else {
+            return true;
+        }
+    }
+
+  @action loadProjections_1980_2100 = (scen,re,timescale,season,month) => {
 
     if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
     let varReduce = ''
@@ -1048,18 +1124,6 @@ export class AppStore {
                 data['years'].push(Date.UTC(res.data.data[i][0].split('-')[0],0,1))
             }
 
-            // when I was testing with state averages
-            //data['avgt'].push(res.data.data[i][1][params['state']])
-            //data['maxt'].push(res.data.data[i][2][params['state']])
-            //data['mint'].push(res.data.data[i][3][params['state']])
-            //data['pcpn'].push(res.data.data[i][4][params['state']])
-
-            // when I was testing with single grid
-            //data['avgt'].push(res.data.data[i][1])
-            //data['maxt'].push(res.data.data[i][2])
-            //data['mint'].push(res.data.data[i][3])
-            //data['pcpn'].push(res.data.data[i][4])
-
             // when averaging over bounding box
             // for each variable, we 1)flatten array and 2)average all values
             arrFlat = [].concat.apply([], res.data.data[i][1]);
@@ -1079,7 +1143,108 @@ export class AppStore {
       });
   }
 
-  @action loadLivnehData = (id,timescale,season,month) => {
+  @action loadProjectionsAK_1980_2100 = (scen,model,timescale,season,month) => {
+
+    if (this.getLoaderProjectionsAK === false) { this.updateLoaderProjectionsAK(true); }
+
+    let params={}
+
+    //calculate bounding box from center point of nation
+    let wLon = parseFloat(this.getNation.ll[1]) - 0.50
+    let eLon = parseFloat(this.getNation.ll[1]) + 0.50
+    let nLat = parseFloat(this.getNation.ll[0]) + 0.50
+    let sLat = parseFloat(this.getNation.ll[0]) - 0.50
+
+    // month numbers. For seasons, the last month is given (needed for ACIS query).
+    let monthNum = {
+      'jan':'01','feb':'02','mar':'03','apr':'04','may':'05','jun':'06',
+      'jul':'07','aug':'08','sep':'09','oct':'10','nov':'11','dec':'12',
+      'djf':'02','mam':'05','jja':'08','son':'11'
+    }
+
+    if (timescale==='monthly') {
+        params = {
+          "grid": "snap:"+model+":"+scen,
+          "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+          "sdate": "1980-"+monthNum[month],
+          "edate": "2099-"+monthNum[month],
+          "elems": [
+            { "name":"avgt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"maxt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"mint","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum" }
+          ]
+        };
+    } else if (timescale==='seasonal') {
+        params = {
+          "grid": "snap:"+model+":"+scen,
+          "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+          "sdate": "1980-"+monthNum[season],
+          "edate": "2099-"+monthNum[season],
+          "elems": [
+            { "name":"avgt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"maxt","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"mint","interval":[1,0],"duration":1,"reduce":"mean" },
+            { "name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum" }
+          ]
+        };
+    } else {
+        params = {
+          "grid": "snap:"+model+":"+scen,
+          "bbox":wLon.toString()+','+sLat.toString()+','+eLon.toString()+','+nLat.toString(),
+          "sdate": "1980",
+          "edate": "2099",
+          "elems": [
+            { "name":"avgt","interval":[1],"duration":1,"reduce":"mean" },
+            { "name":"maxt","interval":[1],"duration":1,"reduce":"mean" },
+            { "name":"mint","interval":[1],"duration":1,"reduce":"mean" },
+            { "name":"pcpn","interval":[1],"duration":1,"reduce":"sum" }
+          ]
+        };
+    }
+
+    console.log('loading AK projections: params');
+    console.log(params);
+
+    return axios
+      .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
+      .then(res => {
+        console.log('successful download of projection data : ' + scen + ' ' + model + ' 1980-2100');
+        let i
+        let data = {}
+        let arrFlat
+        data['years'] = []
+        data['avgt'] = []
+        data['maxt'] = []
+        data['mint'] = []
+        data['pcpn'] = []
+        for (i=0; i<res.data.data.length; i++) {
+            if (timescale==='annual') {
+                data['years'].push(Date.UTC(res.data.data[i][0],0,1))
+            } else {
+                data['years'].push(Date.UTC(res.data.data[i][0].split('-')[0],0,1))
+            }
+
+            // when averaging over bounding box
+            // for each variable, we 1)flatten array and 2)average all values
+            arrFlat = [].concat.apply([], res.data.data[i][1]);
+            data['avgt'].push(arrAvg(arrFlat))
+            arrFlat = [].concat.apply([], res.data.data[i][2]);
+            data['maxt'].push(arrAvg(arrFlat))
+            arrFlat = [].concat.apply([], res.data.data[i][3]);
+            data['mint'].push(arrAvg(arrFlat))
+            arrFlat = [].concat.apply([], res.data.data[i][4]);
+            data['pcpn'].push(arrAvg(arrFlat))
+        }
+        this.updateProjectionDataAK(data,model,scen);
+        if (this.getLoaderProjectionsAK === true) { this.updateLoaderProjectionsAK(false); }
+      })
+      .catch(err => {
+        console.log("Failed to load AK projection data 1980-2100 ", err);
+      });
+  }
+
+  @action loadLivnehData = (timescale,season,month) => {
 
     if (this.getLoaderProjections === false) { this.updateLoaderProjections(true); }
 
@@ -1191,16 +1356,23 @@ export class AppStore {
       });
   }
 
-    @action loadProjections = (id,timescale,season,month) => {
+    @action loadProjections = (timescale,season,month) => {
         this.emptyProjectionData()
         this.emptyLivnehData()
-        this.loadLivnehData(id,timescale,season,month);
-        this.loadProjections_1980_2100(id,'rcp85','mean',timescale,season,month);
-        this.loadProjections_1980_2100(id,'rcp85','max',timescale,season,month);
-        this.loadProjections_1980_2100(id,'rcp85','min',timescale,season,month);
-        this.loadProjections_1980_2100(id,'rcp45','mean',timescale,season,month);
-        this.loadProjections_1980_2100(id,'rcp45','max',timescale,season,month);
-        this.loadProjections_1980_2100(id,'rcp45','min',timescale,season,month);
+        this.loadLivnehData(timescale,season,month);
+        this.loadProjections_1980_2100('rcp85','mean',timescale,season,month);
+        this.loadProjections_1980_2100('rcp85','max',timescale,season,month);
+        this.loadProjections_1980_2100('rcp85','min',timescale,season,month);
+        this.loadProjections_1980_2100('rcp45','mean',timescale,season,month);
+        this.loadProjections_1980_2100('rcp45','max',timescale,season,month);
+        this.loadProjections_1980_2100('rcp45','min',timescale,season,month);
+    }
+
+    @action loadProjectionsAK = (timescale,season,month) => {
+        this.emptyProjectionDataAK()
+        this.loadProjectionsAK_1980_2100('rcp85','gfdl-cm3',timescale,season,month);
+        this.loadProjectionsAK_1980_2100('rcp85','ncar-ccsm4',timescale,season,month);
+        // rcp45 unavailable for snap grids
     }
 
     @action climview_loadData = (getObs,getProj,uid,timescale,season,month) => {
@@ -1210,18 +1382,11 @@ export class AppStore {
         if (getObs) {this.loadPresentData(uid)};
         if (getObs) {this.loadPresentPrecip(uid)};
         if (getObs) {this.loadPresentExtremes(uid)};
-        if (getProj) {this.loadProjections(this.getStateId,timescale,season,month)};
+        if (getProj) {
+            if (parseFloat(this.getNation.ll[0])<51.0) {this.loadProjections(timescale,season,month)};
+            if (parseFloat(this.getNation.ll[0])>=51.0) {this.loadProjectionsAK(timescale,season,month)};
+        }
     }
-
-    //@action climview_loadData = (getObs,getProj,uid) => {
-    //    // getObs: boolean, whether to load observations
-    //    // getProj: boolean, whether to load projections
-    //    if (getObs) {this.loadPastData(uid)};
-    //    if (getObs) {this.loadPresentData(uid)};
-    //    if (getObs) {this.loadPresentPrecip(uid)};
-    //    if (getObs) {this.loadPresentExtremes(uid)};
-    //    if (getProj) {this.loadProjections(this.getStateId)};
-    //}
 
     // run these on initial load
     //constructor() {

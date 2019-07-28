@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
-import UserInput from '../UserInput'
+//import UserInput from '../UserInput'
 
 const styles = theme => ({
   typography: {

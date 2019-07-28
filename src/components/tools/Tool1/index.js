@@ -17,6 +17,7 @@ import PastCharts from './PastCharts'
 import PresentCharts from './PresentCharts'
 import PresentChartsPrecip from './PresentChartsPrecip'
 import FutureCharts from './FutureCharts'
+import FutureChartsForAK from './FutureChartsForAK'
 
 // Styles
 import '../../../styles/Tool1Tool.css';
@@ -109,7 +110,8 @@ class Tool1 extends Component {
                       />
         }
         if (this.state.view==='future') {
-            display = <FutureCharts
+            if (parseFloat(this.props.nation.ll[0])<51.0) {
+                display = <FutureCharts
                           nation={this.props.nation}
                           variable={this.state.variable}
                           scenario={this.state.scenario}
@@ -117,6 +119,16 @@ class Tool1 extends Component {
                           season={this.state.season}
                           month={this.state.month}
                       />
+            } else {
+                display = <FutureChartsForAK
+                          nation={this.props.nation}
+                          variable={this.state.variable}
+                          scenario={this.state.scenario}
+                          timescale={this.state.timescale}
+                          season={this.state.season}
+                          month={this.state.month}
+                      />
+            }
         }
         let display_UserInput = <UserInput
                                   selected_nation={this.props.nation}
