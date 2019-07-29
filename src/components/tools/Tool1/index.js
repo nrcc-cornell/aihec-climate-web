@@ -6,6 +6,9 @@ import { inject, observer} from 'mobx-react';
 import PropTypes from 'prop-types';
 import LoadingOverlay from 'react-loading-overlay';
 //import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import green from '@material-ui/core/colors/green';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 
@@ -21,6 +24,23 @@ import FutureChartsForAK from './FutureChartsForAK'
 
 // Styles
 import '../../../styles/Tool1Tool.css';
+
+const styles = theme => ({
+  wrapper: {
+    position: 'relative',
+  },
+  mainSelect: {
+    marginLeft: '0px'
+  },
+  chartProgress: {
+    color: green[500],
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -60,
+    marginLeft: -40,
+  },
+});
 
 var app;
 
@@ -89,7 +109,10 @@ class Tool1 extends Component {
 
     render() {
 
+        const { classes } = this.props;
+
         let display;
+        let isDataLoading;
         if (this.state.view==='past') {
             display = <PastCharts
                           variable={this.state.variable}
@@ -98,16 +121,19 @@ class Tool1 extends Component {
                           season={this.state.season}
                           month={this.state.month}
                       />
+            isDataLoading = app.isPastLoading
         }
         if (this.state.view==='present' && this.state.variable==='avgt') {
             display = <PresentCharts
                           station={this.state.station}
                       />
+            isDataLoading = app.isPresentLoading
         }
         if (this.state.view==='present' && this.state.variable==='pcpn') {
             display = <PresentChartsPrecip
                           station={this.state.station}
                       />
+            isDataLoading = app.isPresentLoading
         }
         if (this.state.view==='future') {
             if (parseFloat(this.props.nation.ll[0])<51.0) {
@@ -129,6 +155,7 @@ class Tool1 extends Component {
                           month={this.state.month}
                       />
             }
+            isDataLoading = app.isProjectionLoading
         }
         let display_UserInput = <UserInput
                                   selected_nation={this.props.nation}
@@ -166,15 +193,10 @@ class Tool1 extends Component {
                 </Grid>
                 <Grid item container className="nothing" direction="row" justify="center" xs={12} md={9}>
                     <Grid item>
-                        <LoadingOverlay
-                          active={app.isPastLoading}
-                          spinner
-                          background={'rgba(255,255,255,1.0)'}
-                          color={'rgba(34,139,34,1.0)'}
-                          spinnerSize={'10vw'}
-                          >
-                            {display}
-                        </LoadingOverlay>
+                        <div className={classes.wrapper}>
+                          {display}
+                          {isDataLoading && <CircularProgress size={72} className={classes.chartProgress} />}
+                        </div>
                     </Grid>
                 </Grid>
               </Grid>
@@ -187,4 +209,4 @@ Tool1.propTypes = {
   nation: PropTypes.object.isRequired,
 };
 
-export default Tool1;
+export default withStyles(styles)(Tool1);

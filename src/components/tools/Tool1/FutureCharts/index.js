@@ -109,7 +109,8 @@ class FutureCharts extends Component {
             return header + tips;
         }
 
-        if (!app.isProjectionLoading && app.getProjectionData['date']!==[]) {
+        //if (!app.isProjectionLoading && app.getProjectionData['date']!==[]) {
+        if (true) {
 
         const options = {
                  plotOptions: {
@@ -152,6 +153,7 @@ class FutureCharts extends Component {
                      }
                  },
           chart: {
+            height: '56%',
             marginBottom: 70
           },
           title: {

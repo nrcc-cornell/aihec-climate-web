@@ -1081,10 +1081,10 @@ export class AppStore {
           "sdate": "1980-"+monthNum[season],
           "edate": "2099-"+monthNum[season],
           "elems": [
-            { "name":"avgt","interval":[1,0],"duration":1,"reduce":"mean" },
-            { "name":"maxt","interval":[1,0],"duration":1,"reduce":"mean" },
-            { "name":"mint","interval":[1,0],"duration":1,"reduce":"mean" },
-            { "name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum" }
+            {"elem":{"name":"avgt","interval":[0,1],"duration":1,"reduce":"mean"},"interval":[1,0],"duration":3,"reduce":"mean"},
+            {"elem":{"name":"maxt","interval":[0,1],"duration":1,"reduce":"mean"},"interval":[1,0],"duration":3,"reduce":"mean"},
+            {"elem":{"name":"mint","interval":[0,1],"duration":1,"reduce":"mean"},"interval":[1,0],"duration":3,"reduce":"mean"},
+            {"elem":{"name":"pcpn","interval":[0,1],"duration":1,"reduce":"sum"},"interval":[1,0],"duration":3,"reduce":"sum"}
           ]
         };
     } else {
@@ -1182,10 +1182,10 @@ export class AppStore {
           "sdate": "1980-"+monthNum[season],
           "edate": "2099-"+monthNum[season],
           "elems": [
-            { "name":"avgt","interval":[1,0],"duration":1,"reduce":"mean" },
-            { "name":"maxt","interval":[1,0],"duration":1,"reduce":"mean" },
-            { "name":"mint","interval":[1,0],"duration":1,"reduce":"mean" },
-            { "name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum" }
+            {"elem":{"name":"avgt","interval":[0,1],"duration":1,"reduce":"mean"},"interval":[1,0],"duration":3,"reduce":"mean"},
+            {"elem":{"name":"maxt","interval":[0,1],"duration":1,"reduce":"mean"},"interval":[1,0],"duration":3,"reduce":"mean"},
+            {"elem":{"name":"mint","interval":[0,1],"duration":1,"reduce":"mean"},"interval":[1,0],"duration":3,"reduce":"mean"},
+            {"elem":{"name":"pcpn","interval":[0,1],"duration":1,"reduce":"sum"},"interval":[1,0],"duration":3,"reduce":"sum"}
           ]
         };
     } else {
@@ -1284,10 +1284,10 @@ export class AppStore {
           "sdate": "1980-"+monthNum[season],
           "edate": "2013-"+monthNum[season],
           "elems": [
-            { "name":"avgt","interval":[1,0],"duration":1,"reduce":"mean" },
-            { "name":"maxt","interval":[1,0],"duration":1,"reduce":"mean" },
-            { "name":"mint","interval":[1,0],"duration":1,"reduce":"mean" },
-            { "name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum" },
+            {"elem":{"name":"avgt","interval":[0,1],"duration":1,"reduce":"mean"},"interval":[1,0],"duration":3,"reduce":"mean"},
+            {"elem":{"name":"maxt","interval":[0,1],"duration":1,"reduce":"mean"},"interval":[1,0],"duration":3,"reduce":"mean"},
+            {"elem":{"name":"mint","interval":[0,1],"duration":1,"reduce":"mean"},"interval":[1,0],"duration":3,"reduce":"mean"},
+            {"elem":{"name":"pcpn","interval":[0,1],"duration":1,"reduce":"sum"},"interval":[1,0],"duration":3,"reduce":"sum"}
           ]
         };
     } else {

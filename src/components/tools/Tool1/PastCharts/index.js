@@ -94,7 +94,8 @@ class PastCharts extends Component {
             return header + tips;
         }
 
-        if (!app.isPastLoading && app.getPastData['date']!==[]) {
+        //if (!app.isPastLoading && app.getPastData['date']!==[]) {
+        if (true) {
 
         const options = {
                  plotOptions: {
@@ -137,6 +138,7 @@ class PastCharts extends Component {
                      }
                  },
           chart: {
+            height: '56%',
             marginBottom: 70
           },
           title: {
@@ -174,7 +176,7 @@ class PastCharts extends Component {
               step: false,
               showInLegend: false,
           },{
-              name: 'Normal',
+              name: '1981-2010 Normal',
               type: 'line',
               marker: false,
               data: (app.getPastData['date']!==[]) ? createPastSeries(odata['date'],odata[varName+'_normal']) : [],

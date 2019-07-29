@@ -31,13 +31,10 @@ class PresentChartsPrecip extends Component {
         };
     }
 
-    //componentDidMount() {
-    //  this.chart = this.refs.chart.chart;
-    //}
-
     render() {
 
-        let station = this.props.station.name
+        //let station = this.props.station.name
+        let station = this.props.station
         let cdata = app.getPresentPrecip
 
         let createSeries = (y,a) => {
@@ -111,6 +108,7 @@ class PresentChartsPrecip extends Component {
                      }
                  },
           chart: {
+            height: '56%',
             marginBottom: 70
           },
           title: {
@@ -179,7 +177,10 @@ class PresentChartsPrecip extends Component {
 
         } else {
 
-        return(false);
+        //return(false);
+        return(
+          <div style={{'height':'500px', 'width':'100%', 'clear':'both'}}></div>
+        );
 
         }
 

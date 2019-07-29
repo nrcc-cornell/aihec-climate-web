@@ -36,6 +36,7 @@ const styles = theme => ({
 
 var app;
 var history;
+var uw_nations;
 
 @inject('store') @observer
 class UserInput extends React.Component {
@@ -43,6 +44,7 @@ class UserInput extends React.Component {
       super(props);
       app = this.props.store.app;
       history = this.props.history;
+      uw_nations=['Flathead Reservation','Blackfeet Indian Reservation','Lummi Reservation']
   }
 
   onChangeClick = () => {
@@ -105,6 +107,13 @@ class UserInput extends React.Component {
                 onchange_month={this.props.onchange_month}
                 onchange_season={this.props.onchange_season}
             />
+          }
+        </Grid>
+        <Grid item>
+          {this.props.selected_view==='future' && uw_nations.includes(this.props.selected_nation.name) &&
+              <Button variant="outlined" color="secondary" size="small" href="https://climate.northwestknowledge.net/NWTOOLBOX/tribalProjections.php" target="_blank" rel="noopener">
+                {"** view additional projection data for this location (external tool)"}
+              </Button>
           }
         </Grid>
       </Grid>

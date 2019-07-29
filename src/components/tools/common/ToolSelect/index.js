@@ -53,7 +53,6 @@ class ToolSelect extends Component {
                 }}
               >
                 <MenuItem value='climview'>Climate Viewer</MenuItem>
-                <MenuItem value='tool2'>Tool 2</MenuItem>
               </Select>
             </FormControl>
           </form>

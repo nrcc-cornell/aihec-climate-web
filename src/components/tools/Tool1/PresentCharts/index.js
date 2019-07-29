@@ -220,7 +220,10 @@ class PresentCharts extends Component {
 
         } else {
 
-        return(false);
+        //return(false);
+        return(
+          <div style={{'height':'500px', 'width':'100%', 'clear':'both'}}></div>
+        );
 
         }
 

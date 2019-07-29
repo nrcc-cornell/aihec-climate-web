@@ -97,7 +97,8 @@ class FutureChartsForAK extends Component {
             return header + tips;
         }
 
-        if (!app.isProjectionLoading && app.getProjectionDataAK['date']!==[]) {
+        //if (!app.isProjectionLoading && app.getProjectionDataAK['date']!==[]) {
+        if (true) {
 
         const options = {
                  plotOptions: {
@@ -140,6 +141,7 @@ class FutureChartsForAK extends Component {
                      }
                  },
           chart: {
+            height: '56%',
             marginBottom: 70
           },
           title: {
@@ -181,12 +183,12 @@ class FutureChartsForAK extends Component {
                title:{ text:app.wxgraph_getVarLabels[this.props.variable]+' ('+app.wxgraph_getVarUnits[this.props.variable]+')', style:{"font-size":"14px", color:"#000000"}},
             },
           series: [{
-              name: 'GFDL-CM3',
+              name: 'CM3 Model @ GFDL',
               data: (!app.isProjectionLoading) ? createProjectionSeries(pdata[scenario]['gfdl-cm3']['years'],pdata[scenario]['gfdl-cm3'][varName],startYear): [],
               type: "line",
               zIndex: 24,
               lineWidth: 1,
-              color: "#000000",
+              color: "#0000FF",
               shadow: false,
               marker: { enabled: false, fillColor: "#00dd00", lineWidth: 2, lineColor: "#00dd00", radius:2, symbol:"circle" },
               zoneAxis: 'x',
@@ -199,12 +201,12 @@ class FutureChartsForAK extends Component {
                    fillColor: 'rgba(0,0,255,1.0)',
                 }]
           },{
-              name: 'NCAR-CCSM4',
+              name: 'CCSM4 Model @ NCAR',
               data: (!app.isProjectionLoading) ? createProjectionSeries(pdata[scenario]['ncar-ccsm4']['years'],pdata[scenario]['ncar-ccsm4'][varName],startYear): [],
               type: "line",
               zIndex: 24,
               lineWidth: 1,
-              color: "#000000",
+              color: "#FF0000",
               shadow: false,
               marker: { enabled: false, fillColor: "#00dd00", lineWidth: 2, lineColor: "#00dd00", radius:2, symbol:"circle" },
               zoneAxis: 'x',
