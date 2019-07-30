@@ -17,6 +17,8 @@ import VarPicker from '../VarPicker';
 import ScenarioPicker from '../ScenarioPicker';
 import TimescalePicker from '../TimescalePicker';
 import PeriodPicker from '../PeriodPicker';
+import HelpUserPopover from '../HelpUserPopover';
+import HelpUserContent from '../HelpUserContent';
 
 const styles = theme => ({
   root: {
@@ -66,10 +68,15 @@ class UserInput extends React.Component {
     return (
       <Box paddingTop={1} border={1} borderRadius={4} borderColor="primary.main">
       <Grid container direction="column" justify="space-evenly" alignItems="center" spacing={1}>
-        <Grid item>
+        <Grid container item direction="row" justify="center" alignItems="center" spacing={0}>
+          <Grid item>
             <Button className={classes.button} variant="outlined" color="secondary" size="small" onClick={this.onChangeClick}>
               Change Nation
             </Button>
+          </Grid>
+          <Grid item>
+            <HelpUserPopover content={<HelpUserContent/>} />
+          </Grid>
         </Grid>
         <Grid item>
             {this.props.selected_variable &&

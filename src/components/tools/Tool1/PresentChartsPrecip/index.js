@@ -37,6 +37,9 @@ class PresentChartsPrecip extends Component {
         let station = this.props.station
         let cdata = app.getPresentPrecip
 
+        let lastDate = new Date(cdata['obs']['date'][cdata['obs']['date'].length-1])
+        let year = lastDate.getFullYear().toString()
+
         let createSeries = (y,a) => {
             let i
             let oseries = [];
@@ -48,16 +51,33 @@ class PresentChartsPrecip extends Component {
             return oseries;
         }
 
+        let createSeriesFlag = (y,a,f) => {
+            let i
+            let oseries = [];
+            if (a) {
+                for (i=0; i<y.length; i++) {
+                    if (f[i]==='M') {
+                        oseries.push([y[i],a[i]])
+                    } else {
+                        oseries.push([y[i],null])
+                    }
+                };
+            }
+            return oseries;
+        }
+
         function tooltipFormatter() {
             var i, item;
-            var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%b %d, %Y', this.x) + '</span>';
+            var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%b %d', this.x) + '</span>';
+            var year = Highcharts.dateFormat('%Y', this.x);
             var tips = "";
             for (i=0; i<this.points.length; i++) {
                 item = this.points[i];
                 //console.log(item);
-                if ( item.series.name.includes("Range") ) {
-                    tips += '<br/>' + item.point.low.toFixed(2) + '-' + item.point.high.toFixed(2) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
-                    //tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span> : ' + item.point.low.toFixed(2) + '-' + item.point.high.toFixed(2);
+                if ( item.series.name.includes("Missing") ) {
+                    tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
+                } else if ( item.series.name.includes("Accumulation") ) {
+                    tips += '<br/>' + item.y.toFixed(2) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' + year + ' ' +  item.series.name + '</span>';
                 } else {
                     tips += '<br/>' + item.y.toFixed(2) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 }
@@ -115,7 +135,7 @@ class PresentChartsPrecip extends Component {
             text: (station.name==="") ? 'No Data Available - Please try another station.' : 'Recent precipitation @ '+station.name
           },
           subtitle: {
-            text: (station.name==="") ? '' : 'Accumulation since Jan 1'
+            text: (station.name==="") ? '' : 'Accumulation since January 1, ' + year
           },
           exporting: {
             //showTable: true,
@@ -138,12 +158,12 @@ class PresentChartsPrecip extends Component {
               title:{ text:'Precipitation (inches)', style:{"font-size":"14px", color:"#000000"}},
             },
           series: [{
-              name: 'Observed',
+              name: 'Accumulation',
               data: (!app.isPresentLoading) ? createSeries(cdata['obs']['date'],cdata['obs']['pcpn']): [],
               type: "area",
               lineWidth:3,
-              color: 'rgba(0,128,0,1.0)',
-              fillColor: 'rgba(0,128,0,0.3)',
+              color: 'rgba(0,128,0,0.8)',
+              fillColor: 'rgba(0,128,0,0.2)',
               zIndex: 0,
               marker: {
                 enabled: false,
@@ -161,6 +181,23 @@ class PresentChartsPrecip extends Component {
                 enabled: false,
                 symbol: 'circle',
                 radius: 2,
+              },
+          },{
+              name: 'Missing Daily Observation',
+              data: (!app.isPresentLoading) ? createSeriesFlag(cdata['normal']['date'],cdata['obs']['pcpn'],cdata['flag']['pcpn']): [],
+              type: "line",
+              lineWidth:0,
+              color: '#000000',
+              zIndex: 4,
+              marker: {
+                enabled: true,
+                symbol: 'diamond',
+                radius: 3,
+                states: {
+                  hover: {
+                    enabled: false
+                  }
+                }
               },
           }]
         };

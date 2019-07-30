@@ -42,13 +42,8 @@ class HomeContents extends Component {
 
         return (
             <div className="HomeContents">
-                   <div style={{ paddingTop: 20, paddingBottom: 40 }}>
+                   <div style={{ paddingTop: 20, paddingBottom: 20 }}>
                      <Grid container spacing={1} justify="center" xs={12} alignItems="center">
-                      <Grid item>
-                          <Typography variant="h2" className={classes.labelText}>
-                            Nation :
-                          </Typography>
-                      </Grid>
                       <Grid item xs={7} sm={5} md={3}>
                         {app.getNations && app.getNation && <NationSelect names={app.getNations} />}
                       </Grid>

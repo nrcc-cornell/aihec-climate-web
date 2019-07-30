@@ -51,21 +51,7 @@ class AboutContents extends Component {
                       Purpose of these tools
                     </Typography>
                     <Typography align="justify" paragraph variant="body1">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sagittis mauris lectus, vel cursus ipsum auctor sed. Nullam interdum nulla vitae tellus varius facilisis. Etiam dui tortor, pellentesque euismod pretium sed, condimentum quis justo. Aliquam at tristique erat. Phasellus ultricies elit in luctus aliquet. Donec porta commodo consequat. Praesent vitae sapien lacus.
-                    </Typography>
-                    <Typography align="justify" paragraph variant="body1">
-                      Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem.
-                      <ul>
-                        <li>Donec in vehicula tortor.</li>
-                        <li>Duis consequat congue est, et scelerisque nulla rutrum eget.</li>
-                        <li>Praesent non ex lacinia dui bibendum dictum.</li>
-                        <li>Fusce bibendum erat non est auctor, viverra commodo sem euismod. </li>
-                      </ul>
-                    </Typography>
-              </Grid>
-              <Grid item sm={12} md={6}>
-                    <Typography align="left" paragraph variant="h2" className={classes.aboutHeaderText}>
-                      Weather & Climate Data
+These tools are meant to increase the accessibility and usefulness of weather and climate data available to Tribal nations. Data are summarized for nations of interest, and presented in graphical and tabular forms.
                     </Typography>
                     <Typography align="justify" paragraph variant="body1">
 Tools on this site use data from climate models and weather stations located near/within Tribal nations. From these data, nation members can use weather and climate data on a variety of timescales to assess:
@@ -74,6 +60,14 @@ Tools on this site use data from climate models and weather stations located nea
                         <li>how recent weather events compare to normal conditions</li>
                         <li>how their nation may be impacted by a changing climate through the next century</li>
                       </ul>
+                    </Typography>
+                    <Typography align="justify" paragraph variant="body1">
+These assessments are essential to assist nation members in their goal of understanding and preparing for changing climate conditions where they live.
+                    </Typography>
+              </Grid>
+              <Grid item sm={12} md={6}>
+                    <Typography align="left" paragraph variant="h2" className={classes.aboutHeaderText}>
+                      Weather & Climate Data
                     </Typography>
                     <Typography align="justify" paragraph variant="body1">
 The data presented in these tools come from numerous weather station networks across the United States, and are stored in databases managed by <a href="http://www.rcc-acis.org/" rel="noopener noreferrer">Regional Climate Centers</a>. Various networks are designed for different purposes, some measuring different variables (temperature, wind, precipitation, soil moisture, etc) at different timescales (minutes, hours, days).

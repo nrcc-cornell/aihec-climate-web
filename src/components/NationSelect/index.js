@@ -1,19 +1,23 @@
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
 import { withRouter } from "react-router-dom";
-import Select from 'react-select';
-import { array } from 'prop-types'
-import Typography from '@material-ui/core/Typography';
+import PropTypes from 'prop-types';
+//import { inject, observer } from 'mobx-react';
+import { withStyles } from '@material-ui/core/styles';
+import Select from '@material-ui/core/Select';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
 
-//import Control from 'react-leaflet-control';
-
-// Components
-
-// Styles
-import '../../styles/NationSelect.css';
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  formControl: {
+    minWidth: 120,
+  },
+});
 
 var app;
 var history;
@@ -21,56 +25,52 @@ var history;
 @inject('store') @observer
 class NationSelect extends Component {
 
-    static propTypes = {
-      names: array,
-    }
-
-    static defaultProps = {
-      names: [],
-    }
-
     constructor(props) {
         super(props);
         app = this.props.store.app;
         history = this.props.history;
     }
 
-    componentDidMount() {
-      this.forceUpdate();
-    }
-
     // run on selection
-    onChangeNation = (t) => {
-        app.setSelectedNation(t);
-        //history.push('/tools');
+    onChangeNation = (e) => {
+        app.setSelectedNation({'value':e.target.value});
         history.push(app.getToolInfo(app.getToolName).url);
     }
 
     render() {
-
-        let disabled
-        let selectOptions = []
-        for (var v of this.props.names) {
-            disabled = false
-            selectOptions.push({ value: v.name, label: v.name, clearableValue: false, disabled: disabled })
-        }
-        console.log('selectOptions');
-        console.log(selectOptions);
+        const { classes } = this.props;
 
         return (
-          <Typography variant="subtitle2">
-            <Select
-                name="nation"
-                className="nation-select"
-                placeholder={app.getNation.name}
+          <form className={classes.root} autoComplete="off">
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="nation">Nation</InputLabel>
+              <Select
                 value={app.getNation.name}
-                isClearable={false}
-                options={selectOptions}
                 onChange={this.onChangeNation}
-            /> 
-          </Typography>
-        );
+                inputProps={{
+                  name: 'nation',
+                  id: 'nation',
+                }}
+              >
+                {this.props.names &&
+                  this.props.names.map((n,i) => (
+                    <MenuItem
+                      value={n.name}
+                    >
+                      {n.name}
+                    </MenuItem>
+                  ))
+                }
+              </Select>
+            </FormControl>
+          </form>
+        )
     }
+
+};
+
+NationSelect.propTypes = {
+  names: PropTypes.array.isRequired,
 }
 
-export default withRouter(NationSelect);
+export default withRouter(withStyles(styles)(NationSelect));

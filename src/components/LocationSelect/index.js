@@ -78,9 +78,6 @@ class LocationSelect extends Component {
                 <Grid item>
                   <ToolSelect/>
                 </Grid>
-                <Grid item>
-                  <OutputSelect/>
-                </Grid>
               </Grid>
               <Grid container item spacing={1} direction="column" justify="flex-start" alignItems="center">
                 <Grid item>

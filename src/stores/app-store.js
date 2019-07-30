@@ -585,10 +585,13 @@ export class AppStore {
             newData['stn'] = d['stn']
             newData['obs'] = {}
             newData['normal'] = {}
+            newData['flag'] = {}
             newData['obs']['date'] = d['date']
             newData['obs']['pcpn'] = d['pcpn_obs']
             newData['normal']['date'] = d['date']
             newData['normal']['pcpn'] = d['pcpn_normal']
+            newData['flag']['date'] = d['date']
+            newData['flag']['pcpn'] = d['pcpn_flag']
             this.present_precip_data = newData
         }
     @action emptyPresentPrecip = () => {
@@ -600,6 +603,7 @@ export class AppStore {
                     'stn' : "",
                     'obs' : data,
                     'normal' : data,
+                    'flag' : data,
                 };
         }
     @computed get getPresentPrecip() {
@@ -743,14 +747,20 @@ export class AppStore {
         console.log("Call loadPresentPrecip")
         if (this.getLoaderPresentPrecip === false) { this.updateLoaderPresentPrecip(true); }
         this.emptyPresentPrecip()
+        let enddate = moment()
+        enddate = enddate.format("YYYY-MM-DD")
+        let startdate = enddate.split('-')[0]+'-01-01'
         let params = {
             "uid": uid,
             "meta":"name,state",
-            "sdate":"2019-01-01",
-            "edate":"2019-06-13",
+            //"sdate":"2019-01-01",
+            //"edate":"2019-06-13",
+            "sdate":startdate,
+            "edate":enddate,
             "elems":[
                 {"name":"pcpn","interval":[0,0,1],"duration":"ytd","reduce":"sum"},
-                {"name":"pcpn","interval":[0,0,1],"duration":"ytd","reduce":"sum","normal":"1"}
+                {"name":"pcpn","interval":[0,0,1],"duration":"ytd","reduce":"sum","normal":"1"},
+                {"name":"pcpn","add":"f"}
               ]
           }
         return axios
@@ -760,19 +770,22 @@ export class AppStore {
             console.log(res);
             if (!res.data.hasOwnProperty('error')) {
               let i,thisDate
-              let pcpnObsValue,pcpnNormalValue
+              let pcpnObsValue,pcpnNormalValue,pcpnFlagValue
               let data = {}
               data['stn'] = res.data.meta.name+', '+res.data.meta.state
               data['date'] = []
               data['pcpn_obs'] = []
               data['pcpn_normal'] = []
+              data['pcpn_flag'] = []
               for (i=0; i<res.data.data.length; i++) {
                 thisDate = res.data.data[i][0];
                 pcpnObsValue = (res.data.data[i][1]==='M') ? null : ((res.data.data[i][1]==='T') ? 0.00 : parseFloat(res.data.data[i][1]))
                 pcpnNormalValue = (res.data.data[i][2]==='M') ? null : ((res.data.data[i][2]==='T') ? 0.00 : parseFloat(res.data.data[i][2]))
+                pcpnFlagValue = res.data.data[i][3][1]
                 data['date'].push(Date.UTC( thisDate.substr(0,4), thisDate.substr(5,2)-1, thisDate.substr(8,2) ))
                 data['pcpn_obs'].push(pcpnObsValue)
                 data['pcpn_normal'].push(pcpnNormalValue)
+                data['pcpn_flag'].push(pcpnFlagValue)
               }
               this.updatePresentPrecip(data);
             }

@@ -8,10 +8,11 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
-//import white from '@material-ui/core/colors/white';
 import Button from '@material-ui/core/Button';
 import Grid from "@material-ui/core/Grid";
-//import Typography from "@material-ui/core/Typography";
+
+import HelpToolContent from "../HelpToolContent";
+import HelpToolPopover from "../HelpToolPopover";
 
 //import ReactModal from 'react-modal';
 
@@ -110,6 +111,9 @@ class ChartRangeSelector extends Component {
                     </Button>
                     {app.isProjectionLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
                   </div>
+                </Grid>
+                <Grid item>
+                  <HelpToolPopover content={<HelpToolContent/>} />
                 </Grid>
               </Grid>
           </div>
