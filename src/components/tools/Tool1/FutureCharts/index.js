@@ -54,9 +54,17 @@ class FutureCharts extends Component {
 
     getScenarioText = (s) => {
       if (s==='rcp85') {
-        return 'High Emission Model Scenario (RCP 8.5)'
+        return 'High Emissions Scenario (RCP 8.5)'
       } else {
-        return 'Low Emission Model Scenario (RCP 4.5)'
+        return 'Low Emissions Scenario (RCP 4.5)'
+      }
+    }
+
+    getReductionText = (v) => {
+      if (v==='pcpn') {
+        return ''
+      } else {
+        return ' averages'
       }
     }
 
@@ -153,16 +161,14 @@ class FutureCharts extends Component {
                      }
                  },
           chart: {
-            height: '56%',
+            height: '66%',
             marginBottom: 70
           },
           title: {
-            text: varLabel+' @ '+nation
+            text: varLabel+' ('+this.getTimescaleText(this.props.timescale,this.props.season,this.props.month)+this.getReductionText(this.props.variable)+')'
           },
           subtitle: {
-            //text: (this.props.scenario==='rcp85') ? 'High Emission Model Scenario (RCP 8.5)' : 'Low Emission Model Scenario (RCP 4.5)'
-            //text: this.getTimescaleText(this.props.timescale,this.props.season,this.props.month) + ' : ' + this.getScenarioText(this.props.scenario)
-            text: this.getScenarioText(this.props.scenario) + ' : ' + this.getTimescaleText(this.props.timescale,this.props.season,this.props.month)
+            text: nation+', '+this.getScenarioText(this.props.scenario)
           },
           exporting: {
             //showTable: true,

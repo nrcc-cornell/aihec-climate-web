@@ -116,11 +116,14 @@ class PresentCharts extends Component {
                      }
                  },
           chart: {
-            height: '56%',
+            height: '66%',
             marginBottom: 70
           },
           title: {
-            text: (cdata.stn==="" || edata.stn==="") ? 'No Data Available - Please try another station.' : 'Recent temperature @ '+station.name
+            text: (cdata.stn==="" || edata.stn==="") ? 'No Data Available - Please try another station.' : 'Recent Temperatures'
+          },
+          subtitle: {
+            text: (cdata.stn==="" || edata.stn==="") ? '' : 'Station: '+station.name
           },
           exporting: {
             enabled: true,

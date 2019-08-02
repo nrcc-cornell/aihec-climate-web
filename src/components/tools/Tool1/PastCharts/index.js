@@ -54,9 +54,9 @@ class PastCharts extends Component {
 
     getReductionText = (v) => {
       if (v==='pcpn') {
-        return 'total precipitation'
+        return ''
       } else {
-        return 'averages'
+        return ' averages'
       }
     }
 
@@ -138,14 +138,16 @@ class PastCharts extends Component {
                      }
                  },
           chart: {
-            height: '56%',
+            height: '66%',
             marginBottom: 70
           },
           title: {
-            text: varLabel+' @ '+station
+            //text: varLabel+' @ '+station
+            text: varLabel+' ('+this.getTimescaleText(this.props.timescale,this.props.season,this.props.month) + this.getReductionText(this.props.variable) + ')'
           },
           subtitle: {
-            text: this.getTimescaleText(this.props.timescale,this.props.season,this.props.month) + ' ' + this.getReductionText(this.props.variable)
+            //text: this.getTimescaleText(this.props.timescale,this.props.season,this.props.month) + ' ' + this.getReductionText(this.props.variable)
+            text: 'Station: '+station
           },
           exporting: {
             //showTable: true,
@@ -169,9 +171,10 @@ class PastCharts extends Component {
           series: [{
               name: 'Observed',
               type: 'column',
+              visible: (odata[varName+'_normal'][0]) ? true : false,
               data: (app.getPastData['date']!==[]) ? createPastSeries(odata['date'],odata[varName]) : [],
-              color: '#ff0000',
-              negativeColor: '#0088ff',
+              color: (varName==='pcpn') ? '#009900' : '#ff0000',
+              negativeColor: (varName==='pcpn') ? '#9f6934' : '#0088ff',
               threshold: (app.getPastData['date']!==[]) ? odata[varName+'_normal'][0] : 0,
               step: false,
               showInLegend: false,
@@ -185,13 +188,13 @@ class PastCharts extends Component {
           },{
               name : "Observed > Normal",
               data : [],
-              color: '#ff0000',
+              color: (varName==='pcpn') ? '#009900' : '#ff0000',
               lineWidth: 0,
               marker : {symbol:'square',radius:12}
           },{
               name : "Observed < Normal",
               data : [],
-              color: '#0088ff',
+              color: (varName==='pcpn') ? '#9f6934' : '#0088ff',
               lineWidth: 0,
               marker : {symbol:'square',radius:12}
           }]

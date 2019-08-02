@@ -128,14 +128,14 @@ class PresentChartsPrecip extends Component {
                      }
                  },
           chart: {
-            height: '56%',
+            height: '66%',
             marginBottom: 70
           },
           title: {
-            text: (station.name==="") ? 'No Data Available - Please try another station.' : 'Recent precipitation @ '+station.name
+            text: (station.name==="") ? 'No Data Available - Please try another station.' : 'Precipitation since Jan 1, ' + year
           },
           subtitle: {
-            text: (station.name==="") ? '' : 'Accumulation since January 1, ' + year
+            text: (station.name==="") ? '' : 'Station: '+station.name
           },
           exporting: {
             //showTable: true,
