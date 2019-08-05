@@ -7,6 +7,7 @@ import { inject, observer} from 'mobx-react';
 //import Highcharts from 'highcharts/highstock';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import brown from '@material-ui/core/colors/brown';
 
 // Styles
 import '../../../../styles/WxCharts.css';
@@ -29,6 +30,28 @@ class PastCharts extends Component {
         this.exportChart = () => {
           this.chart.exportChart();
         };
+    }
+
+    componentDidMount() {
+        this.updateDisplayState('highcharts-data-table','none');
+    }
+
+    componentDidUpdate(prevProps,prevState) {
+        if ((prevProps.station!==this.props.station) ||
+            (prevProps.variable!==this.props.variable) ||
+            (prevProps.timescale!==this.props.timescale) ||
+            (prevProps.season!==this.props.season) ||
+            (prevProps.month!==this.props.month)) {
+            this.updateDisplayState('highcharts-data-table','none')
+        }
+    }
+
+    updateDisplayState = (className,displayState) => {
+        var elements = document.getElementsByClassName(className)
+
+        for (var i = 0; i < elements.length; i++){
+            elements[i].style.display = displayState;
+        }
     }
 
     getTimescaleText = (t,s,m) => {
@@ -150,12 +173,48 @@ class PastCharts extends Component {
             text: 'Station: '+station
           },
           exporting: {
-            //showTable: true,
+            showTable: true,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'
               }
             },
+            csv: {
+              dateFormat: "%Y"
+            },
+            buttons: {
+                contextButton: {
+                    menuItems: ["downloadPNG","downloadPDF","downloadSVG","separator","downloadCSV"]
+                },
+                dataTableButton: {
+                    text: 'VIEW TABLE',
+                    onclick: () => {
+                        this.updateDisplayState('highcharts-data-table','block');
+                    }
+                }
+            }
+          },
+          navigation: {
+              menuItemHoverStyle: {
+                "background": "#795126", "color": "#ffffff"
+              },
+              buttonOptions: {
+                theme: {
+                    'stroke-width': 1,
+                    stroke: 'rgb(115,64,18,0.6)',
+                    r: 4,
+                    states: {
+                        hover: {
+                            stroke: '#795126',
+                            fill: 'rgb(115,64,18,0.4)'
+                        },
+                        select: {
+                            stroke: '#039',
+                            fill: 'rgb(115,64,18,0.4)'
+                        }
+                    }
+                }
+              }
           },
           tooltip: { useHtml:true, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
               xDateFormat:"%b %d, %Y", shape: 'rect',

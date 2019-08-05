@@ -30,6 +30,24 @@ class PresentCharts extends Component {
         };
     }
 
+    componentDidMount() {
+        this.updateDisplayState('highcharts-data-table','none');
+    }
+
+    componentDidUpdate(prevProps,prevState) {
+        if (prevProps.station!==this.props.station) {
+            this.updateDisplayState('highcharts-data-table','none')
+        }
+    }
+
+    updateDisplayState = (className,displayState) => {
+        var elements = document.getElementsByClassName(className)
+
+        for (var i = 0; i < elements.length; i++){
+            elements[i].style.display = displayState;
+        }
+    }
+
     render() {
 
         let station = this.props.station
@@ -126,9 +144,8 @@ class PresentCharts extends Component {
             text: (cdata.stn==="" || edata.stn==="") ? '' : 'Station: '+station.name
           },
           exporting: {
-            enabled: true,
-            //showTable: false,
-            showTable: app.getOutputType==='chart' ? false : true,
+            //enabled: true,
+            showTable: true,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'
@@ -137,6 +154,39 @@ class PresentCharts extends Component {
             csv: {
               dateFormat: "%Y-%m-%d"
             },
+            buttons: {
+                contextButton: {
+                    menuItems: ["downloadPNG","downloadPDF","downloadSVG","separator","downloadCSV"]
+                },
+                dataTableButton: {
+                    text: 'VIEW TABLE', 
+                    onclick: () => {
+                        this.updateDisplayState('highcharts-data-table','block');
+                    }
+                }
+            }
+          },
+          navigation: {
+              menuItemHoverStyle: {
+                "background": "#795126", "color": "#ffffff"
+              },
+              buttonOptions: {
+                theme: {
+                    'stroke-width': 1,
+                    stroke: 'rgb(115,64,18,0.6)',
+                    r: 4,
+                    states: {
+                        hover: {
+                            stroke: '#795126',
+                            fill: 'rgb(115,64,18,0.4)'
+                        },
+                        select: {
+                            stroke: '#039',
+                            fill: 'rgb(115,64,18,0.4)'
+                        }
+                    }
+                }
+              }
           },
           accessibility: {
             description: 'Shows how temperatures over the last 90 days compare to those normally observed over the same period. Temperature records are also provided for each day, showing if temperatures from this year approached or set new all-time records.'

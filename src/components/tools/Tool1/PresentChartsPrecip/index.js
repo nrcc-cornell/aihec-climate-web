@@ -31,6 +31,24 @@ class PresentChartsPrecip extends Component {
         };
     }
 
+    componentDidMount() {
+        this.updateDisplayState('highcharts-data-table','none');
+    }
+
+    componentDidUpdate(prevProps,prevState) {
+        if (prevProps.station!==this.props.station) {
+            this.updateDisplayState('highcharts-data-table','none')
+        }
+    }
+
+    updateDisplayState = (className,displayState) => {
+        var elements = document.getElementsByClassName(className)
+
+        for (var i = 0; i < elements.length; i++){
+            elements[i].style.display = displayState;
+        }
+    }
+
     render() {
 
         //let station = this.props.station.name
@@ -138,13 +156,48 @@ class PresentChartsPrecip extends Component {
             text: (station.name==="") ? '' : 'Station: '+station.name
           },
           exporting: {
-            //showTable: true,
-            showTable: app.getOutputType==='chart' ? false : true,
+            showTable: true,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'
               }
             },
+            csv: {
+              dateFormat: "%Y-%m-%d"
+            },
+            buttons: {
+                contextButton: {
+                    menuItems: ["downloadPNG","downloadPDF","downloadSVG","separator","downloadCSV"]
+                },
+                dataTableButton: {
+                    text: 'VIEW TABLE', 
+                    onclick: () => {
+                        this.updateDisplayState('highcharts-data-table','block');
+                    }
+                }
+            }
+          },
+          navigation: {
+              menuItemHoverStyle: {
+                "background": "#795126", "color": "#ffffff"
+              },
+              buttonOptions: {
+                theme: {
+                    'stroke-width': 1,
+                    stroke: 'rgb(115,64,18,0.6)',
+                    r: 4,
+                    states: {
+                        hover: {
+                            stroke: '#795126',
+                            fill: 'rgb(115,64,18,0.4)'
+                        },
+                        select: {
+                            stroke: '#039',
+                            fill: 'rgb(115,64,18,0.4)'
+                        }
+                    }
+                }
+              }
           },
           tooltip: { useHtml:true, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
               xDateFormat:"%b %d, %Y", shape: 'rect',
