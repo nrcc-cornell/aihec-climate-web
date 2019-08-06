@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 import React from 'react';
-import PropTypes from 'prop-types';
+//import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 
 const HelpUserContent = () => {

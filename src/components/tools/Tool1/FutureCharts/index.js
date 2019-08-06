@@ -194,7 +194,7 @@ class FutureCharts extends Component {
             text: nation+', '+this.getScenarioText(this.props.scenario)
           },
           exporting: {
-            showTable: true,
+            showTable: false,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'
@@ -209,8 +209,9 @@ class FutureCharts extends Component {
                 },
                 dataTableButton: {
                     text: 'VIEW TABLE', 
-                    onclick: () => {
-                        this.updateDisplayState('highcharts-data-table','block')
+                    onclick: function() {
+                        //this.updateDisplayState('highcharts-data-table','block')
+                        this.viewData();
                     }
                 }
             }

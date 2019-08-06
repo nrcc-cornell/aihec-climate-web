@@ -4,8 +4,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { inject, observer} from 'mobx-react';
+import moment from 'moment';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+
+import LoadExtremePrecipYears from './LoadExtremePrecipYears';
+import LoadExtremePrecipTimeSeries from './LoadExtremePrecipTimeSeries';
 
 // Styles
 import '../../../../styles/WxCharts.css';
@@ -29,15 +33,44 @@ class PresentChartsPrecip extends Component {
         this.exportChart = () => {
           this.chart.exportChart();
         };
+        this.today_mmdd = moment().format('MMDD')
+        this.state = {
+            min_year: null,
+            max_year: null,
+            data_min_year: [],
+            data_max_year: [],
+            isExtremeMaxPrecipLoading: true,
+            isExtremeMinPrecipLoading: true,
+        }
     }
 
     componentDidMount() {
         this.updateDisplayState('highcharts-data-table','none');
+        LoadExtremePrecipYears({uid:this.props.station.uid, enddate_mmdd:this.today_mmdd})
+          .then(response =>
+            this.setState({ min_year: response.min_year, max_year: response.max_year })
+          );
     }
 
     componentDidUpdate(prevProps,prevState) {
         if (prevProps.station!==this.props.station) {
-            this.updateDisplayState('highcharts-data-table','none')
+            this.updateDisplayState('highcharts-data-table','none');
+            LoadExtremePrecipYears({uid:this.props.station.uid, enddate_mmdd:this.today_mmdd})
+              .then(response =>
+                this.setState({ min_year: response.min_year, max_year: response.max_year })
+              );
+        }
+        if ((prevState.min_year!==this.state.min_year) ||
+            (prevState.max_year!==this.state.max_year)) {
+            this.setState({ data_min_year:[], data_max_year: [], isExtremeMaxPrecipLoading: true, isExtremeMinPrecipLoading: true })
+            LoadExtremePrecipTimeSeries({uid:this.props.station.uid, enddate_yyyymmdd:this.state.max_year+this.today_mmdd})
+              .then(response =>
+                this.setState({ data_max_year: response, isExtremeMaxPrecipLoading: false })
+              );
+            LoadExtremePrecipTimeSeries({uid:this.props.station.uid, enddate_yyyymmdd:this.state.min_year+this.today_mmdd})
+              .then(response =>
+                this.setState({ data_min_year: response, isExtremeMinPrecipLoading: false })
+              );
         }
     }
 
@@ -69,6 +102,18 @@ class PresentChartsPrecip extends Component {
             return oseries;
         }
 
+        let createSeriesExtremes = (yearToUse,data) => {
+            let i, date_dt
+            let oseries = [];
+            if (data) {
+                for (i=0; i<data.length; i++) {
+                    date_dt = Date.UTC( parseInt(yearToUse,10), parseInt(data[i][0].slice(5,7),10)-1, parseInt(data[i][0].slice(8),10) )
+                    oseries.push([date_dt,parseFloat(data[i][1])])
+                };
+            }
+            return oseries;
+        }
+
         let createSeriesFlag = (y,a,f) => {
             let i
             let oseries = [];
@@ -86,8 +131,8 @@ class PresentChartsPrecip extends Component {
 
         function tooltipFormatter() {
             var i, item;
-            var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%b %d', this.x) + '</span>';
-            var year = Highcharts.dateFormat('%Y', this.x);
+            var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%b %e', this.x) + '</span>';
+            //var year = Highcharts.dateFormat('%Y', this.x);
             var tips = "";
             for (i=0; i<this.points.length; i++) {
                 item = this.points[i];
@@ -95,7 +140,7 @@ class PresentChartsPrecip extends Component {
                 if ( item.series.name.includes("Missing") ) {
                     tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 } else if ( item.series.name.includes("Accumulation") ) {
-                    tips += '<br/>' + item.y.toFixed(2) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' + year + ' ' +  item.series.name + '</span>';
+                    tips += '<br/>' + item.y.toFixed(2) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 } else {
                     tips += '<br/>' + item.y.toFixed(2) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 }
@@ -103,7 +148,12 @@ class PresentChartsPrecip extends Component {
             return header + tips;
         }
 
-        if (!app.isPresentLoading && app.getPresentPrecip['date']!==[]) {
+        function labelFormatter() {
+            //return '<input type="checkbox"><span style="color: '+this.color+'">'+ this.name + '</span>'; 
+            return '<span style="color: '+this.color+'">'+ this.name + '</span>'; 
+        }
+
+        if (!app.isPresentLoading && !this.state.isExtremeMinPrecipLoading && !this.state.isExtremeMaxPrecipLoading && app.getPresentPrecip['date']!==[]) {
 
         const options = {
                  plotOptions: {
@@ -112,7 +162,7 @@ class PresentChartsPrecip extends Component {
                      },
                      series: {
                          type: 'line',
-                         showCheckbox: false,
+                         showCheckbox: true,
                          pointStart: Date.UTC(1850,1,1),
                          animation: true,
                          lineWidth: 4,
@@ -133,6 +183,7 @@ class PresentChartsPrecip extends Component {
                              }
                          },
                          events: {
+                             legendItemClick: () => false,
                              checkboxClick: function(event) {
                                  if (event.checked) {
                                      this.show();
@@ -156,7 +207,7 @@ class PresentChartsPrecip extends Component {
             text: (station.name==="") ? '' : 'Station: '+station.name
           },
           exporting: {
-            showTable: true,
+            showTable: false,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'
@@ -171,8 +222,8 @@ class PresentChartsPrecip extends Component {
                 },
                 dataTableButton: {
                     text: 'VIEW TABLE', 
-                    onclick: () => {
-                        this.updateDisplayState('highcharts-data-table','block');
+                    onclick: function() {
+                        this.viewData()
                     }
                 }
             }
@@ -200,36 +251,84 @@ class PresentChartsPrecip extends Component {
               }
           },
           tooltip: { useHtml:true, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
-              xDateFormat:"%b %d, %Y", shape: 'rect',
+              shape: 'rect',
+              followPointer: true,
               crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
-          legend: { align: 'center', floating: true, verticalAlign: 'bottom', layout: 'horizontal', x: 0, y: 0 },
+          legend: {
+              enabled: true,
+              useHTML: true,
+              //symbolWidth: 0,
+              symbolRadius: 0,
+              //symbolHeight: 0,
+              align: 'left',
+              floating: true,
+              verticalAlign: 'top',
+              layout: 'vertical',
+              x: 80,
+              y: 60,
+              backgroundColor: '#ffffff',
+              labelFormatter:labelFormatter
+          },
           xAxis: { type: 'datetime', gridLineWidth: 1, crosshair: true, startOnTick: false, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
-                   dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
+                   //dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b<br/>%Y', year:'%Y' },
+                   dateTimeLabelFormats:{ day:'%d %b', week:'%d %b', month:'%b 1', year:'%Y' },
             },
           yAxis: {
               title:{ text:'Precipitation (inches)', style:{"font-size":"14px", color:"#000000"}},
             },
           series: [{
-              name: 'Accumulation',
+              name: 'Accumulation ('+year+')',
               data: (!app.isPresentLoading) ? createSeries(cdata['obs']['date'],cdata['obs']['pcpn']): [],
               type: "area",
               lineWidth:3,
               color: 'rgba(0,128,0,0.8)',
               fillColor: 'rgba(0,128,0,0.2)',
               zIndex: 0,
+              selected: true,
+              visible: true,
               marker: {
                 enabled: false,
                 symbol: 'square',
                 radius: 2,
               },
           },{
-              name: 'Normal',
+              name: 'Normal (1981-2010)',
               data: (!app.isPresentLoading) ? createSeries(cdata['normal']['date'],cdata['normal']['pcpn']): [],
               type: "line",
               lineWidth:3,
               color: '#654321',
               zIndex: 2,
+              selected: true,
+              visible: true,
+              marker: {
+                enabled: false,
+                symbol: 'circle',
+                radius: 2,
+              },
+          },{
+              name: (this.state.max_year) ? 'Highest ('+this.state.max_year+')' : '',
+              data: (!app.isPresentLoading && !this.state.isExtremePrecipLoading) ? createSeriesExtremes(year,this.state.data_max_year): [],
+              type: "line",
+              lineWidth:3,
+              color: '#0000ff',
+              zIndex: 2,
+              selected: false,
+              visible: false,
+              marker: {
+                enabled: false,
+                symbol: 'circle',
+                radius: 2,
+              },
+          },{
+              name: (this.state.min_year) ? 'Lowest ('+this.state.min_year+')' : '',
+              data: (!app.isPresentLoading && !this.state.isExtremePrecipLoading) ? createSeriesExtremes(year,this.state.data_min_year): [],
+              type: "line",
+              lineWidth:3,
+              color: '#ff0000',
+              zIndex: 2,
+              selected: false,
+              visible: false,
               marker: {
                 enabled: false,
                 symbol: 'circle',
@@ -242,6 +341,8 @@ class PresentChartsPrecip extends Component {
               lineWidth:0,
               color: '#000000',
               zIndex: 4,
+              selected: true,
+              visible: true,
               marker: {
                 enabled: true,
                 symbol: 'diamond',

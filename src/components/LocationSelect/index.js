@@ -18,7 +18,7 @@ import Hidden from '@material-ui/core/Hidden';
 //import NationPicker from '../../components/NationPicker';
 //import NationSelect from '../../components/NationSelect';
 import ToolSelect from '../tools/common/ToolSelect'
-import OutputSelect from '../tools/common/OutputSelect'
+//import OutputSelect from '../tools/common/OutputSelect'
 
 // Styles
 import '../../styles/LocationSelect.css';

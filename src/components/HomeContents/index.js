@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+//import Typography from '@material-ui/core/Typography';
 import Grid from "@material-ui/core/Grid";
 //import Hidden from '@material-ui/core/Hidden';
 
@@ -38,7 +38,7 @@ class HomeContents extends Component {
     }
 
     render() {
-        const { classes } = this.props;
+        //const { classes } = this.props;
 
         return (
             <div className="HomeContents">
@@ -60,7 +60,7 @@ class HomeContents extends Component {
 }
 
 HomeContents.propTypes = {
-  classes: PropTypes.object.isRequired,
+  //classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
 };
 

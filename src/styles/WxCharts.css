@@ -65,6 +65,9 @@
 .recharts-cartesian-axis { font-size: calc(10px + 0.2vw); font-family: sans-serif; }
 
 // highcharts table styling
+.highcharts-data-table {
+    display: none;
+}
 .highcharts-data-table table {
     border-collapse: collapse;
     border-spacing: 0;

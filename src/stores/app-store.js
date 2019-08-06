@@ -820,13 +820,13 @@ export class AppStore {
             console.log('SUCCESS downloading PRESENT EXTREMES from ACIS');
             console.log(res);
             if (!res.data.hasOwnProperty('error')) {
-              let i,startDate,thisDate,thisDateDT,lastYear,thisYear,extremeDate,todayDate
+              let i,startDate,thisDate,thisDateMoment,lastYear,thisYear,extremeDate,todayDate
               let maxtExtremeValue,mintExtremeValue
               let data = {}
               // today's date as MM-DD
               todayDate=moment().format('MM-DD')
-              startDate=moment()
-              //startDate = startDate.subtract(90, "days");
+              startDate=moment().format('YYYY-MM-DD')
+              startDate=moment(startDate,'YYYY-MM-DD')
               startDate = startDate.subtract(90, "days");
               // this year as YYYY string
               thisYear=moment().format('YYYY')
@@ -845,12 +845,12 @@ export class AppStore {
                 maxtExtremeValue = (res.data.smry[0][i][0]==='M') ? null : parseFloat(res.data.smry[0][i][0])
                 mintExtremeValue = (res.data.smry[1][i][0]==='M') ? null : parseFloat(res.data.smry[1][i][0])
                 if (thisDate <= todayDate) {
-                    thisDateDT = Date.UTC( thisYear, thisDate.substr(0,2)-1, thisDate.substr(3,2) );
+                    thisDateMoment = moment(thisYear+thisDate.substr(0,2)+thisDate.substr(3,2),'YYYYMMDD' );
                 } else {
-                    thisDateDT = Date.UTC( lastYear, thisDate.substr(0,2)-1, thisDate.substr(3,2) );
+                    thisDateMoment = moment( lastYear+thisDate.substr(0,2)+thisDate.substr(3,2),'YYYYMMDD' );
                 }
-                if (thisDateDT >= startDate) {
-                    data['date'].push(thisDateDT)
+                if (thisDateMoment >= startDate) {
+                    data['date'].push(Date.UTC(thisDateMoment.year(), thisDateMoment.month(), thisDateMoment.date()))
                     data['maxt_extreme'].push(maxtExtremeValue)
                     data['mint_extreme'].push(mintExtremeValue)
                 }

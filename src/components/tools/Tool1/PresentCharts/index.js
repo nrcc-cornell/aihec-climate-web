@@ -36,7 +36,7 @@ class PresentCharts extends Component {
 
     componentDidUpdate(prevProps,prevState) {
         if (prevProps.station!==this.props.station) {
-            this.updateDisplayState('highcharts-data-table','none')
+            this.updateDisplayState('highcharts-data-table','none');
         }
     }
 
@@ -144,8 +144,7 @@ class PresentCharts extends Component {
             text: (cdata.stn==="" || edata.stn==="") ? '' : 'Station: '+station.name
           },
           exporting: {
-            //enabled: true,
-            showTable: true,
+            showTable: false,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'
@@ -160,8 +159,14 @@ class PresentCharts extends Component {
                 },
                 dataTableButton: {
                     text: 'VIEW TABLE', 
-                    onclick: () => {
-                        this.updateDisplayState('highcharts-data-table','block');
+                    //onclick: () => {
+                    //    this.updateDisplayState('highcharts-data-table','block');
+                    //}
+                    onclick: function() {
+                        //this.updateDisplayState('highcharts-data-table','block');
+                        //console.log('get table');
+                        //console.log(this.getTable());
+                        this.viewData();
                     }
                 }
             }

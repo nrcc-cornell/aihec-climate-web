@@ -4,7 +4,7 @@
 import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
 import PropTypes from 'prop-types';
-import LoadingOverlay from 'react-loading-overlay';
+//import LoadingOverlay from 'react-loading-overlay';
 //import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';

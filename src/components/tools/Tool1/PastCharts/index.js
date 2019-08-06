@@ -7,7 +7,7 @@ import { inject, observer} from 'mobx-react';
 //import Highcharts from 'highcharts/highstock';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import brown from '@material-ui/core/colors/brown';
+//import brown from '@material-ui/core/colors/brown';
 
 // Styles
 import '../../../../styles/WxCharts.css';
@@ -173,7 +173,7 @@ class PastCharts extends Component {
             text: 'Station: '+station
           },
           exporting: {
-            showTable: true,
+            showTable: false,
             chartOptions: {
               chart: {
                 backgroundColor: '#ffffff'
@@ -188,8 +188,8 @@ class PastCharts extends Component {
                 },
                 dataTableButton: {
                     text: 'VIEW TABLE',
-                    onclick: () => {
-                        this.updateDisplayState('highcharts-data-table','block');
+                    onclick: function() {
+                        this.viewData()
                     }
                 }
             }
