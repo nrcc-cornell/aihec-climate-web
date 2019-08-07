@@ -5,6 +5,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { inject, observer} from 'mobx-react';
 import moment from 'moment';
+import { withStyles } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import green from '@material-ui/core/colors/green';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -18,8 +21,26 @@ var HighchartsMore = require('highcharts-more');
 HighchartsMore(Highcharts);
 
 require("highcharts/modules/accessibility")(Highcharts);
+require("highcharts/modules/no-data-to-display")(Highcharts);
 require("highcharts/modules/exporting")(Highcharts);
 require("highcharts/modules/export-data")(Highcharts);
+
+const styles = theme => ({
+  wrapper: {
+    position: 'relative',
+  },
+  mainSelect: {
+    marginLeft: '0px'
+  },
+  chartProgress: {
+    color: green[500],
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -60,
+    marginLeft: -40,
+  },
+});
 
 var app;
 
@@ -46,32 +67,40 @@ class PresentChartsPrecip extends Component {
 
     componentDidMount() {
         this.updateDisplayState('highcharts-data-table','none');
-        LoadExtremePrecipYears({uid:this.props.station.uid, enddate_mmdd:this.today_mmdd})
-          .then(response =>
-            this.setState({ min_year: response.min_year, max_year: response.max_year })
-          );
+        this.updateExtremePrecip();
     }
 
     componentDidUpdate(prevProps,prevState) {
         if (prevProps.station!==this.props.station) {
             this.updateDisplayState('highcharts-data-table','none');
+            this.updateExtremePrecip();
+        }
+    }
+
+    reinitState = () => {
+        this.setState({ min_year:null, max_year:null, data_min_year:[], data_max_year:[], isExtremeMaxPrecipLoading:true, isExtremeMinPrecipLoading:true })
+    }
+
+    updateExtremePrecip = () => {
+            this.reinitState();
             LoadExtremePrecipYears({uid:this.props.station.uid, enddate_mmdd:this.today_mmdd})
-              .then(response =>
-                this.setState({ min_year: response.min_year, max_year: response.max_year })
-              );
-        }
-        if ((prevState.min_year!==this.state.min_year) ||
-            (prevState.max_year!==this.state.max_year)) {
-            this.setState({ data_min_year:[], data_max_year: [], isExtremeMaxPrecipLoading: true, isExtremeMinPrecipLoading: true })
-            LoadExtremePrecipTimeSeries({uid:this.props.station.uid, enddate_yyyymmdd:this.state.max_year+this.today_mmdd})
-              .then(response =>
-                this.setState({ data_max_year: response, isExtremeMaxPrecipLoading: false })
-              );
-            LoadExtremePrecipTimeSeries({uid:this.props.station.uid, enddate_yyyymmdd:this.state.min_year+this.today_mmdd})
-              .then(response =>
-                this.setState({ data_min_year: response, isExtremeMinPrecipLoading: false })
-              );
-        }
+              .then(res_years => {
+                  this.setState({ min_year: res_years.min_year, max_year: res_years.max_year });
+                  if (res_years.min_year && res_years.max_year && res_years.min_year!=='M' && res_years.max_year!=='M') {
+                    // extreme years are defined ... data download is attempted ... reinit data and enable loading spinners
+                    LoadExtremePrecipTimeSeries({uid:this.props.station.uid, enddate_yyyymmdd:this.state.max_year+this.today_mmdd})
+                      .then(res_max_data => {
+                        this.setState({ data_max_year: res_max_data, isExtremeMaxPrecipLoading: false });
+                        LoadExtremePrecipTimeSeries({uid:this.props.station.uid, enddate_yyyymmdd:this.state.min_year+this.today_mmdd})
+                          .then(res_min_data => {
+                            this.setState({ data_min_year: res_min_data, isExtremeMinPrecipLoading: false })
+                          });
+                      });
+                  } else {
+                    // extreme years are not defined ... no data download is attempted ... reinit data and stop loading spinners
+                    this.setState({ data_min_year:[], data_max_year: [], isExtremeMaxPrecipLoading: false, isExtremeMinPrecipLoading: false })
+                  }
+              });
     }
 
     updateDisplayState = (className,displayState) => {
@@ -83,6 +112,8 @@ class PresentChartsPrecip extends Component {
     }
 
     render() {
+
+        const { classes } = this.props;
 
         //let station = this.props.station.name
         let station = this.props.station
@@ -250,9 +281,9 @@ class PresentChartsPrecip extends Component {
                 }
               }
           },
-          tooltip: { useHtml:true, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
+          tooltip: { useHtml:false, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
               shape: 'rect',
-              followPointer: true,
+              //followPointer: false,
               crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
           legend: {
@@ -268,6 +299,7 @@ class PresentChartsPrecip extends Component {
               x: 80,
               y: 60,
               backgroundColor: '#ffffff',
+              zIndex: 1000,
               labelFormatter:labelFormatter
           },
           xAxis: { type: 'datetime', gridLineWidth: 1, crosshair: true, startOnTick: false, endOnTick: false, labels: { align: 'center', x: 0, y: 20 },
@@ -277,6 +309,16 @@ class PresentChartsPrecip extends Component {
           yAxis: {
               title:{ text:'Precipitation (inches)', style:{"font-size":"14px", color:"#000000"}},
             },
+          lang: {
+              noData: "Data Not Available"
+          },
+          noData: {
+              style: {
+                  fontWeight: 'bold',
+                  fontSize: '15px',
+                  color: '#303030'
+              }
+          },
           series: [{
               name: 'Accumulation ('+year+')',
               data: (!app.isPresentLoading) ? createSeries(cdata['obs']['date'],cdata['obs']['pcpn']): [],
@@ -370,7 +412,11 @@ class PresentChartsPrecip extends Component {
 
         //return(false);
         return(
-          <div style={{'height':'500px', 'width':'100%', 'clear':'both'}}></div>
+          <div style={{'height':'500px', 'width':'100%', 'clear':'both'}} className={classes.wrapper}>
+              {(app.isPresentLoading || this.state.isExtremeMaxPrecipLoading || this.state.isExtremeMinPrecipLoading) &&
+                  <CircularProgress size={72} className={classes.chartProgress} />
+              }
+          </div>
         );
 
         }
@@ -382,5 +428,5 @@ PresentChartsPrecip.propTypes = {
   station: PropTypes.object.isRequired,
 }
 
-export default PresentChartsPrecip;
+export default withStyles(styles)(PresentChartsPrecip);
 

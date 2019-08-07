@@ -210,7 +210,6 @@ class FutureCharts extends Component {
                 dataTableButton: {
                     text: 'VIEW TABLE', 
                     onclick: function() {
-                        //this.updateDisplayState('highcharts-data-table','block')
                         this.viewData();
                     }
                 }

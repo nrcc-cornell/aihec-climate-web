@@ -377,14 +377,23 @@ export class AppStore {
         }
 
     // Check if a past data is loading
+    //@computed get isPastLoading() {
+    //    if (this.getPastData) {
+    //        if (this.getPastData.date.length > 0 &&
+    //            !this.getLoaderPast) {
+    //                return false;
+    //        } else {
+    //                return true;
+    //        }
+    //    } else {
+    //        return true;
+    //    }
+    //}
+
+    // Check if a past data is loading
     @computed get isPastLoading() {
-        if (this.getPastData) {
-            if (this.getPastData.date.length > 0 &&
-                !this.getLoaderPast) {
-                    return false;
-            } else {
-                    return true;
-            }
+        if (!this.getLoaderPast) {
+            return false;
         } else {
             return true;
         }
@@ -482,13 +491,13 @@ export class AppStore {
               ]
             }
         }
+        console.log('PAST PARAMS');
+        console.log(params);
         return axios
           //.post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPast(uid))
-          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
+          .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PAST DATA from ACIS');
-            //let i,thisDate
-            //let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,snowValue
             let i
             let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,avgtNormal,maxtNormal,mintNormal,pcpnNormal
             let data = {}
@@ -514,7 +523,7 @@ export class AppStore {
                 maxtNormal = (res.data.data[i][6]==='M') ? null : parseFloat(res.data.data[i][6])
                 mintNormal = (res.data.data[i][7]==='M') ? null : parseFloat(res.data.data[i][7])
                 pcpnNormal = (res.data.data[i][8]==='M') ? null : ((res.data.data[i][8]==='T') ? 0.00 : parseFloat(res.data.data[i][8]))
-                if (avgtValue || maxtValue || mintValue || pcpnValue) { validDataFound=true }
+                if ((avgtValue || maxtValue || mintValue || pcpnValue) && (avgtNormal || maxtNormal || mintNormal || pcpnNormal)) { validDataFound=true }
                 if (validDataFound) {
                     data['stn'].push(stnValue)
                     data['date'].push(dateValue)
@@ -529,13 +538,14 @@ export class AppStore {
                 }
             }
             this.updatePastData(data);
-            console.log(this.getPastData);
             if (this.getLoaderPast === true) { this.updateLoaderPast(false); }
+            console.log(this.getPastData);
           })
           .catch(err => {
             console.log(
               "Request Error: " + (err.response.data || err.response.statusText)
             );
+            if (this.getLoaderPast === true) { this.updateLoaderPast(false); }
           });
     }
 
@@ -704,7 +714,8 @@ export class AppStore {
               ]
           }
         return axios
-          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
+          //.post(`${protocol}//data.rcc-acis.org/StnData`, params)
+          .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PRESENT DATA from ACIS');
             console.log(res);
@@ -739,6 +750,7 @@ export class AppStore {
             console.log(
               "Request Error: " + (err.response.data || err.response.statusText)
             );
+            if (this.getLoaderPresent === true) { this.updateLoaderPresent(false); }
           });
     }
 
@@ -764,7 +776,8 @@ export class AppStore {
               ]
           }
         return axios
-          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
+          //.post(`${protocol}//data.rcc-acis.org/StnData`, params)
+          .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PRESENT PRECIP from ACIS');
             console.log(res);
@@ -795,6 +808,7 @@ export class AppStore {
             console.log(
               "Request Error: " + (err.response.data || err.response.statusText)
             );
+            if (this.getLoaderPresentPrecip === true) { this.updateLoaderPresentPrecip(false); }
           });
     }
 
@@ -815,7 +829,7 @@ export class AppStore {
           }
         return axios
           //.post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresentExtremes)
-          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
+          .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('SUCCESS downloading PRESENT EXTREMES from ACIS');
             console.log(res);
@@ -863,6 +877,7 @@ export class AppStore {
             console.log(
               "Request Error: " + (err.response.data || err.response.statusText)
             );
+            if (this.getLoaderPresentExtremes === true) { this.updateLoaderPresentExtremes(false); }
           });
     }
 

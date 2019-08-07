@@ -14,6 +14,7 @@ var HighchartsMore = require('highcharts-more');
 HighchartsMore(Highcharts);
 
 require("highcharts/modules/accessibility")(Highcharts);
+require("highcharts/modules/no-data-to-display")(Highcharts);
 require("highcharts/modules/exporting")(Highcharts);
 require("highcharts/modules/export-data")(Highcharts);
 
@@ -138,7 +139,7 @@ class PresentCharts extends Component {
             marginBottom: 70
           },
           title: {
-            text: (cdata.stn==="" || edata.stn==="") ? 'No Data Available - Please try another station.' : 'Recent Temperatures'
+            text: 'Recent Temperatures'
           },
           subtitle: {
             text: (cdata.stn==="" || edata.stn==="") ? '' : 'Station: '+station.name
@@ -207,6 +208,16 @@ class PresentCharts extends Component {
           yAxis: {
               title:{ text:'Temperature (°F)', style:{"font-size":"14px", color:"#000000"}},
             },
+          lang: {
+              noData: "No Data Available - Please try another station."
+          },
+          noData: {
+              style: {
+                  fontWeight: 'bold',
+                  fontSize: '15px',
+                  color: '#303030'
+              }
+          },
           series: [{
               name: 'Observed Range',
               data: (!app.isPresentLoading) ? createRanges(cdata['obs']['date'],cdata['obs']['mint'],cdata['obs']['maxt']): [],

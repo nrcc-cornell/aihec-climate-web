@@ -22,8 +22,10 @@ const LoadExtremePrecipTimeSeries = ({uid,enddate_yyyymmdd}) => {
                 "reduce":"sum"
               }]
           }
+        console.log('PARAMS');
+        console.log(params);
         return axios
-          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
+          .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('LoadExtremePrecipTimeSeries success');
             console.log(res.data.data);

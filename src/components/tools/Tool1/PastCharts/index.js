@@ -16,6 +16,7 @@ var HighchartsMore = require('highcharts-more');
 HighchartsMore(Highcharts);
 
 require("highcharts/modules/accessibility")(Highcharts);
+require("highcharts/modules/no-data-to-display")(Highcharts);
 require("highcharts/modules/exporting")(Highcharts);
 require("highcharts/modules/export-data")(Highcharts);
 
@@ -117,8 +118,8 @@ class PastCharts extends Component {
             return header + tips;
         }
 
-        //if (!app.isPastLoading && app.getPastData['date']!==[]) {
-        if (true) {
+        if (!app.isPastLoading && app.getPastData['date']!==[]) {
+        //if (true) {
 
         const options = {
                  plotOptions: {
@@ -227,6 +228,16 @@ class PastCharts extends Component {
           yAxis: {
               title:{ text:app.wxgraph_getVarLabels[this.props.variable]+' ('+app.wxgraph_getVarUnits[this.props.variable]+')', style:{"font-size":"14px", color:"#000000"}},
             },
+          lang: {
+              noData: "Unable To Display Data - Please try another station." 
+          },
+          noData: {
+              style: {
+                  fontWeight: 'bold',
+                  fontSize: '15px',
+                  color: '#303030'
+              }
+          },
           series: [{
               name: 'Observed',
               type: 'column',
@@ -271,7 +282,10 @@ class PastCharts extends Component {
 
         } else {
 
-        return(false);
+        //return(false);
+        return(
+          <div style={{'height':'500px', 'width':'100%', 'clear':'both'}}></div>
+        );
 
         }
 

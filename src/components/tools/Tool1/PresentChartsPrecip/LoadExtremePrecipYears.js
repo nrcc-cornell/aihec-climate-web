@@ -33,7 +33,7 @@ const LoadExtremePrecipYears = ({uid,enddate_mmdd}) => {
               }]
           }
         return axios
-          .post(`${protocol}//data.rcc-acis.org/StnData`, params)
+          .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
             console.log('LoadExtremePrecipYears success');
             let minYear = res.data.smry[0][1].split('-')[0]
