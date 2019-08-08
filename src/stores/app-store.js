@@ -188,62 +188,6 @@ export class AppStore {
     ///////////////////////////////////////////////////////
     /// Tool: Climate Viewer
     ///////////////////////////////////////////////////////
-    /// chart details
-    /// which time range is selected?
-    /// past : observed annual values through last year
-    /// present : two months of daily observed data and normals
-    /// future: model projections from next year through 2100
-    @observable chart_view='present';
-    @action setChartView = (v) => {
-        this.chart_view = v;
-    };
-    @computed get getChartView() { return this.chart_view };
-    @computed get chartViewIsPast() { return this.getChartView==='past' };
-    @computed get chartViewIsPresent() { return this.getChartView==='present' };
-    @computed get chartViewIsFuture() { return this.getChartView==='future' };
-
-    /// which variable is active?
-    /// possibilities are 'avgt','mint','maxt','pcpn','snow'
-    @observable wxgraph_var = 'avgt';
-    @action wxgraph_setVar = (v) => {
-        this.wxgraph_var = v;
-    };
-    @action wxgraph_setVarFromRadioGroup = (e) => {
-        let t = e.target.value;
-        // has the var changed?
-        let changed = (this.wxgraph_getVar===t) ? false : true
-        // only update and download data if time frame has changed
-        if (changed===true) {
-            this.wxgraph_var = t;
-            //this.wxgraph_downloadData()
-        }
-    }
-    @action wxgraph_setVarFromInput = (e) => {
-        let t = e.target.value;
-        // has the var changed?
-        let changed = (this.wxgraph_getVar===t) ? false : true
-        // only update and download data if time frame has changed
-        if (changed===true) {
-            this.wxgraph_var = t;
-            //this.wxgraph_downloadData()
-        }
-    }
-    @computed get wxgraph_getVar() { return this.wxgraph_var };
-
-    /// which output type is active?
-    @observable outputType = 'chart';
-    @action setOutputType = (changeEvent) => {
-        console.log('Changing output type to ', changeEvent.target.value)
-        this.outputType = changeEvent.target.value
-    }
-    // set outputType from select menu
-    @action setSelectedOutputType = (t) => {
-            if (this.getOutputType !== t) {
-                this.outputType = t.value;
-            }
-        };
-    @computed get getOutputType() { return this.outputType };
-
     @computed get wxgraph_getVarUnits() {
         let varUnits = {}
         varUnits = {
@@ -264,74 +208,6 @@ export class AppStore {
           pcpn : 'Total Precipitation',
           snow : 'Total Snowfall',
         };
-    }
-
-    // timescale
-    // annual, seasonal, or monthly
-    @observable timescale='annual'
-    @action updateTimescale = (t) => {
-        this.timescale = t
-    }
-    @action updateTimescaleFromMenu = (e) => {
-        let t = e.target.value;
-        // has the timescale changed?
-        let changed = (this.timescale===t) ? false : true
-        // only update if timescale has changed
-        if (changed===true) {
-            this.timescale = t
-            console.log('timescale updated: ',this.getTimescale)
-        }
-    }
-    @computed get getTimescale() {
-        return this.timescale
-    }
-
-    // time period: month
-    // jan,feb,mar,...,oct,nov,dec
-    @observable period_month='jan'
-    @action updatePeriodMonth = (t) => {
-        this.period_month = t
-    }
-    @action updatePeriodMonthFromMenu = (e) => {
-        let t = e.target.value;
-        // has the month changed?
-        let changed = (this.period_month===t) ? false : true
-        // only update if timescale has changed
-        if (changed===true) {
-            this.period_month = t
-            if (this.chartViewIsPast) { this.loadPastData() }
-            //console.log('period_month updated: ',this.getPeriodMonth)
-        }
-    }
-    @computed get getPeriodMonth() {
-        return this.period_month
-    }
-    @computed get getPeriodMonthAsNumber() {
-        let monthNum = {
-          'jan':'01','feb':'02','mar':'03','apr':'04','may':'05','jun':'06',
-          'jul':'07','aug':'08','sep':'09','oct':'10','nov':'11','dec':'12'
-        }
-        return monthNum[this.period_month]
-    }
-
-    // time period: season
-    // djf,mam,jja,son
-    @observable period_season='djf'
-    @action updatePeriodSeason = (t) => {
-        this.period_season = t
-    }
-    @action updatePeriodSeasonFromMenu = (e) => {
-        let t = e.target.value;
-        // has the season changed?
-        let changed = (this.period_season===t) ? false : true
-        // only update if timescale has changed
-        if (changed===true) {
-            this.period_season = t
-            //console.log('period_season updated: ',this.getPeriodSeason)
-        }
-    }
-    @computed get getPeriodSeason() {
-        return this.period_season
     }
 
     //////////////////////////////////
@@ -377,20 +253,6 @@ export class AppStore {
         }
 
     // Check if a past data is loading
-    //@computed get isPastLoading() {
-    //    if (this.getPastData) {
-    //        if (this.getPastData.date.length > 0 &&
-    //            !this.getLoaderPast) {
-    //                return false;
-    //        } else {
-    //                return true;
-    //        }
-    //    } else {
-    //        return true;
-    //    }
-    //}
-
-    // Check if a past data is loading
     @computed get isPastLoading() {
         if (!this.getLoaderPast) {
             return false;
@@ -407,25 +269,6 @@ export class AppStore {
     @computed get getLoaderPast() {
             return this.loader_past
         }
-
-    // Past data download - set parameters
-    //@computed get getAcisParamsPast(uid) {
-    //        let elems
-    //        elems = [
-    //            {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"mint","interval":[1],"duration":"yly","reduce":{"reduce":"mean"},"maxmissing":10},
-    //            {"name":"pcpn","interval":[1],"duration":"yly","reduce":{"reduce":"sum"},"maxmissing":10},
-    //        ]
-    //        return {
-    //            //"sid": this.getStationFromNation,
-    //            "uid": uid,
-    //            "meta":"name,state",
-    //            "sdate":"por",
-    //            "edate":"por",
-    //            "elems":elems
-    //        }
-    //    }
 
     // Past data download - download data using parameters
     @action loadPastData = (uid,timescale,season,month) => {
@@ -884,24 +727,6 @@ export class AppStore {
     //////////////////////////////////
     // PROJECTIONS
     //////////////////////////////////
-
-    @observable state_id = 'NY';
-    @action updateStateId = (id) => {
-            this.stateId = id
-        }
-    @computed get getStateId() {
-            return this.state_id
-        }
-
-    // model scenario management
-    // 'rcp85' : High emissions scenario, RCP 8.5
-    // 'rcp45' : Low emissions scenario, RCP 4.5
-    @observable model_scenario = 'rcp85';
-    @action setModelScenario = (changeEvent) => {
-        console.log('Changing model scenario to ', changeEvent.target.value)
-        this.model_scenario = changeEvent.target.value
-    }
-    @computed get getModelScenario() { return this.model_scenario };
 
     // store downloaded livneh data
     @observable livneh_data = null;

@@ -116,15 +116,16 @@ class FutureChartsForAK extends Component {
         }
 
         function tooltipFormatter() {
+            let precision = (varName==='pcpn') ? 2 : 1
             var i, item;
             var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%Y', this.x) + '</span>';
             var tips = "";
             for (i=0; i<this.points.length; i++) {
                 item = this.points[i];
                 if ( item.series.name.includes("range") ) {
-                    tips += '<br/>' + item.point.low.toFixed(0) + '-' + item.point.high.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
+                    tips += '<br/>' + item.point.low.toFixed(precision) + '-' + item.point.high.toFixed(precision) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 } else {
-                    tips += '<br/>' + item.y.toFixed(0) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
+                    tips += '<br/>' + item.y.toFixed(precision) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 }
             }
             return header + tips;
