@@ -283,8 +283,64 @@ class PresentChartsPrecip extends Component {
           },
           tooltip: { useHtml:false, shared:true, borderColor:"#000000", borderWidth:2, borderRadius:8, shadow:false, backgroundColor:"#ffffff",
               shape: 'rect',
+              //split: true,
               //followPointer: false,
-              crosshairs: { width:1, color:"#ff0000", snap:true }, formatter:tooltipFormatter },
+              crosshairs: { width:1, color:"#ff0000", snap:true },
+              //positioner: function(boxWidth, boxHeight, point) {         
+              //  return {x:point.plotX + 20,y:point.plotY};         
+              //},
+              //positioner: function(boxWidth, boxHeight, point) {
+              //  return { x: point.plotX, y: this.chart.plotHeight };
+              //},
+              positioner: function(boxWidth, boxHeight, point) {
+                  // Set up the variables
+                  var chart = this.chart,
+                      plotLeft = chart.plotLeft,
+                      plotTop = chart.plotTop,
+                      plotWidth = chart.plotWidth,
+                      plotHeight = chart.plotHeight,
+                      distance = 12, // You can use a number directly here, as you may not be able to use pick, as its an internal highchart function 
+                      pointX = point.plotX,
+                      pointY = point.plotY,
+                      x = pointX + plotLeft + (chart.inverted ? distance : -boxWidth - distance),
+                      //y = pointY - boxHeight + plotTop + 15, // 15 means the point is 15 pixels up from the bottom of the tooltip
+                      y = plotHeight,
+                      alignedRight;
+
+                  // It is too far to the left, adjust it
+                  if (x < 7) {
+                      x = plotLeft + pointX + distance;
+                  }
+
+                  // Test to see if the tooltip is too far to the right,
+                  // if it is, move it back to be inside and then up to not cover the point.
+                  if ((x + boxWidth) > (plotLeft + plotWidth)) {
+                      x -= (x + boxWidth) - (plotLeft + plotWidth);
+                      y = pointY - boxHeight + plotTop - distance;
+                      alignedRight = true;
+                  }
+
+                  // If it is now above the plot area, align it to the top of the plot area
+                  if (y < plotTop + 5) {
+                      y = plotTop + 5;
+
+                      // If the tooltip is still covering the point, move it below instead
+                      if (alignedRight && pointY >= y && pointY <= (y + boxHeight)) {
+                          y = pointY + plotTop + distance; // below
+                      }
+                  } 
+
+                  // Now if the tooltip is below the chart, move it up. It's better to cover the
+                  // point than to disappear outside the chart. #834.
+                  if (y + boxHeight > plotTop + plotHeight) {
+                      //y = mathMax(plotTop, plotTop + plotHeight - boxHeight - distance); // below
+                      y = plotTop + plotHeight - boxHeight - distance; // below
+                  }
+
+                  return {x: x, y: y};
+              },
+              formatter:tooltipFormatter,
+          },
           credits: { text:"Powered by ACIS", href:"http://www.rcc-acis.org/", color:"#000000" },
           legend: {
               enabled: true,

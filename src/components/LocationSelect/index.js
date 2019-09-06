@@ -13,12 +13,7 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Hidden from '@material-ui/core/Hidden';
 
-//import ReactModal from 'react-modal';
-//import StationPicker from '../../components/StationPicker';
-//import NationPicker from '../../components/NationPicker';
-//import NationSelect from '../../components/NationSelect';
-import ToolSelect from '../tools/common/ToolSelect'
-//import OutputSelect from '../tools/common/OutputSelect'
+//import ToolSelect from '../tools/common/ToolSelect'
 
 // Styles
 import '../../styles/LocationSelect.css';
@@ -74,11 +69,13 @@ class LocationSelect extends Component {
 
         return (
           <div>
+            {/* removal of tool selection
               <Grid container item spacing={3} direction="row" justify="flex-start" alignItems="flex-start" className={classes.mainSelect}>
                 <Grid item>
                   <ToolSelect/>
                 </Grid>
               </Grid>
+            */}
               <Grid container item spacing={1} direction="column" justify="flex-start" alignItems="center">
                 <Grid item>
                   <Typography variant='h2' className={classes.titleText} noWrap>

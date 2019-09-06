@@ -12,6 +12,8 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 //import { borders } from '@material-ui/system';
 
+import ciglogo from '../../../../assets/logo-climate-impacts-group.png'
+
 import StationPickerMap from '../../common/StationPickerMap';
 import VarPicker from '../VarPicker';
 import ScenarioPicker from '../ScenarioPicker';
@@ -33,6 +35,9 @@ const styles = theme => ({
   },
   button: {
     color: red[500],
+  },
+  buttonUW: {
+    textTransform: 'none',
   },
 });
 
@@ -118,8 +123,9 @@ class UserInput extends React.Component {
         </Grid>
         <Grid item>
           {this.props.selected_view==='future' && uw_nations.includes(this.props.selected_nation.name) &&
-              <Button variant="outlined" color="secondary" size="small" href="https://climate.northwestknowledge.net/NWTOOLBOX/tribalProjections.php" target="_blank" rel="noopener">
-                {"** view additional projection data for this location (external tool)"}
+              <Button className={classes.buttonUW} variant="outlined" color="secondary" size="small" href="https://climate.northwestknowledge.net/NWTOOLBOX/tribalProjections.php" target="_blank" rel="noopener">
+                <img src={ciglogo} width="61" hspace="20" alt="Climate Impacts Group" />
+                {"** view additional projections for this location (external site)"}
               </Button>
           }
         </Grid>
