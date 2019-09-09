@@ -1,6 +1,6 @@
 {
   "name": "nrcc-aihec-tools",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "homepage": "https://aihec-climate.github.io/aihec-climate-web",
   "private": true,
   "devDependencies": {
