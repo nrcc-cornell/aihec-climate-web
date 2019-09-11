@@ -34,6 +34,7 @@ class NationSelect extends Component {
     // run on selection
     onChangeNation = (e) => {
         app.setSelectedNation({'value':e.target.value});
+        app.setActivePage(2);
         history.push(app.getToolInfo(app.getToolName).url);
     }
 

@@ -44,6 +44,7 @@ class ToolContents extends Component {
     constructor(props) {
         super(props);
         app = this.props.store.app;
+        app.setActivePage(2);
     }
 
     render() {

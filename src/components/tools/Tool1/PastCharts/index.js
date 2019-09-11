@@ -103,6 +103,14 @@ class PastCharts extends Component {
             return oseries;
         }
 
+        let getPositiveColor = (v) => {
+            return (v==='pcpn') ? '#009900' : '#ff0000';
+        }
+
+        let getNegativeColor = (v) => {
+            return (varName==='pcpn') ? '#9f6934' : '#0088ff';
+        }
+
         function tooltipFormatter() {
             let precision = (varName==='pcpn') ? 2 : 1
             var i, item;
@@ -240,8 +248,10 @@ class PastCharts extends Component {
               type: 'column',
               visible: (odata[varName+'_normal'][0]) ? true : false,
               data: (app.getPastData['date']!==[]) ? createPastSeries(odata['date'],odata[varName]) : [],
-              color: (varName==='pcpn') ? '#009900' : '#ff0000',
-              negativeColor: (varName==='pcpn') ? '#9f6934' : '#0088ff',
+              color: getPositiveColor(varName),
+              negativeColor: getNegativeColor(varName),
+              //color: (varName==='pcpn') ? '#009900' : '#ff0000',
+              //negativeColor: (varName==='pcpn') ? '#9f6934' : '#0088ff',
               threshold: (app.getPastData['date']!==[]) ? odata[varName+'_normal'][0] : 0,
               step: false,
               showInLegend: false,
@@ -255,14 +265,16 @@ class PastCharts extends Component {
           },{
               name : "Observed > Normal",
               data : [],
-              color: (varName==='pcpn') ? '#009900' : '#ff0000',
+              //color: (varName==='pcpn') ? '#009900' : '#ff0000',
+              color: getPositiveColor(varName),
               lineWidth: 0,
               includeInDataExport: false,
               marker : {symbol:'square',radius:12}
           },{
               name : "Observed < Normal",
               data : [],
-              color: (varName==='pcpn') ? '#9f6934' : '#0088ff',
+              //color: (varName==='pcpn') ? '#9f6934' : '#0088ff',
+              color: getNegativeColor(varName),
               lineWidth: 0,
               includeInDataExport: false,
               marker : {symbol:'square',radius:12}
