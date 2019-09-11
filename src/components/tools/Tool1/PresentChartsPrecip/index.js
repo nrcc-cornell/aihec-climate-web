@@ -139,7 +139,11 @@ class PresentChartsPrecip extends Component {
             if (data) {
                 for (i=0; i<data.length; i++) {
                     date_dt = Date.UTC( parseInt(yearToUse,10), parseInt(data[i][0].slice(5,7),10)-1, parseInt(data[i][0].slice(8),10) )
-                    oseries.push([date_dt,parseFloat(data[i][1])])
+                    if (isNaN(data[i][1])) {
+                        oseries.push([date_dt,null])
+                    } else {
+                        oseries.push([date_dt,parseFloat(data[i][1])])
+                    }
                 };
             }
             return oseries;
@@ -160,6 +164,21 @@ class PresentChartsPrecip extends Component {
             return oseries;
         }
 
+        let createSeriesFlagAsM = (y,a,f) => {
+            let i
+            let oseries = [];
+            if (a) {
+                for (i=0; i<y.length; i++) {
+                    if (f[i]==='M') {
+                        oseries.push([y[i],'M'])
+                    } else {
+                        oseries.push([y[i],null])
+                    }
+                };
+            }
+            return oseries;
+        }
+
         function tooltipFormatter() {
             var i, item;
             var header = '<span style="font-size:14px;font-weight:bold;text-align:center">' + Highcharts.dateFormat('%b %e', this.x) + '</span>';
@@ -168,7 +187,8 @@ class PresentChartsPrecip extends Component {
             for (i=0; i<this.points.length; i++) {
                 item = this.points[i];
                 //console.log(item);
-                if ( item.series.name.includes("Missing") ) {
+                //if ( item.series.name.includes("Missing") ) {
+                if ( item.series.name==="Missing Daily Observation" ) {
                     tips += '<br/><span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
                 } else if ( item.series.name.includes("Accumulation") ) {
                     tips += '<br/>' + item.y.toFixed(2) + ' : <span style="color:'+item.color+';font-size:12px;font-weight:bold">' +  item.series.name + '</span>';
@@ -441,6 +461,7 @@ class PresentChartsPrecip extends Component {
               zIndex: 4,
               selected: true,
               visible: true,
+              includeInDataExport: false,
               marker: {
                 enabled: true,
                 symbol: 'diamond',
@@ -450,6 +471,18 @@ class PresentChartsPrecip extends Component {
                     enabled: false
                   }
                 }
+              },
+          },{
+              name: 'Missing Daily Observations',
+              data: (!app.isPresentLoading) ? createSeriesFlagAsM(cdata['normal']['date'],cdata['obs']['pcpn'],cdata['flag']['pcpn']): [],
+              type: "line",
+              lineWidth:0,
+              selected: true,
+              visible: true,
+              showInLegend: false,
+              includeInDataExport: true,
+              marker: {
+                enabled: false,
               },
           }]
         };

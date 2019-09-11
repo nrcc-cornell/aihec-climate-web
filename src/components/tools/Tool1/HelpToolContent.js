@@ -16,11 +16,11 @@ const HelpToolContent = () => {
               </p>
               <p>
                 <b>RECENT</b> view shows daily weather observations over the past 3 months (temperature) or season (precipitation) from the selected station near your nation.
-                <ul>
-                  <li>Daily temperature ranges are presented with references to normal and extreme records observed at the site.</li>
-                  <li>Accumulated precipitation for the current year (since January 1) is provided, with reference to normal amounts. </li>
-                </ul>
               </p>
+              <ul>
+                <li>Daily temperature ranges are presented with references to normal and extreme records observed at the site.</li>
+                <li>Accumulated precipitation for the current year (since January 1) is provided, with reference to normal amounts. </li>
+              </ul>
               <p>
                 <b>FUTURE</b> view shows averages and ranges of 32 climate models from 1981-2099. Observed values from 1981-2013 are overlayed on the climate model results for reference. These climate models were executed during a joint project in the early part of this century. The blue shading represents years that were simulated by the climate models, while the red shading represents years that were projected by the climate models. <b>NOTE: For nations in Alaska</b>, output from only two climate models are available to view, and each are shown on charts.
               </p>

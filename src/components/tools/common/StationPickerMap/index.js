@@ -104,8 +104,8 @@ class StationPickerMap extends Component {
         return axios
           .post(`${protocol}//data.rcc-acis.org/StnMeta`, params)
           .then(res => {
-            console.log('SUCCESS downloading STATIONS IN BBOX from ACIS');
-            console.log(res);
+            //console.log('SUCCESS downloading STATIONS IN BBOX from ACIS');
+            //console.log(res);
             let uidList = res.data.meta.map((s,i) => (s.uid.toString()))
             if (v==='temp') {
               this.setState({ stations_temp_present: res.data.meta });
@@ -137,8 +137,8 @@ class StationPickerMap extends Component {
         return axios
           .post(`${protocol}//data.rcc-acis.org/StnMeta`, params)
           .then(res => {
-            console.log('SUCCESS downloading LONG-TERM STATIONS from ACIS');
-            console.log(res);
+            //console.log('SUCCESS downloading LONG-TERM STATIONS from ACIS');
+            //console.log(res);
             if (v==='temp') {
               this.setState({ stations_temp_past: res.data.meta });
             } else {

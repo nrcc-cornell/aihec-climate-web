@@ -82,8 +82,8 @@ export class AppStore {
             return {'name':name, 'title':title, 'tagline':tagline, 'thumbnail':thumbnail, 'url':url, 'onclick':onclick}
         };
 
-    //@computed get getNationGeojson() { return us_aiannh_pilot };
-    @computed get getNationGeojson() { console.log(us_aiannh_pilot); return us_aiannh_pilot };
+    //@computed get getNationGeojson() { console.log(us_aiannh_pilot); return us_aiannh_pilot };
+    @computed get getNationGeojson() { return us_aiannh_pilot };
 
     /// manage currently active nation
     // get currently selected nation object (for nation select and nation picker)
@@ -91,12 +91,14 @@ export class AppStore {
     @action setNation = (l) => {
         if (this.getNation.name !== l.toString()) {
             this.nation = this.getNations.find(obj => obj.name === l);
+            localStorage.setItem("TRIBAL-CLIMATE-TOOLS.nation",l)
         };
     }
     // set nation from select menu
     @action setSelectedNation = (t) => {
             if (this.getNation.name !== t.value) {
                 this.nation = this.getNations.find(obj => obj.name.toString() === t.value);
+                localStorage.setItem("TRIBAL-CLIMATE-TOOLS.nation",t.value)
             }
             if (this.getShowModalMap) { this.setShowModalMap(false) };
         };
@@ -272,7 +274,7 @@ export class AppStore {
 
     // Past data download - download data using parameters
     @action loadPastData = (uid,timescale,season,month) => {
-        console.log("Call loadPastData")
+        //console.log("Call loadPastData")
         if (this.getLoaderPast === false) { this.updateLoaderPast(true); }
         this.emptyPastData()
         let params={}
@@ -334,13 +336,14 @@ export class AppStore {
               ]
             }
         }
-        console.log('PAST PARAMS');
-        console.log(params);
+        //console.log('PAST PARAMS');
+        //console.log(params);
         return axios
           //.post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPast(uid))
           .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
-            console.log('SUCCESS downloading PAST DATA from ACIS');
+            //console.log('SUCCESS downloading PAST DATA from ACIS');
+            //console.log(res);
             let i
             let stnValue,dateValue,avgtValue,maxtValue,mintValue,pcpnValue,avgtNormal,maxtNormal,mintNormal,pcpnNormal
             let data = {}
@@ -357,7 +360,8 @@ export class AppStore {
             let validDataFound=false
             for (i=0; i<res.data.data.length; i++) {
                 stnValue = res.data.meta.name+', '+res.data.meta.state
-                dateValue = Date.UTC(res.data.data[i][0].slice(0,4),res.data.data[i][0].slice(5)-1,1)
+                //dateValue = Date.UTC(res.data.data[i][0].slice(0,4),res.data.data[i][0].slice(5)-1,1)
+                dateValue = (res.data.data[i][0].length===4) ? Date.UTC(res.data.data[i][0],0,1) : Date.UTC(res.data.data[i][0].slice(0,4),res.data.data[i][0].slice(5)-1,1)
                 avgtValue = (res.data.data[i][1]==='M') ? null : parseFloat(res.data.data[i][1])
                 maxtValue = (res.data.data[i][2]==='M') ? null : parseFloat(res.data.data[i][2])
                 mintValue = (res.data.data[i][3]==='M') ? null : parseFloat(res.data.data[i][3])
@@ -382,7 +386,7 @@ export class AppStore {
             }
             this.updatePastData(data);
             if (this.getLoaderPast === true) { this.updateLoaderPast(false); }
-            console.log(this.getPastData);
+            //console.log(this.getPastData);
           })
           .catch(err => {
             console.log(
@@ -536,7 +540,7 @@ export class AppStore {
 
     // Present data download - download data using parameters
     @action loadPresentData = (uid) => {
-        console.log("Call loadPresentData")
+        //console.log("Call loadPresentData")
         if (this.getLoaderPresent === false) { this.updateLoaderPresent(true); }
         this.emptyPresentData()
         let startdate = moment();
@@ -560,8 +564,8 @@ export class AppStore {
           //.post(`${protocol}//data.rcc-acis.org/StnData`, params)
           .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
-            console.log('SUCCESS downloading PRESENT DATA from ACIS');
-            console.log(res);
+            //console.log('SUCCESS downloading PRESENT DATA from ACIS');
+            //console.log(res);
             if (!res.data.hasOwnProperty('error')) {
               let i,thisDate
               let maxtObsValue,mintObsValue,maxtNormalValue,mintNormalValue
@@ -599,7 +603,7 @@ export class AppStore {
 
     // Present precipitation download - download data using parameters
     @action loadPresentPrecip = (uid) => {
-        console.log("Call loadPresentPrecip")
+        //console.log("Call loadPresentPrecip")
         if (this.getLoaderPresentPrecip === false) { this.updateLoaderPresentPrecip(true); }
         this.emptyPresentPrecip()
         let enddate = moment()
@@ -622,8 +626,8 @@ export class AppStore {
           //.post(`${protocol}//data.rcc-acis.org/StnData`, params)
           .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
-            console.log('SUCCESS downloading PRESENT PRECIP from ACIS');
-            console.log(res);
+            //console.log('SUCCESS downloading PRESENT PRECIP from ACIS');
+            //console.log(res);
             if (!res.data.hasOwnProperty('error')) {
               let i,thisDate
               let pcpnObsValue,pcpnNormalValue,pcpnFlagValue
@@ -657,7 +661,7 @@ export class AppStore {
 
     // Present extremes download - download data using parameters
     @action loadPresentExtremes = (uid) => {
-        console.log("Call loadPresentExtremes")
+        //console.log("Call loadPresentExtremes")
         if (this.getLoaderPresentExtremes === false) { this.updateLoaderPresentExtremes(true); }
         this.emptyPresentExtremes()
         let params = {
@@ -674,8 +678,8 @@ export class AppStore {
           //.post(`${protocol}//data.rcc-acis.org/StnData`, this.getAcisParamsPresentExtremes)
           .post(`${protocol}//data.nrcc.rcc-acis.org/StnData`, params)
           .then(res => {
-            console.log('SUCCESS downloading PRESENT EXTREMES from ACIS');
-            console.log(res);
+            //console.log('SUCCESS downloading PRESENT EXTREMES from ACIS');
+            //console.log(res);
             if (!res.data.hasOwnProperty('error')) {
               let i,startDate,thisDate,thisDateMoment,lastYear,thisYear,extremeDate,todayDate
               let maxtExtremeValue,mintExtremeValue
@@ -732,7 +736,7 @@ export class AppStore {
     @observable livneh_data = null;
     @action updateLivnehData = (d) => {
             this.livneh_data = d;
-            console.log(this.getLivnehData);
+            //console.log(this.getLivnehData);
         }
     @action emptyLivnehData = (d) => {
             if (this.getLivnehData) { this.livneh_data = null }
@@ -956,13 +960,13 @@ export class AppStore {
         };
     }
 
-    console.log('loading projections: params');
-    console.log(params);
+    //console.log('loading projections: params');
+    //console.log(params);
 
     return axios
       .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
       .then(res => {
-        console.log('successful download of projection data : ' + scen + ' ' + re + ' 1980-2100');
+        //console.log('successful download of projection data : ' + scen + ' ' + re + ' 1980-2100');
         let i
         let data = {}
         let arrFlat
@@ -1057,13 +1061,13 @@ export class AppStore {
         };
     }
 
-    console.log('loading AK projections: params');
-    console.log(params);
+    //console.log('loading AK projections: params');
+    //console.log(params);
 
     return axios
       .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
       .then(res => {
-        console.log('successful download of projection data : ' + scen + ' ' + model + ' 1980-2100');
+        //console.log('successful download of projection data : ' + scen + ' ' + model + ' 1980-2100');
         let i
         let data = {}
         let arrFlat
@@ -1163,7 +1167,7 @@ export class AppStore {
       //.post("http://grid2.rcc-acis.org/GridData", params)
       .post(`${protocol}//grid2.rcc-acis.org/GridData`, params)
       .then(res => {
-        console.log('successful download of livneh data 1980-2013');
+        //console.log('successful download of livneh data 1980-2013');
         let i
         let data = {}
         let arrFlat
@@ -1243,8 +1247,13 @@ export class AppStore {
     }
 
     // run these on initial load
-    //constructor() {
-    //    this.downloadStationInfo()
-    //}
+    constructor() {
+        //this.downloadStationInfo()
+        if (localStorage.getItem("TRIBAL-CLIMATE-TOOLS.nation")) {
+            this.setNation(localStorage.getItem("TRIBAL-CLIMATE-TOOLS.nation"))
+        } else {
+            this.setNation("Pine Ridge Reservation")
+        }
+    }
 
 }

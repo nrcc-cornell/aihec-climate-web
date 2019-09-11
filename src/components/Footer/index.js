@@ -38,14 +38,14 @@ class Footer extends Component {
                         {' '}
                         <a href="http://www.rcc-acis.org" target="_blank" rel="noopener noreferrer"><img src={acislogo} alt="RCC ACIS" /></a>
           </Grid>
-          <Grid container item direction="column" spacing="1" xs={12} sm={3}>
+          <Grid container item direction="column" spacing={1} xs={12} sm={3}>
               <Grid item>
-                    <Button variant="contained" color="white" size="small" href="https://www.wcc.nrcs.usda.gov/tribalscan/" target="_blank" rel="noopener">
+                    <Button variant="contained" size="small" href="https://www.wcc.nrcs.usda.gov/tribalscan/" target="_blank" rel="noopener">
                       {"About Tribal SCAN"}
                     </Button>
               </Grid>
               <Grid item>
-                    <Button variant="contained" color="white" size="small" href="https://www.wcc.nrcs.usda.gov/tribalscan/tribalscan_brochure.pdf" target="_blank" rel="noopener">
+                    <Button variant="contained" size="small" href="https://www.wcc.nrcs.usda.gov/tribalscan/tribalscan_brochure.pdf" target="_blank" rel="noopener">
                       {"Tribal SCAN Brochure"}
                     </Button>
               </Grid>

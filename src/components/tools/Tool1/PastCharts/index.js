@@ -257,12 +257,14 @@ class PastCharts extends Component {
               data : [],
               color: (varName==='pcpn') ? '#009900' : '#ff0000',
               lineWidth: 0,
+              includeInDataExport: false,
               marker : {symbol:'square',radius:12}
           },{
               name : "Observed < Normal",
               data : [],
               color: (varName==='pcpn') ? '#9f6934' : '#0088ff',
               lineWidth: 0,
+              includeInDataExport: false,
               marker : {symbol:'square',radius:12}
           }]
         };

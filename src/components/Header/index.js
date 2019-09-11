@@ -133,6 +133,7 @@ class FullWidthTabs extends React.Component {
                 textColor="primary"
                 variant="standard"
               >
+                <Tab label="MAP" value={0} />
                 <Tab label="TOOLS" value={2} />
                 <Tab label="ABOUT" value={1} />
               </Tabs>
@@ -146,6 +147,7 @@ class FullWidthTabs extends React.Component {
                 textColor="primary"
                 variant="standard"
               >
+                <Tab label="MAP" value={0} />
                 <Tab label="TOOLS" value={2} />
                 <Tab label="ABOUT" value={1} />
               </Tabs>

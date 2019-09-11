@@ -55,6 +55,7 @@ class NationSelect extends Component {
                 {this.props.names &&
                   this.props.names.map((n,i) => (
                     <MenuItem
+                      key={i}
                       value={n.name}
                     >
                       {n.name}
