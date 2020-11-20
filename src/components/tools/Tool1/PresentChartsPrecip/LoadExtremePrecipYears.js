@@ -7,15 +7,20 @@ import PropTypes from 'prop-types';
 
 const protocol = window.location.protocol;
 
-const LoadExtremePrecipYears = ({uid,enddate_mmdd}) => {
+const LoadExtremePrecipYears = ({uid,network,enddate_mmdd}) => {
         // uid : ACIS uid for station
+        // network: 'scan','tscan', or 'other'
         // enddate_mmdd : 'mmdd' representing date that year-to-date period ends 
+        let vN_pcpn=0
+        if (network==='scan') { vN_pcpn=22 }
+        if (network==='tscan') { vN_pcpn=23 }
         let params = {
             "uid": uid,
             "sdate":"1850"+enddate_mmdd,
             "edate":"por",
             "elems":[{
                 "name":"pcpn",
+                "vN":vN_pcpn,
                 "interval":[1,0,0],
                 "duration":"ytd",
                 "reduce":"sum",
@@ -24,6 +29,7 @@ const LoadExtremePrecipYears = ({uid,enddate_mmdd}) => {
                 "smry_only":"1"
               },{
                 "name":"pcpn",
+                "vN":vN_pcpn,
                 "interval":[1,0,0],
                 "duration":"ytd",
                 "reduce":"sum",
@@ -49,6 +55,7 @@ const LoadExtremePrecipYears = ({uid,enddate_mmdd}) => {
 
 LoadExtremePrecipYears.propTypes = {
   uid: PropTypes.string.isRequired,
+  network: PropTypes.string.isRequired,
   enddate_mmdd: PropTypes.string.isRequired,
 };
 

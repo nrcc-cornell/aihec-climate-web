@@ -3,6 +3,7 @@
 
 import React, { Component } from 'react';
 import { inject, observer} from 'mobx-react';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 //import LoadingOverlay from 'react-loading-overlay';
 //import Typography from '@material-ui/core/Typography';
@@ -63,20 +64,40 @@ class Tool1 extends Component {
 
     componentDidMount() {
         //app.climview_loadData(1,1,this.state.station.uid);
-        app.climview_loadData(1,1,this.state.station.uid,this.state.timescale,this.state.season,this.state.month);
+        app.climview_loadData(1,1,this.state.station.uid,this.state.station.network,this.state.timescale,this.state.season,this.state.month);
     }
 
     componentDidUpdate(prevProps,prevState) {
       if (prevState.station!==this.state.station) {
         //app.climview_loadData(1,0,this.state.station.uid);
-        app.climview_loadData(1,0,this.state.station.uid,this.state.timescale,this.state.season,this.state.month);
+        app.climview_loadData(1,0,this.state.station.uid,this.state.station.network,this.state.timescale,this.state.season,this.state.month);
       }
       if (prevState.timescale!==this.state.timescale ||
           prevState.month!==this.state.month ||
           prevState.season!==this.state.season) {
             //app.climview_loadData(1,1,this.state.station.uid);
-            app.climview_loadData(1,1,this.state.station.uid,this.state.timescale,this.state.season,this.state.month);
+            app.climview_loadData(1,1,this.state.station.uid,this.state.station.network,this.state.timescale,this.state.season,this.state.month);
       }
+    }
+
+    getRecentPeriod = () => {
+        let startdate = moment();
+        startdate = startdate.subtract(90, "days");
+        startdate = startdate.format("YYYY-MM-DD");
+        let enddate = moment()
+        enddate = enddate.format("YYYY-MM-DD")
+        return [startdate,enddate]
+    }
+
+    getNetworkFromSids = (sids) => {
+        let networks = sids.map((s,i) => (s.split(' ')[1]))
+        if (networks.includes('17')) {
+            return 'scan'
+        } else if (networks.includes('19')) {
+            return 'tscan'
+        } else {
+            return 'other'
+        }
     }
 
     handleViewChange = (v) => {
@@ -84,7 +105,9 @@ class Tool1 extends Component {
     }
 
     handleStationChange = (s) => {
-        this.setState({ station: {name:s.name, uid:s.uid} })
+	let network = this.getNetworkFromSids(s.sids)
+        console.log('network:', network)
+        this.setState({ station: {name:s.name, uid:s.uid, network:network} })
     }
 
     handleVariableChange = (e) => {
@@ -158,6 +181,7 @@ class Tool1 extends Component {
             isDataLoading = app.isProjectionLoading
         }
         let display_UserInput = <UserInput
+                                  period={this.getRecentPeriod()}
                                   selected_nation={this.props.nation}
                                   selected_view={this.state.view}
                                   selected_station={this.state.station}

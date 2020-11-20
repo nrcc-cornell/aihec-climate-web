@@ -83,15 +83,16 @@ class PresentChartsPrecip extends Component {
 
     updateExtremePrecip = () => {
             this.reinitState();
-            LoadExtremePrecipYears({uid:this.props.station.uid, enddate_mmdd:this.today_mmdd})
+            LoadExtremePrecipYears({uid:this.props.station.uid, network:this.props.station.network, enddate_mmdd:this.today_mmdd})
               .then(res_years => {
                   this.setState({ min_year: res_years.min_year, max_year: res_years.max_year });
+                  //if (res_years.min_year && res_years.max_year && res_years.min_year!=='M' && res_years.max_year!=='M') {
                   if (res_years.min_year && res_years.max_year && res_years.min_year!=='M' && res_years.max_year!=='M') {
                     // extreme years are defined ... data download is attempted ... reinit data and enable loading spinners
-                    LoadExtremePrecipTimeSeries({uid:this.props.station.uid, enddate_yyyymmdd:this.state.max_year+this.today_mmdd})
+                    LoadExtremePrecipTimeSeries({uid:this.props.station.uid, network:this.props.station.network, enddate_yyyymmdd:this.state.max_year+this.today_mmdd})
                       .then(res_max_data => {
                         this.setState({ data_max_year: res_max_data, isExtremeMaxPrecipLoading: false });
-                        LoadExtremePrecipTimeSeries({uid:this.props.station.uid, enddate_yyyymmdd:this.state.min_year+this.today_mmdd})
+                        LoadExtremePrecipTimeSeries({uid:this.props.station.uid, network:this.props.station.network, enddate_yyyymmdd:this.state.min_year+this.today_mmdd})
                           .then(res_min_data => {
                             this.setState({ data_min_year: res_min_data, isExtremeMinPrecipLoading: false })
                           });

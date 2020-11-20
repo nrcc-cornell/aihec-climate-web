@@ -132,24 +132,24 @@ export class AppStore {
 
     @computed get getDefaultStationFromNation() {
         let stns = {
-            "Flathead Reservation": {"uid":"12082","name":"POLSON KERR DAM"},
-            "L'Anse Reservation": {"uid":"29678","name":"HANCOCK HOUGHTON COUNTY AP"},
-            "Pine Ridge Reservation": {"uid":"16756","name":"COTTONWOOD 2 E"},
-            "Tohono O'odham Nation Reservation": {"uid":"1274","name":"KITT PEAK"},
-            "Navajo Nation Reservation": {"uid":"171","name":"CANYON DE CHELLY"},
-            "Fort Belknap Reservation": {"uid":"12221","name":"CHINOOK"},
-            "Leech Lake Reservation": {"uid":"10561","name":"LEECH LAKE"},
-            "Crow Reservation": {"uid":"11733","name":"BUSBY"},
-            "Spirit Lake Reservation": {"uid":"13595","name":"MC HENRY 3W"},
-            "Menominee Reservation": {"uid":"19892","name":"SHAWANO 2SSW"},
-            "Fond du Lac Reservation": {"uid":"10517","name":"CLOQUET"},
-            "Lummi Reservation": {"uid":"26258","name":"CLEARBROOK"},
-            "Standing Rock Reservation": {"uid":"16965","name":"POLLOCK"},
-            "Turtle Mountain Reservation": {"uid":"13691","name":"WILLOW CITY"},
-            "Blackfeet Indian Reservation": {"uid":"12237","name":"CUT BANK AIRPORT"},
-            "Winnebago Reservation": {"uid":"6939","name":"SIOUX CITY AP"},
-            "Barrow ANVSA": {"uid":"21127","name":"BARROW WSO AP"},
-            "Creek OTSA": {"uid":"14134","name":"TULSA INTL AIRPORT"},
+            "Flathead Reservation": {"uid":"12082","name":"POLSON KERR DAM","network":"other"},
+            "L'Anse Reservation": {"uid":"29678","name":"HANCOCK HOUGHTON COUNTY AP","network":"other"},
+            "Pine Ridge Reservation": {"uid":"16756","name":"COTTONWOOD 2 E","network":"other"},
+            "Tohono O'odham Nation Reservation": {"uid":"1274","name":"KITT PEAK","network":"other"},
+            "Navajo Nation Reservation": {"uid":"171","name":"CANYON DE CHELLY","network":"other"},
+            "Fort Belknap Reservation": {"uid":"12221","name":"CHINOOK","network":"other"},
+            "Leech Lake Reservation": {"uid":"10561","name":"LEECH LAKE","network":"other"},
+            "Crow Reservation": {"uid":"11733","name":"BUSBY","network":"other"},
+            "Spirit Lake Reservation": {"uid":"13595","name":"MC HENRY 3W","network":"other"},
+            "Menominee Reservation": {"uid":"19892","name":"SHAWANO 2SSW","network":"other"},
+            "Fond du Lac Reservation": {"uid":"10517","name":"CLOQUET","network":"other"},
+            "Lummi Reservation": {"uid":"26258","name":"CLEARBROOK","network":"other"},
+            "Standing Rock Reservation": {"uid":"16965","name":"POLLOCK","network":"other"},
+            "Turtle Mountain Reservation": {"uid":"13691","name":"WILLOW CITY","network":"other"},
+            "Blackfeet Indian Reservation": {"uid":"12237","name":"CUT BANK AIRPORT","network":"other"},
+            "Winnebago Reservation": {"uid":"6939","name":"SIOUX CITY AP","network":"other"},
+            "Barrow ANVSA": {"uid":"21127","name":"BARROW WSO AP","network":"other"},
+            "Creek OTSA": {"uid":"14134","name":"TULSA INTL AIRPORT","network":"other"},
         }
         return stns[this.getNation.name]
     };
@@ -210,6 +210,15 @@ export class AppStore {
           pcpn : 'Total Precipitation',
           snow : 'Total Snowfall',
         };
+    }
+
+    getVarMinor = (vType,network) => {
+        let vN = 0
+        if (vType==='temp' && network==='scan') { vN=23 }
+        if (vType==='pcpn' && network==='scan') { vN=22 }
+        if (vType==='temp' && network==='tscan') { vN=24 }
+        if (vType==='pcpn' && network==='tscan') { vN=23 }
+        return vN
     }
 
     //////////////////////////////////
@@ -273,7 +282,7 @@ export class AppStore {
         }
 
     // Past data download - download data using parameters
-    @action loadPastData = (uid,timescale,season,month) => {
+    @action loadPastData = (uid,network,timescale,season,month) => {
         //console.log("Call loadPastData")
         if (this.getLoaderPast === false) { this.updateLoaderPast(true); }
         this.emptyPastData()
@@ -284,6 +293,9 @@ export class AppStore {
           'jul':'07','aug':'08','sep':'09','oct':'10','nov':'11','dec':'12',
           'djf':'02','mam':'05','jja':'08','son':'11'
         }
+        // get var minors for ACIS calls
+        let vN_temp = this.getVarMinor('temp',network)
+        let vN_pcpn = this.getVarMinor('pcpn',network)
         if (timescale==='monthly') {
           params = {
             "uid": uid,
@@ -291,14 +303,14 @@ export class AppStore {
             "sdate":"1850-"+monthNum[month],
             "edate":"por",
             "elems":[
-                {"name":"avgt","interval":[1,0],"duration":1,"reduce":"mean","maxmissing":"3"},
-                {"name":"maxt","interval":[1,0],"duration":1,"reduce":"mean","maxmissing":"3"},
-                {"name":"mint","interval":[1,0],"duration":1,"reduce":"mean","maxmissing":"3"},
-                {"name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum","maxmissing":"3"},
-                {"name":"avgt","interval":[1,0],"duration":1,"reduce":"mean","normal":"1"},
-                {"name":"maxt","interval":[1,0],"duration":1,"reduce":"mean","normal":"1"},
-                {"name":"mint","interval":[1,0],"duration":1,"reduce":"mean","normal":"1"},
-                {"name":"pcpn","interval":[1,0],"duration":1,"reduce":"sum","normal":"1"},
+                {"name":"avgt","vN":vN_temp,"interval":[1,0],"duration":1,"reduce":"mean","maxmissing":"3"},
+                {"name":"maxt","vN":vN_temp,"interval":[1,0],"duration":1,"reduce":"mean","maxmissing":"3"},
+                {"name":"mint","vN":vN_temp,"interval":[1,0],"duration":1,"reduce":"mean","maxmissing":"3"},
+                {"name":"pcpn","vN":vN_pcpn,"interval":[1,0],"duration":1,"reduce":"sum","maxmissing":"3"},
+                {"name":"avgt","vN":vN_temp,"interval":[1,0],"duration":1,"reduce":"mean","normal":"1"},
+                {"name":"maxt","vN":vN_temp,"interval":[1,0],"duration":1,"reduce":"mean","normal":"1"},
+                {"name":"mint","vN":vN_temp,"interval":[1,0],"duration":1,"reduce":"mean","normal":"1"},
+                {"name":"pcpn","vN":vN_pcpn,"interval":[1,0],"duration":1,"reduce":"sum","normal":"1"},
               ]
             }
         } else if (timescale==='seasonal') {
@@ -308,14 +320,14 @@ export class AppStore {
             "sdate":"1850-"+monthNum[season],
             "edate":"por",
             "elems":[
-                {"name":"avgt","interval":[1,0],"duration":3,"reduce":"mean","maxmissing":"10"},
-                {"name":"maxt","interval":[1,0],"duration":3,"reduce":"mean","maxmissing":"10"},
-                {"name":"mint","interval":[1,0],"duration":3,"reduce":"mean","maxmissing":"10"},
-                {"name":"pcpn","interval":[1,0],"duration":3,"reduce":"sum","maxmissing":"10"},
-                {"name":"avgt","interval":[1,0],"duration":3,"reduce":"mean","normal":"1"},
-                {"name":"maxt","interval":[1,0],"duration":3,"reduce":"mean","normal":"1"},
-                {"name":"mint","interval":[1,0],"duration":3,"reduce":"mean","normal":"1"},
-                {"name":"pcpn","interval":[1,0],"duration":3,"reduce":"sum","normal":"1"},
+                {"name":"avgt","vN":vN_temp,"interval":[1,0],"duration":3,"reduce":"mean","maxmissing":"10"},
+                {"name":"maxt","vN":vN_temp,"interval":[1,0],"duration":3,"reduce":"mean","maxmissing":"10"},
+                {"name":"mint","vN":vN_temp,"interval":[1,0],"duration":3,"reduce":"mean","maxmissing":"10"},
+                {"name":"pcpn","vN":vN_pcpn,"interval":[1,0],"duration":3,"reduce":"sum","maxmissing":"10"},
+                {"name":"avgt","vN":vN_temp,"interval":[1,0],"duration":3,"reduce":"mean","normal":"1"},
+                {"name":"maxt","vN":vN_temp,"interval":[1,0],"duration":3,"reduce":"mean","normal":"1"},
+                {"name":"mint","vN":vN_temp,"interval":[1,0],"duration":3,"reduce":"mean","normal":"1"},
+                {"name":"pcpn","vN":vN_pcpn,"interval":[1,0],"duration":3,"reduce":"sum","normal":"1"},
               ]
             }
         } else {
@@ -325,14 +337,14 @@ export class AppStore {
             "sdate":"por",
             "edate":"por",
             "elems":[
-                {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-                {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-                {"name":"mint","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
-                {"name":"pcpn","interval":[1],"duration":1,"reduce":{"reduce":"sum"},"maxmissing":10},
-                {"name":"avgt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"normal":"1"},
-                {"name":"maxt","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"normal":"1"},
-                {"name":"mint","interval":[1],"duration":1,"reduce":{"reduce":"mean"},"normal":"1"},
-                {"name":"pcpn","interval":[1],"duration":1,"reduce":{"reduce":"sum"},"normal":"1"},
+                {"name":"avgt","vN":vN_temp,"interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"maxt","vN":vN_temp,"interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"mint","vN":vN_temp,"interval":[1],"duration":1,"reduce":{"reduce":"mean"},"maxmissing":10},
+                {"name":"pcpn","vN":vN_pcpn,"interval":[1],"duration":1,"reduce":{"reduce":"sum"},"maxmissing":10},
+                {"name":"avgt","vN":vN_temp,"interval":[1],"duration":1,"reduce":{"reduce":"mean"},"normal":"1"},
+                {"name":"maxt","vN":vN_temp,"interval":[1],"duration":1,"reduce":{"reduce":"mean"},"normal":"1"},
+                {"name":"mint","vN":vN_temp,"interval":[1],"duration":1,"reduce":{"reduce":"mean"},"normal":"1"},
+                {"name":"pcpn","vN":vN_pcpn,"interval":[1],"duration":1,"reduce":{"reduce":"sum"},"normal":"1"},
               ]
             }
         }
@@ -539,7 +551,7 @@ export class AppStore {
         }
 
     // Present data download - download data using parameters
-    @action loadPresentData = (uid) => {
+    @action loadPresentData = (uid,network) => {
         //console.log("Call loadPresentData")
         if (this.getLoaderPresent === false) { this.updateLoaderPresent(true); }
         this.emptyPresentData()
@@ -548,16 +560,18 @@ export class AppStore {
         startdate = startdate.format("YYYY-MM-DD");
         let enddate = moment()
         enddate = enddate.format("YYYY-MM-DD")
+        // get var minors for ACIS calls
+        let vN_temp = this.getVarMinor('temp',network)
         let params = {
             "uid": uid,
             "meta":"name,state",
             "sdate":startdate,
             "edate":enddate,
             "elems": [
-                {"name":"maxt"},
-                {"name":"mint"},
-                {"name":"maxt","normal":"1"},
-                {"name":"mint","normal":"1"},
+                {"name":"maxt","vN":vN_temp},
+                {"name":"mint","vN":vN_temp},
+                {"name":"maxt","vN":vN_temp,"normal":"1"},
+                {"name":"mint","vN":vN_temp,"normal":"1"},
               ]
           }
         return axios
@@ -602,13 +616,15 @@ export class AppStore {
     }
 
     // Present precipitation download - download data using parameters
-    @action loadPresentPrecip = (uid) => {
+    @action loadPresentPrecip = (uid,network) => {
         //console.log("Call loadPresentPrecip")
         if (this.getLoaderPresentPrecip === false) { this.updateLoaderPresentPrecip(true); }
         this.emptyPresentPrecip()
         let enddate = moment()
         enddate = enddate.format("YYYY-MM-DD")
         let startdate = enddate.split('-')[0]+'-01-01'
+        // get var minors for ACIS calls
+        let vN_pcpn = this.getVarMinor('pcpn',network)
         let params = {
             "uid": uid,
             "meta":"name,state",
@@ -617,9 +633,9 @@ export class AppStore {
             "sdate":startdate,
             "edate":enddate,
             "elems":[
-                {"name":"pcpn","interval":[0,0,1],"duration":"ytd","reduce":"sum"},
-                {"name":"pcpn","interval":[0,0,1],"duration":"ytd","reduce":"sum","normal":"1"},
-                {"name":"pcpn","add":"f"}
+                {"name":"pcpn","vN":vN_pcpn,"interval":[0,0,1],"duration":"ytd","reduce":"sum"},
+                {"name":"pcpn","vN":vN_pcpn,"interval":[0,0,1],"duration":"ytd","reduce":"sum","normal":"1"},
+                {"name":"pcpn","vN":vN_pcpn,"add":"f"}
               ]
           }
         return axios
@@ -660,18 +676,20 @@ export class AppStore {
     }
 
     // Present extremes download - download data using parameters
-    @action loadPresentExtremes = (uid) => {
+    @action loadPresentExtremes = (uid,network) => {
         //console.log("Call loadPresentExtremes")
         if (this.getLoaderPresentExtremes === false) { this.updateLoaderPresentExtremes(true); }
         this.emptyPresentExtremes()
+        // get var minors for ACIS calls
+        let vN_temp = this.getVarMinor('temp',network)
         let params = {
             "uid": uid,
             "meta":"name,state",
             "sdate":"por",
             "edate":"por",
             "elems":[
-                {"name":"maxt","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"max"},"smry_only":"1","groupby":"year"},
-                {"name":"mint","interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"min"},"smry_only":"1","groupby":"year"}
+                {"name":"maxt","vN":vN_temp,"interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"max"},"smry_only":"1","groupby":"year"},
+                {"name":"mint","vN":vN_temp,"interval":[0,0,1],"duration":1,"smry":{"add":"date","reduce":"min"},"smry_only":"1","groupby":"year"}
               ]
           }
         return axios
@@ -1233,13 +1251,13 @@ export class AppStore {
         // rcp45 unavailable for snap grids
     }
 
-    @action climview_loadData = (getObs,getProj,uid,timescale,season,month) => {
+    @action climview_loadData = (getObs,getProj,uid,network,timescale,season,month) => {
         // getObs: boolean, whether to load observations
         // getProj: boolean, whether to load projections
-        if (getObs) {this.loadPastData(uid,timescale,season,month)};
-        if (getObs) {this.loadPresentData(uid)};
-        if (getObs) {this.loadPresentPrecip(uid)};
-        if (getObs) {this.loadPresentExtremes(uid)};
+        if (getObs) {this.loadPastData(uid,network,timescale,season,month)};
+        if (getObs) {this.loadPresentData(uid,network)};
+        if (getObs) {this.loadPresentPrecip(uid,network)};
+        if (getObs) {this.loadPresentExtremes(uid,network)};
         if (getProj) {
             if (parseFloat(this.getNation.ll[0])<51.0) {this.loadProjections(timescale,season,month)};
             if (parseFloat(this.getNation.ll[0])>=51.0) {this.loadProjectionsAK(timescale,season,month)};

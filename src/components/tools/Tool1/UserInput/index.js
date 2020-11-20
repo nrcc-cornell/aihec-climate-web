@@ -87,7 +87,7 @@ class UserInput extends React.Component {
             {this.props.selected_variable &&
               <StationPickerMap
                   type={this.props.selected_variable}
-                  period={['2019-04-01','2019-06-01']}
+                  period={this.props.period}
                   bounds={this.getStationBox(4.,4.)}
                   selected_nation={this.props.selected_nation}
                   selected_variable={this.props.selected_variable}
@@ -137,6 +137,7 @@ class UserInput extends React.Component {
 
 UserInput.propTypes = {
   classes: PropTypes.object.isRequired,
+  period: PropTypes.array.isRequired,
   selected_nation: PropTypes.object.isRequired,
   selected_view: PropTypes.string.isRequired,
   selected_station: PropTypes.object.isRequired,

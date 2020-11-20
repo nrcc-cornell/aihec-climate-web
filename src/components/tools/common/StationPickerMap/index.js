@@ -93,9 +93,13 @@ class StationPickerMap extends Component {
     getStations = (v) => {
         // v: variable name ('temp' or 'precip')
         // first, get list of current stations
+	let varname = (v==='temp') ? 'avgt' : 'pcpn'
+	let vN_scan = (varname==='avgt') ? 23 : 22
+	let vN_tscan = (varname==='avgt') ? 24 : 23
         let params = {
-            "meta":"name,ll,uid",
-            "elems":(v==='temp') ? 'avgt' : 'pcpn',
+            //"meta":"name,ll,uid",
+            "meta":"name,ll,uid,sids",
+            "elems":[{"name":varname},{"name":varname,"vN":vN_scan},{"name":varname,"vN":vN_tscan}],
             "output":"json",
             "sdate":this.props.period[0],
             "edate":this.props.period[1],
@@ -126,9 +130,13 @@ class StationPickerMap extends Component {
         // v: variable name ('temp' or 'precip')
         // sList: string with list of stations
         //        e.g. "1234,5432,11256"
+        let varname = (v==='temp') ? 'avgt' : 'pcpn'
+        let vN_scan = (varname==='avgt') ? 23 : 22
+        let vN_tscan = (varname==='avgt') ? 24 : 23
         let params = {
-            "meta":"name,ll,uid",
-            "elems":(v==='temp') ? 'avgt' : 'pcpn',
+            //"meta":"name,ll,uid",
+            "meta":"name,ll,uid,sids",
+            "elems":[{"name":varname},{"name":varname,"vN":vN_scan},{"name":varname,"vN":vN_tscan}],
             "output":"json",
             "sdate":"1850-01-01",
             "edate":"1960-01-01",
