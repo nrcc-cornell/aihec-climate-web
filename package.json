@@ -9,7 +9,7 @@
   "dependencies": {
     "@material-ui/core": "^4.8.2",
     "@material-ui/icons": "^4.5.1",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "core-js": "^3.6.1",
     "dom-to-image": "^2.6.0",
     "file-saver": "^2.0.2",
