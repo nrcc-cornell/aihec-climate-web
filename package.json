@@ -13,7 +13,7 @@
     "core-js": "^3.6.1",
     "dom-to-image": "^2.6.0",
     "file-saver": "^2.0.2",
-    "highcharts": "^7.2.1",
+    "highcharts": "^9.0.0",
     "highcharts-more": "^0.1.7",
     "highcharts-react-official": "^2.2.2",
     "leaflet": "^1.6.0",
